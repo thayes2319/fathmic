@@ -592,18 +592,14 @@ function checkStaleness() {
 // Visual-only — tracks the selected position, doesn't itself receive clicks
 // (the three buttons underneath do). Rightward = higher, the same convention
 // as a volume knob or thermostat.
-// Needle rotation: -90/0/90deg from vertical maps exactly to 9/12/3 o'clock,
-// the same 270/0/90 (clockwise-from-top) angles the markers sit at.
-// 5 positions, evenly spaced (85deg apart) across the same 340deg sweep the
-// 3-position version used (190deg to 170deg, the long way through 270/0/90) —
-// -170/-85/0/85/170 are the shortest-path equivalents of that.
-const STAKES_NEEDLE_ANGLE = { very_low: -170, low: -85, medium: 0, high: 85, very_high: 170 };
+// 3 positions at 8/12/4 o'clock — -120/0/120deg clockwise-from-top, matching
+// the .stakes-knob-arc gradient stops (blue at -120, accent at 0, red at 120)
+// and the marker left/top percentages in index.html.
+const STAKES_NEEDLE_ANGLE = { low: -120, medium: 0, high: 120 };
 const STAKES_NEEDLE_COLOR = {
-  very_low: "#5b8dd6",
-  low: "#5ba8a0",
+  low: "#5b8dd6",
   medium: "var(--accent)",
-  high: "#d68a45",
-  very_high: "#d64545"
+  high: "#d64545"
 };
 
 function renderStakesDial() {

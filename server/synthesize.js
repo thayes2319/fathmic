@@ -40,11 +40,9 @@ const GENRE_PRESETS = {
 // Stakes doesn't change WHAT gets said (that's genre's job) — it changes how
 // confidently it's said. Independent of genre, threaded in alongside it.
 const STAKES_GUIDANCE = {
-  very_low: "Stakes are minimal — pure curiosity or a casual hobby. Write with full confidence and zero hedging. No disclaimers, no caveats, no \"consult a professional.\" Treat every caveat as friction the reader doesn't need.",
-  low: "Stakes are low. Write with full confidence — no hedging, no disclaimers, no \"consult a professional.\" Being direct serves the reader better than false caution here.",
+  low: "Stakes are low — curiosity or a casual hobby. Write with full confidence and zero hedging. No disclaimers, no caveats, no \"consult a professional.\" Treat every caveat as friction the reader doesn't need.",
   medium: "Stakes are moderate. State things plainly, but flag the one or two points where getting it wrong would actually matter.",
-  high: "Stakes are high — real consequences if this is wrong or incomplete. Be precise about what's well-established vs. what depends on specifics only the reader knows. Where a professional (medical, legal, financial) should actually be involved, say so plainly, once, without being repetitive about it.",
-  very_high: "Stakes are severe — real, serious consequences (medical, legal, financial, safety) if this is wrong or incomplete. Be precise and explicit about what's well-established vs. uncertain or reader-specific. Clearly recommend involving the right professional before acting, stated plainly near the top, not buried. Precision over reassurance."
+  high: "Stakes are high — real, possibly serious consequences (medical, legal, financial, safety) if this is wrong or incomplete. Be precise and explicit about what's well-established vs. uncertain or reader-specific. Clearly recommend involving the right professional before acting, stated plainly near the top, not buried. Precision over reassurance."
 };
 
 function buildSystemPrompt(genre, stakes) {

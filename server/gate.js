@@ -34,8 +34,8 @@ const GATE_TOOL = {
       },
       stakes: {
         type: "string",
-        enum: ["very_low", "low", "medium", "high", "very_high"],
-        description: "How much is riding on this being right, on a 5-point scale. very_high: real, serious consequences if wrong — medical, legal, financial, safety, a binding deadline/contract. high: matters a real amount but not severe. medium: genuinely mixed or moderate. low: matters some but wrong is cheap/easy to fix. very_low: pure curiosity or a casual hobby, no real consequence either way. This is a default the user can override, not a judgment on them — most everyday inputs land low or very_low."
+        enum: ["low", "medium", "high"],
+        description: "How much is riding on this being right, on a 3-point scale. high: real consequences if wrong — medical, legal, financial, safety, a binding deadline/contract. medium: genuinely matters but isn't severe, or the picture is mixed. low: curiosity, a casual hobby, or anything where wrong is cheap/easy to fix. This is a default the user can override, not a judgment on them — most everyday inputs land at low."
       }
     },
     required: ["status", "domainClarity", "gapType", "note", "clarifyingQuestion", "firstBranch", "stakes"]
@@ -54,7 +54,7 @@ Two kinds of gaps are NOT the same:
 
 Default to "pass" unless the gap is genuinely of the user-only kind. Most inputs should pass.
 
-Also estimate "stakes" on the 5-point scale — how much is actually riding on getting this right. This sets a default for how hedged vs. confident the eventual output should be; the user can always override it. Don't default to "medium" reflexively — spread across the real range; most everyday inputs (hobbies, curiosity, casual planning) genuinely land at low or very_low.`;
+Also estimate "stakes" on the 3-point scale — how much is actually riding on getting this right. This sets a default for how hedged vs. confident the eventual output should be; the user can always override it. Don't default to "medium" reflexively — most everyday inputs (hobbies, curiosity, casual planning) genuinely land at low.`;
 
 async function runGate(input) {
   const result = await callStructured({
@@ -70,7 +70,7 @@ async function runGate(input) {
     note: result.note || "",
     clarifyingQuestion: result.clarifyingQuestion || null,
     firstBranch: result.firstBranch || null,
-    stakes: ["very_low", "low", "medium", "high", "very_high"].includes(result.stakes) ? result.stakes : "medium"
+    stakes: ["low", "medium", "high"].includes(result.stakes) ? result.stakes : "medium"
   };
 }
 
