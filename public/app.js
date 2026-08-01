@@ -791,7 +791,7 @@ function scopeRow(type, score, label) {
   const litBars = Math.max(1, Math.round(score * 5));
   const pct = Math.round(score * 100);
   const bars = Array.from({ length: 5 }, (_, i) =>
-    `<span class="scope-mini-bar ${i < litBars ? "lit" : ""}" style="height:${8 + i * 4}px"></span>`
+    `<span class="scope-mini-bar ${i < litBars ? "lit" : ""}" style="height:${10 + i * 6}px"></span>`
   ).join("");
 
   return `
