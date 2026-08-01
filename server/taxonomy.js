@@ -87,22 +87,71 @@ If a first branch is suggested below (from the specificity gate), make it the fi
 
 You must produce 4-7 categories, each with 1-4 subcategories, each with 3-8 concrete, selectable elements. An empty or thin taxonomy is a failed response — do the actual work of thinking through the subject before calling the tool.`;
 
+const MIN_ACCEPTABLE_CATEGORIES = 4;
+const MAX_ATTEMPTS = 3;
+
+// Occasionally the model leaks XML-style tool-parameter framing
+// (`<parameter name="categories">...`) into a field's string value instead
+// of returning clean JSON there. The data underneath is usually well-formed —
+// strip the leaked tags and try to parse what's left rather than discarding
+// real content and burning a retry on it.
+function recoverArrayField(rawValue) {
+  if (Array.isArray(rawValue)) return rawValue;
+  if (typeof rawValue !== "string") return null;
+
+  const cleaned = rawValue
+    .replace(/<parameter[^>]*>/g, "")
+    .replace(/<\/parameter>/g, "")
+    .trim();
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 async function runTaxonomy(input, firstBranch) {
   const branchNote = firstBranch
     ? `\n\nSuggested first branch (make this the first category): ${firstBranch}`
     : "";
 
-  const result = await callStructured({
-    system: SYSTEM_PROMPT,
-    prompt: `Subject: "${input}"${branchNote}`,
-    tool: TAXONOMY_TOOL,
-    maxTokens: 6144
-  });
+  let lastResult = null;
 
-  return {
-    topic: result.topic || input,
-    categories: Array.isArray(result.categories) ? result.categories : []
-  };
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const result = await callStructured({
+      system: SYSTEM_PROMPT,
+      prompt: `Subject: "${input}"${branchNote}`,
+      tool: TAXONOMY_TOOL,
+      maxTokens: 6144
+    });
+
+    const categories = recoverArrayField(result.categories);
+    const categoryCount = categories ? categories.length : 0;
+
+    if (categoryCount >= MIN_ACCEPTABLE_CATEGORIES) {
+      if (!Array.isArray(result.categories)) {
+        console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS}: recovered ${categoryCount} categories from a malformed string field`);
+      }
+      return {
+        topic: result.topic || input,
+        categories
+      };
+    }
+
+    console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS} returned only ${categoryCount} categories (unrecoverable) — retrying`);
+    console.warn(`[taxonomy] failure shape: keys=${JSON.stringify(Object.keys(result || {}))}`);
+    console.warn(`[taxonomy] failure dump: ${JSON.stringify(result).slice(0, 3000)}`);
+    lastResult = result;
+  }
+
+  // Every attempt came back thin. This is a real failure, not something to
+  // paper over with an empty tree the frontend silently renders nothing for.
+  throw new Error(
+    `Taxonomy generation returned too little content after ${MAX_ATTEMPTS} attempts ` +
+    `(last attempt had ${Array.isArray(lastResult?.categories) ? lastResult.categories.length : 0} categories). Try again.`
+  );
 }
 
 module.exports = { runTaxonomy };

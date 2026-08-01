@@ -32,6 +32,7 @@ async function callStructured({ system, prompt, tool, maxTokens = 2048 }) {
   }
 
   const data = await response.json();
+  console.log(`[llm] stop_reason=${data.stop_reason} usage=${JSON.stringify(data.usage)}`);
   const toolUse = (data.content || []).find(block => block.type === "tool_use");
   if (!toolUse) {
     throw new Error("Model did not return a tool_use block.");
