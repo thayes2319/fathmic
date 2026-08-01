@@ -1,4 +1,15 @@
+const { callText } = require("./llm");
+
 const API_URL = "https://api.unsplash.com/photos/random";
+
+const QUERY_SYSTEM = `You are composing an Unsplash stock photo search query for a distilled topic. Unsplash search wants short keyword phrases, not sentences — a real photographer had to have actually shot and tagged something matching this, so favor common, concrete, photographable subjects over abstract or highly specific ones.
+
+Write 2-4 words, nothing else. No punctuation. Strip location/proper-noun specifics and qualifiers that a stock photo library won't have tagged (e.g. "Planning a Food Garden in Georgia, U.S." becomes "vegetable garden", not "Georgia food garden planning"). Favor the most visually concrete, universal noun in the topic.`;
+
+async function composeSearchQuery(topic) {
+  const query = await callText({ system: QUERY_SYSTEM, prompt: `Topic: ${topic}` });
+  return query.trim().replace(/["'.]/g, "");
+}
 
 // Two Unsplash API compliance requirements, not optional:
 // 1. Attribution — every displayed photo must credit Unsplash and the
@@ -32,10 +43,18 @@ async function runPhotoSearch({ topic }) {
     throw new Error("UNSPLASH_ACCESS_KEY is not set. Add it to .env.");
   }
 
-  const url = `${API_URL}?query=${encodeURIComponent(topic)}&orientation=squarish`;
+  const searchQuery = await composeSearchQuery(topic);
+  const url = `${API_URL}?query=${encodeURIComponent(searchQuery)}`;
   const response = await fetch(url, {
     headers: { Authorization: `Client-ID ${accessKey}` }
   });
+
+  if (response.status === 404) {
+    // Zero matches for even a short, generic keyword query — a real
+    // possibility for unusual/niche topics, not just a bug. Surface it
+    // honestly rather than pretending a photo exists.
+    throw new Error(`No stock photo found for "${searchQuery}". Unsplash's library doesn't cover everything.`);
+  }
 
   if (!response.ok) {
     const errText = await response.text().catch(() => "");
