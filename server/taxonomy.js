@@ -12,18 +12,26 @@ const TAXONOMY_TOOL = {
       },
       categories: {
         type: "array",
+        minItems: 4,
+        maxItems: 7,
+        description: "Must contain at least 4 real categories. Never return an empty array.",
         items: {
           type: "object",
           properties: {
             name: { type: "string" },
             subcategories: {
               type: "array",
+              minItems: 1,
+              maxItems: 4,
               items: {
                 type: "object",
                 properties: {
                   name: { type: "string" },
                   elements: {
                     type: "array",
+                    minItems: 3,
+                    maxItems: 8,
+                    description: "Concrete, specific elements — never an empty array.",
                     items: { type: "string" }
                   }
                 },
@@ -45,7 +53,7 @@ The goal is not a generic outline. The goal is to surface what someone asking th
 
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 
-Produce 4-7 categories. Each category should have 1-4 subcategories. Each subcategory should have 3-8 concrete elements.`;
+You must produce 4-7 categories, each with 1-4 subcategories, each with 3-8 concrete elements. An empty or thin taxonomy is a failed response — do the actual work of thinking through the subject before calling the tool.`;
 
 async function runTaxonomy(input, firstBranch) {
   const branchNote = firstBranch
@@ -55,7 +63,8 @@ async function runTaxonomy(input, firstBranch) {
   const result = await callStructured({
     system: SYSTEM_PROMPT,
     prompt: `Subject: "${input}"${branchNote}`,
-    tool: TAXONOMY_TOOL
+    tool: TAXONOMY_TOOL,
+    maxTokens: 4096
   });
 
   return {

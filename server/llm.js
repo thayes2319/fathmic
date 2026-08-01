@@ -3,7 +3,7 @@ const API_URL = "https://api.anthropic.com/v1/messages";
 // Calls Claude with a single forced tool call and returns the tool's input object.
 // This is the structured-output pattern for all three endpoints — the model has
 // no room to reply with prose, only with arguments matching the given schema.
-async function callStructured({ system, prompt, tool }) {
+async function callStructured({ system, prompt, tool, maxTokens = 2048 }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not set. Copy .env.example to .env and fill it in.");
@@ -18,7 +18,7 @@ async function callStructured({ system, prompt, tool }) {
     },
     body: JSON.stringify({
       model: process.env.LLM_MODEL || "claude-sonnet-5",
-      max_tokens: 2048,
+      max_tokens: maxTokens,
       system,
       messages: [{ role: "user", content: prompt }],
       tools: [tool],
