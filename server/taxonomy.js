@@ -48,6 +48,10 @@ const TAXONOMY_TOOL = {
             direction: {
               type: "string",
               description: "Optional. Which side of the axis this node represents. Required if axis is set."
+            },
+            fixedness: {
+              type: "number",
+              description: "Only set on 'category' nodes. A 0-1 score: 0 means this category is essentially a given condition the user already has (little real choice — e.g. 'what climate zone you live in'), 1 means it's a genuine open discovery/options space with many valid paths to explore (e.g. 'which crops to grow'). Omit for subcategory/element nodes."
             }
           },
           required: ["id", "type", "label"]
@@ -77,6 +81,8 @@ Four rules for the content itself:
 3. Tag genuine either/or conflicts with axis + direction. This tool is meant to converge the user toward ONE coherent plan, not let them assemble a self-contradictory pile of choices. Whenever two or more nodes — anywhere in the list, not just siblings — are genuinely mutually exclusive (choosing one makes the other wrong, not just less relevant), tag every node on both sides with the same "axis" slug and their respective "direction". Example: a cool-season crop element and a warm-season crop element that can't both be planted for the same purpose might share axis "season" with directions "cool" and "warm". A subject can have zero, one, or several such axes — invent whatever axis names actually fit the subject, don't force a conflict that isn't real. Most nodes will have no axis at all.
 
 4. Tag subcategories too when the whole subcategory is one side of a conflict. If a subcategory itself represents one branch of a real either/or (e.g. "Piedmont" vs. "Coastal Plain" as regions), tag the subcategory node with axis/direction too, not just its elements. This lets a user accept the subcategory as a whole without picking through individual elements, while still correctly excluding whatever conflicts with it elsewhere.
+
+5. Score every category's fixedness. Set "fixedness" (0-1) on every category node: near 0 means the category is mostly a given condition or constraint the user already has and isn't really choosing (e.g. their climate zone, their existing assignment rubric) — near 1 means it's a genuine space of options worth exploring, where the user benefits from seeing what's possible (e.g. crop varieties, narrative approaches). Most subjects have a mix — be honest about where each category actually falls rather than defaulting to the middle.
 
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 
@@ -130,6 +136,7 @@ function buildTreeFromNodes(nodes) {
 
   return categories.map(cat => ({
     name: cat.label,
+    fixedness: typeof cat.fixedness === "number" ? cat.fixedness : null,
     subcategories: (cat.children || [])
       .filter(c => c.type === "subcategory")
       .map(sub => ({

@@ -168,6 +168,29 @@ button:disabled { opacity: 0.5; cursor: default; }
 .specific-elements.collapsed-by-general { display: none; }
 .subcategory.excluded-subcategory { display: none; }
 
+.category-general-option {
+  display: block;
+  padding: 0.5rem 0 0.75rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.category-subs.collapsed-by-general { display: none; }
+
+.fixedness-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  margin-left: 0.6rem;
+  vertical-align: middle;
+}
+.fixedness-given { background: rgba(127, 127, 127, 0.15); color: var(--muted); }
+.fixedness-mixed { background: rgba(127, 127, 127, 0.1); color: var(--fg); border: 1px solid var(--border); }
+.fixedness-explore { background: var(--accent); color: #fff; }
+
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); transition: background 0.15s ease, color 0.15s ease; }
 #genre-buttons button:hover { background: var(--accent); color: #fff; }

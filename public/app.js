@@ -179,7 +179,66 @@ function renderTaxonomy() {
 
     const catTitle = document.createElement("summary");
     catTitle.textContent = category.name;
+
+    // Fixedness badge: a quick signal of whether this category is mostly a
+    // given condition (little real choice) or a genuine space worth exploring —
+    // so attention goes to the categories where exploring actually pays off.
+    if (typeof category.fixedness === "number") {
+      const badge = document.createElement("span");
+      const f = category.fixedness;
+      if (f < 0.35) {
+        badge.className = "fixedness-badge fixedness-given";
+        badge.textContent = "Given";
+      } else if (f > 0.65) {
+        badge.className = "fixedness-badge fixedness-explore";
+        badge.textContent = "Explore";
+      } else {
+        badge.className = "fixedness-badge fixedness-mixed";
+        badge.textContent = "Mixed";
+      }
+      catTitle.appendChild(badge);
+    }
+
     catEl.appendChild(catTitle);
+
+    // Category-level "General": accept the whole category as noise/not-worth-
+    // drilling-into right now, without picking through any of its subcategories.
+    // Same mutual-exclusivity rule as subcategory-level General, one level up:
+    // checking this clears and hides everything below; checking anything below
+    // clears this.
+    const categorySubsWrapper = document.createElement("div");
+    categorySubsWrapper.className = "category-subs";
+    const categoryCheckboxes = []; // every subcategory-General and element checkbox under this category
+
+    const catGeneralLabel = document.createElement("label");
+    catGeneralLabel.className = "general-option category-general-option";
+    const catGeneralCheckbox = document.createElement("input");
+    catGeneralCheckbox.type = "checkbox";
+    catGeneralCheckbox.value = category.name;
+    catGeneralCheckbox.checked = state.selected.has(category.name);
+    catGeneralCheckbox.addEventListener("change", () => {
+      if (catGeneralCheckbox.checked) {
+        state.selected.add(category.name);
+        categoryCheckboxes.forEach(({ checkbox, text }) => {
+          if (checkbox.checked) {
+            checkbox.checked = false;
+            state.selected.delete(text);
+          }
+        });
+        categorySubsWrapper.classList.add("collapsed-by-general");
+      } else {
+        state.selected.delete(category.name);
+        categorySubsWrapper.classList.remove("collapsed-by-general");
+      }
+      applyExclusions();
+    });
+    catGeneralLabel.appendChild(catGeneralCheckbox);
+    catGeneralLabel.append(" General — this whole category is noise to me right now");
+    catEl.appendChild(catGeneralLabel);
+
+    if (catGeneralCheckbox.checked) {
+      categorySubsWrapper.classList.add("collapsed-by-general");
+    }
 
     (category.subcategories || []).forEach(sub => {
       const subEl = document.createElement("details");
@@ -219,6 +278,11 @@ function renderTaxonomy() {
             }
           });
           specificsList.classList.add("collapsed-by-general");
+          if (catGeneralCheckbox.checked) {
+            catGeneralCheckbox.checked = false;
+            state.selected.delete(category.name);
+            categorySubsWrapper.classList.remove("collapsed-by-general");
+          }
         } else {
           state.selected.delete(sub.name);
           specificsList.classList.remove("collapsed-by-general");
@@ -228,6 +292,7 @@ function renderTaxonomy() {
       generalLabel.appendChild(generalCheckbox);
       generalLabel.append(" General — include this without picking specifics");
       list.appendChild(generalLabel);
+      categoryCheckboxes.push({ checkbox: generalCheckbox, text: sub.name });
 
       if (sub.axis && sub.direction) {
         elementRegistry.push({
@@ -258,6 +323,11 @@ function renderTaxonomy() {
               state.selected.delete(sub.name);
               specificsList.classList.remove("collapsed-by-general");
             }
+            if (catGeneralCheckbox.checked) {
+              catGeneralCheckbox.checked = false;
+              state.selected.delete(category.name);
+              categorySubsWrapper.classList.remove("collapsed-by-general");
+            }
           } else {
             state.selected.delete(text);
           }
@@ -267,6 +337,7 @@ function renderTaxonomy() {
         label.append(` ${text}`);
         specificsList.appendChild(label);
         specificCheckboxes.push({ checkbox, text });
+        categoryCheckboxes.push({ checkbox, text });
 
         if (axis && direction) {
           elementRegistry.push({ checkbox, label, text, axis, direction });
@@ -292,9 +363,10 @@ function renderTaxonomy() {
       }
 
       subEl.appendChild(list);
-      catEl.appendChild(subEl);
+      categorySubsWrapper.appendChild(subEl);
     });
 
+    catEl.appendChild(categorySubsWrapper);
     row.appendChild(catEl);
     el.taxonomyTree.appendChild(row);
   });
@@ -373,6 +445,7 @@ el.genreButtons.addEventListener("click", async event => {
     });
     el.outputText.textContent = result.text;
     state.lastResultText = result.text;
+    generateIllustration(); // fire-and-forget: don't block the text result on image generation
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
