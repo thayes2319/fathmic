@@ -802,8 +802,10 @@ function scopeRow(type, score, label) {
   // stacked, spaced generously to actually fill the square card's height.
   const litBars = Math.max(1, Math.round(score * 5));
   const pct = Math.round(score * 100);
+  // Percentage heights, not fixed px — scales to whatever size the row's
+  // flex box actually resolves to, instead of floating small in a corner.
   const bars = Array.from({ length: 5 }, (_, i) =>
-    `<span class="scope-mini-bar ${i < litBars ? "lit" : ""}" style="height:${10 + i * 6}px"></span>`
+    `<span class="scope-mini-bar ${i < litBars ? "lit" : ""}" style="height:${20 + i * 20}%"></span>`
   ).join("");
 
   return `

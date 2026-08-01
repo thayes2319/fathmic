@@ -410,23 +410,37 @@ button:disabled { opacity: 0.5; cursor: default; }
 .scope-rows-fill {
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
   align-items: stretch;
   width: 100%;
   height: 100%;
-  padding: 1rem;
+  padding: 1.2rem;
+  gap: 0.9rem;
+  box-sizing: border-box;
 }
-.scope-row { display: flex; align-items: center; width: 100%; }
-.scope-icon { width: 22px; height: 22px; flex-shrink: 0; color: var(--muted); }
+.scope-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex: 1; /* each row claims an equal third of the card's real height */
+  min-height: 0; /* let flex children shrink/size correctly instead of overflowing */
+}
+.scope-icon {
+  height: 65%;
+  width: auto;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  color: var(--muted);
+}
 .scope-icon svg { width: 100%; height: 100%; }
 .scope-mini-bars {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   flex: 1;
-  margin-left: 0.7rem;
+  height: 100%; /* resolves against .scope-row's real (flex:1) height */
+  margin-left: 1rem;
 }
-.scope-mini-bar { width: 12%; border-radius: 2px; background: var(--border); }
+.scope-mini-bar { width: 16%; border-radius: 3px; background: var(--border); }
 .scope-mini-bar.lit { background: var(--accent); }
 
 #output-text {
