@@ -27,6 +27,14 @@ const TAXONOMY_TOOL = {
                 type: "object",
                 properties: {
                   name: { type: "string" },
+                  axis: {
+                    type: "string",
+                    description: "Optional. Set this if the subcategory AS A WHOLE represents one side of a real either/or against another subcategory elsewhere (e.g. one region vs. another). Lets the user accept the whole subcategory generally, without picking through individual elements, while still correctly excluding conflicting choices elsewhere."
+                  },
+                  direction: {
+                    type: "string",
+                    description: "Optional. Which side of the axis this subcategory represents. Required if axis is set."
+                  },
                   elements: {
                     type: "array",
                     minItems: 3,
@@ -72,6 +80,8 @@ Two rules keep the levels from collapsing into each other:
 2. Elements are only things you'd actually select. Every entry in an "elements" array must be a concrete, choosable item — a specific named thing, technique, or option a person would pick between. Background facts, general characteristics, or context do NOT belong in elements — if the reader wouldn't check a box next to it as a decision, it doesn't go there. Fold it into the name instead, or leave it out.
 
 3. Tag genuine either/or conflicts with axis + direction. This tool is meant to converge the user toward ONE coherent plan, not let them assemble a self-contradictory pile of choices. Whenever two or more elements — anywhere in the taxonomy, not just in the same subcategory — are genuinely mutually exclusive (choosing one makes the other wrong, not just less relevant), tag every element on both sides with the same "axis" slug and their respective "direction". Example: a cool-season crop and a warm-season crop that can't both be planted for the same purpose might share axis "climate-direction" with directions "cool" and "warm". A subject can have zero, one, or several such axes — invent whatever axis names actually fit the subject, don't force a conflict that isn't real. Most elements will have no axis at all; only tag the ones where selecting it should genuinely rule out its opposite.
+
+4. Tag subcategories too when the whole subcategory is one side of a conflict. If a subcategory itself represents one branch of a real either/or (e.g. "Piedmont" vs. "Coastal Plain" as regions), tag the subcategory with the same axis/direction convention as elements. This lets a user accept the subcategory as a whole — a "General" option, for someone who doesn't yet know enough to evaluate the individual elements underneath it — while still correctly excluding whatever conflicts with it elsewhere in the tree.
 
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 

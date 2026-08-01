@@ -134,6 +134,15 @@ button:disabled { opacity: 0.5; cursor: default; }
 .elements label:has(input:checked) { color: var(--fg); }
 .elements label.excluded { display: none; }
 
+.general-option {
+  font-style: italic;
+  color: var(--accent) !important;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
+  border-bottom: 1px dashed var(--border);
+}
+.general-option:has(input:checked) { font-style: normal; font-weight: 600; }
+
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); }
 #genre-buttons button:hover { background: var(--accent); color: #fff; }

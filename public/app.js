@@ -169,6 +169,35 @@ function renderTaxonomy() {
       const list = document.createElement("div");
       list.className = "elements";
 
+      // "General" option: accept this subcategory as a whole, without picking
+      // through individual elements — for a user who doesn't yet know enough
+      // to evaluate the specifics. Still participates in the same exclusion
+      // sweep as elements when the subcategory itself carries an axis/direction.
+      const generalLabel = document.createElement("label");
+      generalLabel.className = "general-option";
+      const generalCheckbox = document.createElement("input");
+      generalCheckbox.type = "checkbox";
+      generalCheckbox.value = sub.name;
+      generalCheckbox.checked = state.selected.has(sub.name);
+      generalCheckbox.addEventListener("change", () => {
+        if (generalCheckbox.checked) state.selected.add(sub.name);
+        else state.selected.delete(sub.name);
+        applyExclusions();
+      });
+      generalLabel.appendChild(generalCheckbox);
+      generalLabel.append(" General — include this without picking specifics");
+      list.appendChild(generalLabel);
+
+      if (sub.axis && sub.direction) {
+        elementRegistry.push({
+          checkbox: generalCheckbox,
+          label: generalLabel,
+          text: sub.name,
+          axis: sub.axis,
+          direction: sub.direction
+        });
+      }
+
       (sub.elements || []).forEach(elementObj => {
         // Defensive: tolerate a plain string too, same pattern Muralizer uses for sanitizing input shapes.
         const text = typeof elementObj === "string" ? elementObj : elementObj.text;
