@@ -97,6 +97,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-size: 0.9rem;
 }
 #stale-banner button { margin-top: 0; padding: 0.35rem 0.8rem; font-size: 0.85rem; }
+#stale-banner[hidden] { display: none; }
 
 #demo-cases { margin-top: 1rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
