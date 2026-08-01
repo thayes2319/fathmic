@@ -169,10 +169,17 @@ function renderTaxonomy() {
       const list = document.createElement("div");
       list.className = "elements";
 
+      const specificsList = document.createElement("div");
+      specificsList.className = "specific-elements";
+      const specificCheckboxes = [];
+
       // "General" option: accept this subcategory as a whole, without picking
       // through individual elements — for a user who doesn't yet know enough
-      // to evaluate the specifics. Still participates in the same exclusion
-      // sweep as elements when the subcategory itself carries an axis/direction.
+      // to evaluate the specifics. Mutually exclusive with specific picks in
+      // THIS subcategory by definition (not domain-dependent, so it's a local
+      // rule, not an axis tag): checking General clears and hides the specific
+      // list; checking any specific element clears General. Still participates
+      // in the cross-tree axis/direction exclusion sweep when tagged.
       const generalLabel = document.createElement("label");
       generalLabel.className = "general-option";
       const generalCheckbox = document.createElement("input");
@@ -180,8 +187,19 @@ function renderTaxonomy() {
       generalCheckbox.value = sub.name;
       generalCheckbox.checked = state.selected.has(sub.name);
       generalCheckbox.addEventListener("change", () => {
-        if (generalCheckbox.checked) state.selected.add(sub.name);
-        else state.selected.delete(sub.name);
+        if (generalCheckbox.checked) {
+          state.selected.add(sub.name);
+          specificCheckboxes.forEach(({ checkbox, text }) => {
+            if (checkbox.checked) {
+              checkbox.checked = false;
+              state.selected.delete(text);
+            }
+          });
+          specificsList.classList.add("collapsed-by-general");
+        } else {
+          state.selected.delete(sub.name);
+          specificsList.classList.remove("collapsed-by-general");
+        }
         applyExclusions();
       });
       generalLabel.appendChild(generalCheckbox);
@@ -210,18 +228,32 @@ function renderTaxonomy() {
         checkbox.value = text;
         checkbox.checked = state.selected.has(text);
         checkbox.addEventListener("change", () => {
-          if (checkbox.checked) state.selected.add(text);
-          else state.selected.delete(text);
+          if (checkbox.checked) {
+            state.selected.add(text);
+            if (generalCheckbox.checked) {
+              generalCheckbox.checked = false;
+              state.selected.delete(sub.name);
+              specificsList.classList.remove("collapsed-by-general");
+            }
+          } else {
+            state.selected.delete(text);
+          }
           applyExclusions();
         });
         label.appendChild(checkbox);
         label.append(` ${text}`);
-        list.appendChild(label);
+        specificsList.appendChild(label);
+        specificCheckboxes.push({ checkbox, text });
 
         if (axis && direction) {
           elementRegistry.push({ checkbox, label, text, axis, direction });
         }
       });
+
+      if (generalCheckbox.checked) {
+        specificsList.classList.add("collapsed-by-general");
+      }
+      list.appendChild(specificsList);
 
       subEl.appendChild(list);
       catEl.appendChild(subEl);
