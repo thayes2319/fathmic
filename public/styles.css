@@ -300,7 +300,6 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 #reference-cards {
   display: flex;
-  align-items: flex-start; /* so the taller popularity card doesn't stretch its siblings */
   gap: 0.75rem;
   margin: 0.75rem 0 1.25rem;
 }
@@ -316,10 +315,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   justify-content: center;
   background: rgba(127, 127, 127, 0.05);
 }
-.ref-card[data-card="popularity"] {
-  aspect-ratio: unset;
-  padding: 0.9rem 0.7rem;
-}
+.ref-card[data-card="popularity"] { padding: 0.5rem; }
 .ref-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ref-card-placeholder { color: var(--muted); font-size: 0.8rem; text-align: center; padding: 0.75rem; }
 .ref-card button { margin-top: 0; }
@@ -341,33 +337,36 @@ button:disabled { opacity: 0.5; cursor: default; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  height: 100%;
 }
 .volume-bars {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  height: 56px;
+  gap: 3px;
+  height: 26px;
 }
 .volume-bar {
-  width: 8px;
-  border-radius: 2px;
+  width: 6px;
+  border-radius: 1.5px;
   background: var(--border);
 }
 .volume-bar.lit { background: var(--accent); }
 .popularity-label {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--muted);
   text-align: center;
 }
-.scope-rows { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; margin-top: 0.3rem; }
-.scope-row { display: flex; align-items: center; gap: 0.4rem; }
-.scope-icon { width: 14px; height: 14px; flex-shrink: 0; color: var(--muted); }
+.scope-rows { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; }
+.scope-row { display: flex; align-items: center; gap: 0.3rem; }
+.scope-icon { width: 10px; height: 10px; flex-shrink: 0; color: var(--muted); }
 .scope-icon svg { width: 100%; height: 100%; }
-.scope-row-label { font-size: 0.65rem; color: var(--muted); width: 46px; flex-shrink: 0; }
-.scope-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.scope-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s ease; }
+.scope-row-label { font-size: 0.55rem; color: var(--muted); width: 34px; flex-shrink: 0; }
+.scope-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.scope-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
 
 #output-text {
   white-space: pre-wrap;
