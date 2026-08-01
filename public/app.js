@@ -31,6 +31,7 @@ const el = {
   outputSection: document.getElementById("output-section"),
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
+  copyOutputBtn: document.getElementById("copy-output-btn"),
   demoButtons: document.getElementById("demo-buttons"),
   illustrateBtn: document.getElementById("illustrate-btn"),
   illustrationCard: document.querySelector('.ref-card[data-card="illustration"]'),
@@ -669,6 +670,24 @@ el.genreButtons.addEventListener("click", event => {
 el.regenerateBtn.addEventListener("click", () => {
   if (!state.lastGenre) return;
   runSynthesisForGenre(state.lastGenre, state.lastGenreLabel);
+});
+
+el.copyOutputBtn.addEventListener("click", async () => {
+  const text = state.lastResultText || el.outputText.textContent;
+  if (!text || text === "Synthesizing...") return;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    el.copyOutputBtn.textContent = "Copy failed";
+    setTimeout(() => { el.copyOutputBtn.textContent = "Copy"; }, 1500);
+    return;
+  }
+  el.copyOutputBtn.textContent = "Copied";
+  el.copyOutputBtn.classList.add("copied");
+  setTimeout(() => {
+    el.copyOutputBtn.textContent = "Copy";
+    el.copyOutputBtn.classList.remove("copied");
+  }, 1500);
 });
 
 el.expandAllBtn.addEventListener("click", () => {

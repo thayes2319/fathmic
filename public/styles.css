@@ -543,6 +543,22 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--muted);
 }
 
+#output-text-wrap { position: relative; }
+#copy-output-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  margin-top: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+#copy-output-btn:hover { color: var(--accent); border-color: var(--accent); }
+#copy-output-btn.copied { color: var(--accent); border-color: var(--accent); }
+
 #output-text {
   white-space: pre-wrap;
   font-family: inherit;
@@ -550,6 +566,6 @@ button:disabled { opacity: 0.5; cursor: default; }
   line-height: 1.65;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 1.25rem 1.4rem;
+  padding: 1.25rem 3.2rem 1.25rem 1.4rem;
   background: rgba(127, 127, 127, 0.05);
 }
