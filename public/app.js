@@ -109,6 +109,7 @@ el.clarifySubmitBtn.addEventListener("click", async () => {
   // V1 simplification: fold the answer into the input and go straight to
   // taxonomy generation rather than re-running the gate a second time.
   state.input = `${state.input} (${answer})`;
+  el.subjectInput.value = state.input; // visible prompt box reflects the clarified version, not just internal state
   el.clarifySection.hidden = true;
   el.gateStatus.textContent = "Thanks — distilling now.";
 
