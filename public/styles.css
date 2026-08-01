@@ -338,35 +338,16 @@ button:disabled { opacity: 0.5; cursor: default; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
   width: 100%;
   height: 100%;
 }
-.volume-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 26px;
-}
-.volume-bar {
-  width: 6px;
-  border-radius: 1.5px;
-  background: var(--border);
-}
-.volume-bar.lit { background: var(--accent); }
-.popularity-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-align: center;
-}
-.scope-rows { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; }
-.scope-row { display: flex; align-items: center; gap: 0.3rem; }
-.scope-icon { width: 10px; height: 10px; flex-shrink: 0; color: var(--muted); }
+.scope-rows { display: flex; flex-direction: column; gap: 0.55rem; width: 100%; }
+.scope-row { display: flex; align-items: center; gap: 0.4rem; }
+.scope-icon { width: 14px; height: 14px; flex-shrink: 0; color: var(--muted); }
 .scope-icon svg { width: 100%; height: 100%; }
-.scope-row-label { font-size: 0.55rem; color: var(--muted); width: 34px; flex-shrink: 0; }
-.scope-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.scope-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+.scope-row-label { font-size: 0.65rem; color: var(--muted); width: 42px; flex-shrink: 0; }
+.scope-track { flex: 1; height: 5px; background: var(--border); border-radius: 2.5px; overflow: hidden; }
+.scope-fill { height: 100%; background: var(--accent); border-radius: 2.5px; transition: width 0.3s ease; }
 
 #output-text {
   white-space: pre-wrap;

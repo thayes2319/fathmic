@@ -806,13 +806,6 @@ async function generatePopularity() {
 
   try {
     const result = await postJSON("/api/popularity", { topic: state.topic });
-    const score = result.score;
-    const label = score < 0.35 ? "Exclusive Topic" : score > 0.65 ? "Popular Topic" : "Balanced Reach";
-
-    const litBars = Math.max(1, Math.round(score * 5));
-    const bars = Array.from({ length: 5 }, (_, i) =>
-      `<span class="volume-bar ${i < litBars ? "lit" : ""}" style="height:${16 + i * 8}px"></span>`
-    ).join("");
 
     const rows = [
       scopeRow("world", result.worldScore, "World"),
@@ -822,8 +815,6 @@ async function generatePopularity() {
 
     el.popularityCard.innerHTML = `
       <div class="popularity-display">
-        <div class="volume-bars">${bars}</div>
-        <div class="popularity-label">${label}</div>
         <div class="scope-rows">${rows}</div>
       </div>
     `;
