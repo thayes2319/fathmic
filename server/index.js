@@ -6,6 +6,7 @@ const { runGate } = require("./gate");
 const { runTaxonomy } = require("./taxonomy");
 const { runSynthesis } = require("./synthesize");
 const { runIllustration } = require("./illustrate");
+const { runPhotoSearch } = require("./photo");
 
 const app = express();
 app.use(express.json());
@@ -63,6 +64,20 @@ app.post("/api/illustrate", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("[illustrate]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/photo", async (req, res) => {
+  try {
+    const { topic } = req.body || {};
+    if (!topic) {
+      return res.status(400).json({ error: "topic is required" });
+    }
+    const result = await runPhotoSearch({ topic });
+    res.json(result);
+  } catch (err) {
+    console.error("[photo]", err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -32,6 +32,8 @@ const el = {
   demoButtons: document.getElementById("demo-buttons"),
   illustrateBtn: document.getElementById("illustrate-btn"),
   illustrationCard: document.querySelector('.ref-card[data-card="illustration"]'),
+  photoBtn: document.getElementById("photo-btn"),
+  photoCard: document.querySelector('.ref-card[data-card="photo"]'),
   expandAllBtn: document.getElementById("expand-all-btn"),
   collapseAllBtn: document.getElementById("collapse-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
@@ -486,6 +488,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   el.outputText.textContent = "Synthesizing...";
   el.staleBanner.hidden = true;
   resetIllustrationCard();
+  resetPhotoCard();
 
   try {
     const result = await postJSON("/api/synthesize", {
@@ -499,6 +502,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
     state.lastGenreLabel = genreLabel;
     state.resultSelectionsSnapshot = new Set(state.selected);
     generateIllustration(); // fire-and-forget: don't block the text result on image generation
+    generatePhoto(); // fire-and-forget: same
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
@@ -589,4 +593,44 @@ async function generateIllustration() {
 
 if (el.illustrateBtn) {
   el.illustrateBtn.addEventListener("click", generateIllustration);
+}
+
+function resetPhotoCard() {
+  if (!el.photoCard) return;
+  el.photoCard.innerHTML = '<button id="photo-btn">Get relevant photo</button>';
+  el.photoBtn = document.getElementById("photo-btn");
+  el.photoBtn.addEventListener("click", generatePhoto);
+}
+
+async function generatePhoto() {
+  if (!el.photoCard) return;
+  el.photoCard.innerHTML = '<div class="ref-card-placeholder">Searching...</div>';
+
+  try {
+    const result = await postJSON("/api/photo", { topic: state.topic });
+    el.photoCard.innerHTML = "";
+
+    const img = document.createElement("img");
+    img.src = result.imageUrl;
+    img.alt = state.topic;
+    el.photoCard.appendChild(img);
+
+    // Required by Unsplash API guidelines — not decorative.
+    const credit = document.createElement("div");
+    credit.className = "photo-credit";
+    const photographerLink = result.photographerUrl
+      ? `<a href="${result.photographerUrl}" target="_blank" rel="noopener">${result.photographerName}</a>`
+      : result.photographerName;
+    const unsplashLink = result.photoPageUrl
+      ? `<a href="${result.photoPageUrl}" target="_blank" rel="noopener">Unsplash</a>`
+      : "Unsplash";
+    credit.innerHTML = `Photo by ${photographerLink} on ${unsplashLink}`;
+    el.photoCard.appendChild(credit);
+  } catch (err) {
+    el.photoCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
+  }
+}
+
+if (el.photoBtn) {
+  el.photoBtn.addEventListener("click", generatePhoto);
 }
