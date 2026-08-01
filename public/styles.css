@@ -269,6 +269,16 @@ button:disabled { opacity: 0.5; cursor: default; }
   border-radius: 50%;
 }
 
+/* The actual turning-knob body (perimeter + gradient track + face) is
+   deliberately much smaller than the outer .stakes-knob box, leaving an
+   open ring of space around it for the position markers to sit in —
+   clearly outside the dial, the way labels sit outside a real knob. */
+.stakes-dial {
+  position: absolute;
+  inset: 55px;
+  border-radius: 50%;
+}
+
 /* Knurled perimeter — thin ridged ring at the very edge, alternating border
    and background color every few degrees to fake a grip texture. */
 .stakes-knob-perimeter {
@@ -276,8 +286,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   inset: 0;
   border-radius: 50%;
   background: repeating-conic-gradient(var(--border) 0deg 3deg, var(--bg) 3deg 7deg);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
 }
 
 /* The volume-style track: a 340deg ring from 190deg to 170deg (clockwise,
@@ -286,7 +296,7 @@ button:disabled { opacity: 0.5; cursor: default; }
    is the same convention the markers and needle rotation use below. */
 .stakes-knob-arc {
   position: absolute;
-  inset: 9px;
+  inset: 5px;
   border-radius: 50%;
   background: conic-gradient(
     from 190deg,
@@ -296,13 +306,13 @@ button:disabled { opacity: 0.5; cursor: default; }
     transparent 340deg,
     transparent 360deg
   );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
 }
 
 .stakes-knob-face {
   position: absolute;
-  inset: 18px;
+  inset: 10px;
   border-radius: 50%;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -314,9 +324,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .stakes-knob-label {
   position: relative;
   z-index: 1;
-  font-size: 1.05rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
   /* Engraved-into-the-face look: light shadow below (catching light), dark
@@ -339,7 +349,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 
 /* Small curved accent sitting right at the needle's tip (needle reaches
-   ~69px from center: 34% of the 204px face) — NOT a long separate arm, just
+   ~37px from center: 34% of the 110px face) — NOT a long separate arm, just
    a tiny marker riding just past where the needle already points. Same
    bottom:50%/transform-origin:bottom-center pattern as the needle so it
    rotates around the same true center. */
@@ -348,7 +358,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   bottom: 50%;
   left: 50%;
   width: 18px;
-  height: 80px;
+  height: 44px;
   transform-origin: bottom center;
   transform: translateX(-50%) rotate(0deg);
   transition: transform 0.25s ease, color 0.25s ease;
