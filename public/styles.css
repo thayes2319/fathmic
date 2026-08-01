@@ -264,8 +264,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .stakes-knob {
   position: relative;
-  width: 210px;
-  height: 210px;
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
 }
 
@@ -314,11 +314,16 @@ button:disabled { opacity: 0.5; cursor: default; }
 .stakes-knob-label {
   position: relative;
   z-index: 1;
-  font-size: 0.75rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
+  /* Engraved-into-the-face look: light shadow below (catching light), dark
+     shadow above (the incised edge) — reads as debossed rather than flat. */
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35),
+    0 -1px 1px rgba(0, 0, 0, 0.35);
 }
 .stakes-knob-needle {
   position: absolute;
@@ -333,9 +338,36 @@ button:disabled { opacity: 0.5; cursor: default; }
   transition: transform 0.25s ease, background 0.25s ease;
 }
 
-/* Markers sit at 9/12/3 o'clock (270/0/90deg), positioned via the left/top
-   percentages set inline in the HTML rather than computed here, since
-   there are only three fixed positions. */
+/* Curved pointer arrow — sits just outside the knurled perimeter, drawn by
+   default pointing down-and-in from the top (12 o'clock), then rotated by
+   the same angle as the needle so it always "chases" the current position
+   from outside the dial. */
+.stakes-pointer {
+  /* Same structural pattern as .stakes-knob-needle (proven to rotate
+     correctly around the knob's true center) — just taller, with the arrow
+     graphic at the far end instead of filling the whole length. Knob radius
+     is 120px, so this reaches comfortably past the knurled perimeter. */
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  width: 40px;
+  height: 148px;
+  transform-origin: bottom center;
+  transform: translateX(-50%) rotate(0deg);
+  transition: transform 0.25s ease, color 0.25s ease;
+  color: var(--accent);
+  pointer-events: none;
+}
+.stakes-pointer svg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.stakes-pointer svg path { stroke: currentColor; stroke-width: 2.5; }
+
+/* Markers sit at 5 evenly-spaced points across the 340deg sweep, positioned
+   via the left/top percentages set inline in the HTML. */
 .stakes-marker {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -346,11 +378,11 @@ button:disabled { opacity: 0.5; cursor: default; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 .stakes-marker-dot {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   border: 2px solid var(--bg);
   background: var(--muted);
@@ -358,12 +390,12 @@ button:disabled { opacity: 0.5; cursor: default; }
   transition: all 0.15s ease;
 }
 .stakes-marker.active .stakes-marker-dot {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   background: var(--accent);
   box-shadow: 0 0 0 3px rgba(127, 127, 127, 0.18);
 }
-.stakes-marker-text { font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+.stakes-marker-text { font-size: 0.55rem; color: var(--muted); white-space: nowrap; }
 .stakes-marker.active .stakes-marker-text { color: var(--accent); font-weight: 600; }
 .stakes-caption { margin-top: 0.7rem; font-size: 0.8rem; color: var(--muted); }
 

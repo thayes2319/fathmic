@@ -56,21 +56,35 @@
         <div class="stakes-knob">
           <div class="stakes-knob-perimeter"></div>
           <div class="stakes-knob-arc"></div>
+          <div class="stakes-pointer">
+            <svg viewBox="0 0 40 40" width="40" height="40">
+              <path d="M8 26 Q 20 6, 33 18" fill="none" stroke-linecap="round"/>
+              <path d="M27 12 L33 18 L25 21" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <div class="stakes-knob-face">
             <div class="stakes-knob-label">Stakes</div>
             <div class="stakes-knob-needle"></div>
           </div>
-          <button class="stakes-marker" data-stakes="low" title="Low stakes" style="left:8%; top:50%;">
+          <button class="stakes-marker" data-stakes="very_low" title="Very low stakes" style="left:43%; top:91%;">
+            <span class="stakes-marker-dot"></span>
+            <span class="stakes-marker-text">V-Low</span>
+          </button>
+          <button class="stakes-marker" data-stakes="low" title="Low stakes" style="left:8%; top:46%;">
             <span class="stakes-marker-dot"></span>
             <span class="stakes-marker-text">Low</span>
           </button>
           <button class="stakes-marker" data-stakes="medium" title="Medium stakes" style="left:50%; top:8%;">
             <span class="stakes-marker-dot"></span>
-            <span class="stakes-marker-text">Medium</span>
+            <span class="stakes-marker-text">Med</span>
           </button>
-          <button class="stakes-marker" data-stakes="high" title="High stakes" style="left:92%; top:50%;">
+          <button class="stakes-marker" data-stakes="high" title="High stakes" style="left:92%; top:46%;">
             <span class="stakes-marker-dot"></span>
             <span class="stakes-marker-text">High</span>
+          </button>
+          <button class="stakes-marker" data-stakes="very_high" title="Very high stakes" style="left:57%; top:91%;">
+            <span class="stakes-marker-dot"></span>
+            <span class="stakes-marker-text">V-High</span>
           </button>
         </div>
         <span class="stakes-caption">How much is riding on this?</span>

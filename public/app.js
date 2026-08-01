@@ -44,7 +44,8 @@ const el = {
   staleBanner: document.getElementById("stale-banner"),
   regenerateBtn: document.getElementById("regenerate-btn"),
   stakesPositions: document.querySelectorAll(".stakes-marker"),
-  stakesNeedle: document.querySelector(".stakes-knob-needle")
+  stakesNeedle: document.querySelector(".stakes-knob-needle"),
+  stakesPointer: document.querySelector(".stakes-pointer")
 };
 
 async function postJSON(path, body) {
@@ -593,18 +594,31 @@ function checkStaleness() {
 // as a volume knob or thermostat.
 // Needle rotation: -90/0/90deg from vertical maps exactly to 9/12/3 o'clock,
 // the same 270/0/90 (clockwise-from-top) angles the markers sit at.
-const STAKES_NEEDLE_ANGLE = { low: -90, medium: 0, high: 90 };
-const STAKES_NEEDLE_COLOR = { low: "#5b8dd6", medium: "var(--accent)", high: "#d64545" };
+// 5 positions, evenly spaced (85deg apart) across the same 340deg sweep the
+// 3-position version used (190deg to 170deg, the long way through 270/0/90) —
+// -170/-85/0/85/170 are the shortest-path equivalents of that.
+const STAKES_NEEDLE_ANGLE = { very_low: -170, low: -85, medium: 0, high: 85, very_high: 170 };
+const STAKES_NEEDLE_COLOR = {
+  very_low: "#5b8dd6",
+  low: "#5ba8a0",
+  medium: "var(--accent)",
+  high: "#d68a45",
+  very_high: "#d64545"
+};
 
 function renderStakesDial() {
   el.stakesPositions.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
   });
+  const angle = STAKES_NEEDLE_ANGLE[state.stakes] ?? 0;
+  const color = STAKES_NEEDLE_COLOR[state.stakes] || "var(--accent)";
   if (el.stakesNeedle) {
-    const angle = STAKES_NEEDLE_ANGLE[state.stakes] ?? 0;
-    const color = STAKES_NEEDLE_COLOR[state.stakes] || "var(--accent)";
     el.stakesNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
     el.stakesNeedle.style.background = color;
+  }
+  if (el.stakesPointer) {
+    el.stakesPointer.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    el.stakesPointer.style.color = color;
   }
 }
 
