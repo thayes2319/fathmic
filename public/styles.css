@@ -338,20 +338,17 @@ button:disabled { opacity: 0.5; cursor: default; }
   transition: transform 0.25s ease, background 0.25s ease;
 }
 
-/* Curved pointer arrow — sits just outside the knurled perimeter, drawn by
-   default pointing down-and-in from the top (12 o'clock), then rotated by
-   the same angle as the needle so it always "chases" the current position
-   from outside the dial. */
+/* Small curved accent sitting right at the needle's tip (needle reaches
+   ~69px from center: 34% of the 204px face) — NOT a long separate arm, just
+   a tiny marker riding just past where the needle already points. Same
+   bottom:50%/transform-origin:bottom-center pattern as the needle so it
+   rotates around the same true center. */
 .stakes-pointer {
-  /* Same structural pattern as .stakes-knob-needle (proven to rotate
-     correctly around the knob's true center) — just taller, with the arrow
-     graphic at the far end instead of filling the whole length. Knob radius
-     is 120px, so this reaches comfortably past the knurled perimeter. */
   position: absolute;
   bottom: 50%;
   left: 50%;
-  width: 40px;
-  height: 148px;
+  width: 18px;
+  height: 80px;
   transform-origin: bottom center;
   transform: translateX(-50%) rotate(0deg);
   transition: transform 0.25s ease, color 0.25s ease;
@@ -361,10 +358,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .stakes-pointer svg {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
 }
-.stakes-pointer svg path { stroke: currentColor; stroke-width: 2.5; }
+.stakes-pointer svg path { stroke: currentColor; stroke-width: 2; }
 
 /* Markers sit at 5 evenly-spaced points across the 340deg sweep, positioned
    via the left/top percentages set inline in the HTML. */
@@ -381,21 +377,21 @@ button:disabled { opacity: 0.5; cursor: default; }
   gap: 0.2rem;
 }
 .stakes-marker-dot {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  border: 2px solid var(--bg);
-  background: var(--muted);
-  box-shadow: 0 0 0 1px var(--border);
+  border: 2px solid var(--muted);
+  background: transparent;
   transition: all 0.15s ease;
 }
 .stakes-marker.active .stakes-marker-dot {
   width: 14px;
   height: 14px;
+  border-color: var(--accent);
   background: var(--accent);
   box-shadow: 0 0 0 3px rgba(127, 127, 127, 0.18);
 }
-.stakes-marker-text { font-size: 0.55rem; color: var(--muted); white-space: nowrap; }
+.stakes-marker-text { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 .stakes-marker.active .stakes-marker-text { color: var(--accent); font-weight: 600; }
 .stakes-caption { margin-top: 0.7rem; font-size: 0.8rem; color: var(--muted); }
 
@@ -474,6 +470,36 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .scope-mini-bar { width: 16%; border-radius: 3px; background: var(--border); }
 .scope-mini-bar.lit { background: var(--accent); }
+
+/* A soft, cloud-shaped callout — irregular rounded corners plus a puffy
+   drop-shadow read as "cloud" without needing a precise multi-blob outline
+   we can't verify the render of. Sits right under the Result heading so the
+   caveat is seen before the text underneath it is trusted. */
+#disclaimer-cloud {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.85rem 1.1rem;
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px solid var(--border);
+  border-radius: 55% 45% 48% 52% / 35% 40% 35% 40%;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+#disclaimer-cloud svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 0.15rem;
+  color: var(--muted);
+}
+#disclaimer-cloud p {
+  margin: 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--muted);
+}
 
 #output-text {
   white-space: pre-wrap;
