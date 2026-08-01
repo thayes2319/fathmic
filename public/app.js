@@ -674,6 +674,24 @@ function resetPopularityCard() {
   el.popularityBtn.addEventListener("click", generatePopularity);
 }
 
+// Thin-line wireframe icons, stroke-only, currentColor — opacity/color set
+// per-icon via inline style based on its own independent score, matching the
+// muted/accent convention used everywhere else in the app.
+const SCOPE_ICONS = {
+  world: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>`,
+  national: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M12 2 L14.5 9 L22 9.5 L16 14.5 L18 22 L12 17.5 L6 22 L8 14.5 L2 9.5 L9.5 9 Z"/></svg>`,
+  local: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="3" y="10" width="5" height="11"/><rect x="10" y="5" width="5" height="16"/><rect x="17" y="13" width="4" height="8"/></svg>`
+};
+
+function scopeIcon(type, score, label) {
+  // Opacity + color both scale with score: faint gray at low relevance,
+  // full accent color at high relevance — same muted/accent language as
+  // fixedness badges and the stakes dial elsewhere in the app.
+  const opacity = (0.25 + score * 0.75).toFixed(2);
+  const color = score > 0.5 ? "var(--accent)" : "var(--muted)";
+  return `<span class="scope-icon" style="opacity:${opacity}; color:${color};" title="${label}: ${Math.round(score * 100)}%">${SCOPE_ICONS[type]}</span>`;
+}
+
 async function generatePopularity() {
   if (!el.popularityCard) return;
   el.popularityCard.innerHTML = '<div class="ref-card-placeholder">Checking...</div>';
@@ -682,18 +700,23 @@ async function generatePopularity() {
     const result = await postJSON("/api/popularity", { topic: state.topic });
     const score = result.score;
     const label = score < 0.35 ? "Exclusive Topic" : score > 0.65 ? "Popular Topic" : "Balanced Reach";
-    const scopeLabel = { world: "World", national: "National", local: "Local" }[result.scope] || "National";
 
     const litBars = Math.max(1, Math.round(score * 5));
     const bars = Array.from({ length: 5 }, (_, i) =>
       `<span class="volume-bar ${i < litBars ? "lit" : ""}" style="height:${16 + i * 8}px"></span>`
     ).join("");
 
+    const icons = [
+      scopeIcon("world", result.worldScore, "World"),
+      scopeIcon("national", result.nationalScore, "National"),
+      scopeIcon("local", result.localScore, "Local")
+    ].join("");
+
     el.popularityCard.innerHTML = `
       <div class="popularity-display">
         <div class="volume-bars">${bars}</div>
         <div class="popularity-label">${label}</div>
-        <div class="scope-badge scope-${result.scope}">${scopeLabel}</div>
+        <div class="scope-icons">${icons}</div>
       </div>
     `;
   } catch (err) {
