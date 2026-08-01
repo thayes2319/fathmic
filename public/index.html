@@ -34,6 +34,10 @@
 
     <section id="taxonomy-section" hidden>
       <h2 id="topic-heading"></h2>
+      <div id="expand-controls">
+        <button id="expand-all-btn" class="link-btn">Expand all</button>
+        <button id="collapse-all-btn" class="link-btn">Collapse all</button>
+      </div>
       <div id="taxonomy-tree"></div>
     </section>
 
@@ -51,6 +55,11 @@
 
     <section id="output-section" hidden>
       <h2 id="output-heading">Result</h2>
+
+      <div id="stale-banner" hidden>
+        <span>Selections changed since this was generated.</span>
+        <button id="regenerate-btn">Regenerate</button>
+      </div>
 
       <div id="reference-cards">
         <div class="ref-card" data-card="news">

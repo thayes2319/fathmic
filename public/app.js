@@ -5,7 +5,11 @@ const state = {
   categories: [],
   selected: new Set(),
   expandedCategories: new Set(),
-  lastResultText: ""
+  expandedSubcategories: new Set(),
+  lastResultText: "",
+  lastGenre: null,
+  lastGenreLabel: null,
+  resultSelectionsSnapshot: null
 };
 
 const el = {
@@ -27,7 +31,11 @@ const el = {
   outputText: document.getElementById("output-text"),
   demoButtons: document.getElementById("demo-buttons"),
   illustrateBtn: document.getElementById("illustrate-btn"),
-  illustrationCard: document.querySelector('.ref-card[data-card="illustration"]')
+  illustrationCard: document.querySelector('.ref-card[data-card="illustration"]'),
+  expandAllBtn: document.getElementById("expand-all-btn"),
+  collapseAllBtn: document.getElementById("collapse-all-btn"),
+  staleBanner: document.getElementById("stale-banner"),
+  regenerateBtn: document.getElementById("regenerate-btn")
 };
 
 async function postJSON(path, body) {
@@ -47,6 +55,10 @@ function resetDownstream() {
   el.genreSection.hidden = true;
   el.outputSection.hidden = true;
   state.selected.clear();
+  state.expandedCategories.clear();
+  state.expandedSubcategories.clear();
+  state.resultSelectionsSnapshot = null;
+  state.lastGenre = null;
 }
 
 el.distillBtn.addEventListener("click", async () => {
@@ -201,6 +213,22 @@ function renderTaxonomy() {
 
     catEl.appendChild(catTitle);
 
+    // Placed outside <summary> deliberately — a button inside <summary> would
+    // also trigger the native toggle-on-click behavior of the parent
+    // <details>, fighting with this button's own click handler.
+    if ((category.subcategories || []).length > 1) {
+      const expandSubsBtn = document.createElement("button");
+      expandSubsBtn.className = "link-btn expand-subs-btn";
+      expandSubsBtn.textContent = "Expand subcategories";
+      expandSubsBtn.addEventListener("click", () => {
+        category.subcategories.forEach(sub => {
+          state.expandedSubcategories.add(`${category.name}::${sub.name}`);
+        });
+        renderTaxonomy();
+      });
+      catEl.appendChild(expandSubsBtn);
+    }
+
     // Category-level "General": accept the whole category as noise/not-worth-
     // drilling-into right now, without picking through any of its subcategories.
     // Same mutual-exclusivity rule as subcategory-level General, one level up:
@@ -241,8 +269,14 @@ function renderTaxonomy() {
     }
 
     (category.subcategories || []).forEach(sub => {
+      const subKey = `${category.name}::${sub.name}`;
       const subEl = document.createElement("details");
       subEl.className = "subcategory";
+      subEl.open = state.expandedSubcategories.has(subKey);
+      subEl.addEventListener("toggle", () => {
+        if (subEl.open) state.expandedSubcategories.add(subKey);
+        else state.expandedSubcategories.delete(subKey);
+      });
 
       const subTitle = document.createElement("summary");
       subTitle.textContent = sub.name;
@@ -423,18 +457,34 @@ function applyExclusions() {
   });
 
   el.genreSection.hidden = state.selected.size === 0;
+  checkStaleness();
 }
 
-el.genreButtons.addEventListener("click", async event => {
-  const genre = event.target.dataset.genre;
-  if (!genre) return;
+// Compares current selections against a snapshot taken at the last successful
+// synthesis. Reordering categories doesn't affect this — the synthesis
+// payload is an unordered set, order carries no meaning there — only actual
+// selection changes (checking/unchecking, General toggles, exclusions
+// firing) do.
+function checkStaleness() {
+  if (!state.resultSelectionsSnapshot || el.outputSection.hidden) {
+    el.staleBanner.hidden = true;
+    return;
+  }
+  const current = state.selected;
+  const snapshot = state.resultSelectionsSnapshot;
+  const changed = current.size !== snapshot.size || Array.from(current).some(v => !snapshot.has(v));
+  el.staleBanner.hidden = !changed;
+}
 
+async function runSynthesisForGenre(genre, genreLabel) {
   Array.from(el.genreButtons.children).forEach(btn => btn.classList.remove("active"));
-  event.target.classList.add("active");
+  const matchingBtn = Array.from(el.genreButtons.children).find(btn => btn.dataset.genre === genre);
+  if (matchingBtn) matchingBtn.classList.add("active");
 
   el.outputSection.hidden = false;
-  el.outputHeading.textContent = `Result — ${event.target.textContent}`;
+  el.outputHeading.textContent = `Result — ${genreLabel}`;
   el.outputText.textContent = "Synthesizing...";
+  el.staleBanner.hidden = true;
   resetIllustrationCard();
 
   try {
@@ -445,10 +495,39 @@ el.genreButtons.addEventListener("click", async event => {
     });
     el.outputText.textContent = result.text;
     state.lastResultText = result.text;
+    state.lastGenre = genre;
+    state.lastGenreLabel = genreLabel;
+    state.resultSelectionsSnapshot = new Set(state.selected);
     generateIllustration(); // fire-and-forget: don't block the text result on image generation
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
+}
+
+el.genreButtons.addEventListener("click", event => {
+  const genre = event.target.dataset.genre;
+  if (!genre) return;
+  runSynthesisForGenre(genre, event.target.textContent);
+});
+
+el.regenerateBtn.addEventListener("click", () => {
+  if (!state.lastGenre) return;
+  runSynthesisForGenre(state.lastGenre, state.lastGenreLabel);
+});
+
+el.expandAllBtn.addEventListener("click", () => {
+  // Top-level only — subcategories stay however they were. Cascading into
+  // every subcategory here would just dump the whole tree open at once,
+  // defeating the point of collapsed-by-default; that's what the per-category
+  // "Expand subcategories" button is for.
+  state.categories.forEach(cat => state.expandedCategories.add(cat.name));
+  renderTaxonomy();
+});
+
+el.collapseAllBtn.addEventListener("click", () => {
+  state.expandedCategories.clear();
+  state.expandedSubcategories.clear();
+  renderTaxonomy();
 });
 
 // Demo cases: real, pre-captured API responses (gate + taxonomy already run,
@@ -466,7 +545,6 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
       state.input = demo.input;
       state.topic = demo.topic;
       state.categories = demo.categories || [];
-      state.expandedCategories = new Set();
       state.selected = new Set(demo.selections || []);
 
       renderTaxonomy();
