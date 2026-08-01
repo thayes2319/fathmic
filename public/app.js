@@ -40,6 +40,7 @@ const el = {
   popularityCard: document.querySelector('.ref-card[data-card="popularity"]'),
   expandAllBtn: document.getElementById("expand-all-btn"),
   collapseAllBtn: document.getElementById("collapse-all-btn"),
+  pickAllBtn: document.getElementById("pick-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
   regenerateBtn: document.getElementById("regenerate-btn"),
   stakesPositions: document.querySelectorAll(".stakes-pos"),
@@ -210,15 +211,19 @@ function renderTaxonomy() {
     if (typeof category.fixedness === "number") {
       const badge = document.createElement("span");
       const f = category.fixedness;
+      const disclaimer = "AI estimate, not a verified fact — how much of a real choice this category represents.";
       if (f < 0.35) {
         badge.className = "fixedness-badge fixedness-given";
         badge.textContent = "Given";
+        badge.title = `Given: ${disclaimer}`;
       } else if (f > 0.65) {
         badge.className = "fixedness-badge fixedness-explore";
         badge.textContent = "Explore";
+        badge.title = `Explore: ${disclaimer}`;
       } else {
         badge.className = "fixedness-badge fixedness-mixed";
         badge.textContent = "Mixed";
+        badge.title = `Mixed: ${disclaimer}`;
       }
       catTitle.appendChild(badge);
     }
@@ -229,6 +234,9 @@ function renderTaxonomy() {
     // also trigger the native toggle-on-click behavior of the parent
     // <details>, fighting with this button's own click handler.
     if ((category.subcategories || []).length > 1) {
+      const catControls = document.createElement("div");
+      catControls.className = "category-controls";
+
       const expandSubsBtn = document.createElement("button");
       expandSubsBtn.className = "link-btn expand-subs-btn";
       expandSubsBtn.textContent = "Expand subcategories";
@@ -238,7 +246,30 @@ function renderTaxonomy() {
         });
         renderTaxonomy();
       });
-      catEl.appendChild(expandSubsBtn);
+      catControls.appendChild(expandSubsBtn);
+
+      const collapseSubsBtn = document.createElement("button");
+      collapseSubsBtn.className = "link-btn collapse-subs-btn";
+      collapseSubsBtn.textContent = "Collapse subcategories";
+      collapseSubsBtn.addEventListener("click", () => {
+        category.subcategories.forEach(sub => {
+          state.expandedSubcategories.delete(`${category.name}::${sub.name}`);
+        });
+        renderTaxonomy();
+      });
+      catControls.appendChild(collapseSubsBtn);
+
+      const pickForMeBtn = document.createElement("button");
+      pickForMeBtn.className = "link-btn pick-for-me-btn";
+      pickForMeBtn.textContent = "Pick for me";
+      pickForMeBtn.title = "Accepts Given subcategories generally, picks one specific option per subcategory worth exploring. Won't touch anything you've already chosen.";
+      pickForMeBtn.addEventListener("click", () => {
+        pickForCategory(category);
+        renderTaxonomy();
+      });
+      catControls.appendChild(pickForMeBtn);
+
+      catEl.appendChild(catControls);
     }
 
     // Category-level "General": accept the whole category as noise/not-worth-
@@ -421,6 +452,73 @@ function renderTaxonomy() {
   applyExclusions();
 }
 
+// Scans the data model (not the DOM) for anything currently selected that
+// carries an axis/direction tag, so pickForCategory can avoid introducing
+// new conflicts — reused fresh on every pick since prior picks (in this
+// category or earlier ones, for the global "Pick for me") change what counts
+// as already-committed.
+function computeActiveDirections() {
+  const active = new Map();
+  state.categories.forEach(cat => {
+    (cat.subcategories || []).forEach(sub => {
+      if (sub.axis && sub.direction && state.selected.has(sub.name)) {
+        if (!active.has(sub.axis)) active.set(sub.axis, new Set());
+        active.get(sub.axis).add(sub.direction);
+      }
+      (sub.elements || []).forEach(elementObj => {
+        const text = typeof elementObj === "string" ? elementObj : elementObj.text;
+        const axis = typeof elementObj === "object" ? elementObj.axis : null;
+        const direction = typeof elementObj === "object" ? elementObj.direction : null;
+        if (axis && direction && state.selected.has(text)) {
+          if (!active.has(axis)) active.set(axis, new Set());
+          active.get(axis).add(direction);
+        }
+      });
+    });
+  });
+  return active;
+}
+
+// "Pick for me": fixedness-driven, quantified rather than arbitrary. Given
+// categories (low fixedness) get accepted generally — there's no real choice
+// to make. Explore/Mixed categories get one concrete pick per subcategory,
+// the "drill down" rather than stopping at General, since that's where a
+// specific choice actually pays off. Never overrides anything already
+// selected, in this category or picked earlier in the same run.
+function pickForCategory(category) {
+  const subHasSelection = sub =>
+    state.selected.has(sub.name) ||
+    (sub.elements || []).some(e => state.selected.has(typeof e === "string" ? e : e.text));
+
+  if (typeof category.fixedness === "number" && category.fixedness < 0.35) {
+    const categoryUntouched = !state.selected.has(category.name) &&
+      !(category.subcategories || []).some(subHasSelection);
+    if (categoryUntouched) state.selected.add(category.name);
+    return;
+  }
+
+  const activeDirections = computeActiveDirections();
+
+  (category.subcategories || []).forEach(sub => {
+    if (subHasSelection(sub)) return; // don't touch an existing choice
+    if (sub.axis && activeDirections.has(sub.axis) && !activeDirections.get(sub.axis).has(sub.direction)) return;
+
+    for (const elementObj of sub.elements || []) {
+      const text = typeof elementObj === "string" ? elementObj : elementObj.text;
+      const axis = typeof elementObj === "object" ? elementObj.axis : null;
+      const direction = typeof elementObj === "object" ? elementObj.direction : null;
+      if (axis && activeDirections.has(axis) && !activeDirections.get(axis).has(direction)) continue;
+
+      state.selected.add(text);
+      if (axis && direction) {
+        if (!activeDirections.has(axis)) activeDirections.set(axis, new Set());
+        activeDirections.get(axis).add(direction);
+      }
+      break; // one concrete pick per subcategory is enough
+    }
+  });
+}
+
 // Sweeps the entire tree (every category, not just the one being edited) and
 // excludes anything tagged with a direction that conflicts with a direction
 // already active elsewhere on the same axis. Tags are embedded once at
@@ -565,6 +663,11 @@ el.expandAllBtn.addEventListener("click", () => {
 el.collapseAllBtn.addEventListener("click", () => {
   state.expandedCategories.clear();
   state.expandedSubcategories.clear();
+  renderTaxonomy();
+});
+
+el.pickAllBtn.addEventListener("click", () => {
+  state.categories.forEach(cat => pickForCategory(cat));
   renderTaxonomy();
 });
 
