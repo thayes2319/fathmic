@@ -60,6 +60,29 @@ button {
 
 button:disabled { opacity: 0.5; cursor: default; }
 
+.skip-btn {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border);
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+#demo-cases { margin-top: 1rem; }
+.demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
+#demo-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.demo-btn {
+  margin-top: 0;
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border);
+  font-weight: normal;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+.demo-btn:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
+.skip-btn:hover { color: var(--fg); border-color: var(--muted); }
+
 .status { color: var(--muted); font-size: 0.9rem; }
 
 .category-row {

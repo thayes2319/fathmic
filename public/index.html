@@ -18,12 +18,18 @@
       <textarea id="subject-input" rows="2" placeholder="e.g. I want to plant a food garden in Georgia, U.S."></textarea>
       <button id="distill-btn">Distill</button>
       <p id="gate-status" class="status"></p>
+
+      <div id="demo-cases">
+        <span class="demo-label">Or load a demo case:</span>
+        <div id="demo-buttons"></div>
+      </div>
     </section>
 
     <section id="clarify-section" hidden>
       <p id="clarify-question"></p>
       <input id="clarify-answer" type="text" placeholder="Your answer" />
       <button id="clarify-submit-btn">Continue</button>
+      <button id="clarify-skip-btn" class="skip-btn">Skip — just give me something general</button>
     </section>
 
     <section id="taxonomy-section" hidden>
@@ -49,6 +55,7 @@
     </section>
   </main>
 
+  <script src="demo-fixtures.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

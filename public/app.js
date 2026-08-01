@@ -15,6 +15,7 @@ const el = {
   clarifyQuestion: document.getElementById("clarify-question"),
   clarifyAnswer: document.getElementById("clarify-answer"),
   clarifySubmitBtn: document.getElementById("clarify-submit-btn"),
+  clarifySkipBtn: document.getElementById("clarify-skip-btn"),
   taxonomySection: document.getElementById("taxonomy-section"),
   topicHeading: document.getElementById("topic-heading"),
   taxonomyTree: document.getElementById("taxonomy-tree"),
@@ -22,7 +23,8 @@ const el = {
   genreButtons: document.getElementById("genre-buttons"),
   outputSection: document.getElementById("output-section"),
   outputHeading: document.getElementById("output-heading"),
-  outputText: document.getElementById("output-text")
+  outputText: document.getElementById("output-text"),
+  demoButtons: document.getElementById("demo-buttons")
 };
 
 async function postJSON(path, body) {
@@ -82,6 +84,21 @@ el.clarifySubmitBtn.addEventListener("click", async () => {
   state.input = `${state.input} (${answer})`;
   el.clarifySection.hidden = true;
   el.gateStatus.textContent = "Thanks — distilling now.";
+
+  try {
+    await runTaxonomy();
+  } catch (err) {
+    el.gateStatus.textContent = `Error: ${err.message}`;
+  }
+});
+
+el.clarifySkipBtn.addEventListener("click", async () => {
+  // Deliberate escape hatch: proceed on the original input, unanswered.
+  // The taxonomy generator falls back to a general framework rather than
+  // guessing at specifics it doesn't have — confirmed as the right behavior,
+  // so this makes it a real, reachable choice instead of an accident.
+  el.clarifySection.hidden = true;
+  el.gateStatus.textContent = "Skipping — building something general instead.";
 
   try {
     await runTaxonomy();
@@ -355,3 +372,28 @@ el.genreButtons.addEventListener("click", async event => {
     el.outputText.textContent = `Error: ${err.message}`;
   }
 });
+
+// Demo cases: real, pre-captured API responses (gate + taxonomy already run,
+// selections already made). Loading one skips straight past the slow gate
+// and taxonomy-generation wait to a populated tree, so the genre-button ->
+// synthesis step — the fast, impressive part — is the only thing done live.
+if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
+  DEMO_CASES.forEach(demo => {
+    const btn = document.createElement("button");
+    btn.className = "demo-btn";
+    btn.textContent = demo.label;
+    btn.addEventListener("click", () => {
+      resetDownstream();
+      el.subjectInput.value = demo.input;
+      state.input = demo.input;
+      state.topic = demo.topic;
+      state.categories = demo.categories || [];
+      state.expandedCategories = new Set();
+      state.selected = new Set(demo.selections || []);
+
+      renderTaxonomy();
+      el.gateStatus.textContent = `Loaded demo case — try "${demo.genre}" below, or pick your own.`;
+    });
+    el.demoButtons.appendChild(btn);
+  });
+}
