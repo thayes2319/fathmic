@@ -4,7 +4,8 @@ const state = {
   topic: "",
   categories: [],
   selected: new Set(),
-  expandedCategories: new Set()
+  expandedCategories: new Set(),
+  lastResultText: ""
 };
 
 const el = {
@@ -24,7 +25,9 @@ const el = {
   outputSection: document.getElementById("output-section"),
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
-  demoButtons: document.getElementById("demo-buttons")
+  demoButtons: document.getElementById("demo-buttons"),
+  illustrateBtn: document.getElementById("illustrate-btn"),
+  illustrationCard: document.querySelector('.ref-card[data-card="illustration"]')
 };
 
 async function postJSON(path, body) {
@@ -360,6 +363,7 @@ el.genreButtons.addEventListener("click", async event => {
   el.outputSection.hidden = false;
   el.outputHeading.textContent = `Result — ${event.target.textContent}`;
   el.outputText.textContent = "Synthesizing...";
+  resetIllustrationCard();
 
   try {
     const result = await postJSON("/api/synthesize", {
@@ -368,6 +372,7 @@ el.genreButtons.addEventListener("click", async event => {
       genre
     });
     el.outputText.textContent = result.text;
+    state.lastResultText = result.text;
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
@@ -396,4 +401,41 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
     });
     el.demoButtons.appendChild(btn);
   });
+}
+
+// Reference cards above the Result. Only the illustration card is built —
+// it reuses Muralizer's actual image-generation backend/account (a
+// deliberate choice, not an oversight — billing separation can happen later
+// if it becomes an accounting issue), but composes its own subject-aware
+// prompt instead of Muralizer's painterly-mural rules. The other two cards
+// (news pull, photo pull) are real placeholders, not hidden — each needs its
+// own external service decision before it's buildable.
+function resetIllustrationCard() {
+  if (!el.illustrationCard) return;
+  el.illustrationCard.innerHTML = '<button id="illustrate-btn">Generate illustration</button>';
+  el.illustrateBtn = document.getElementById("illustrate-btn");
+  el.illustrateBtn.addEventListener("click", generateIllustration);
+}
+
+async function generateIllustration() {
+  if (!el.illustrationCard) return;
+  el.illustrationCard.innerHTML = '<div class="ref-card-placeholder">Generating...</div>';
+
+  try {
+    const result = await postJSON("/api/illustrate", {
+      topic: state.topic,
+      resultText: state.lastResultText
+    });
+    el.illustrationCard.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = `data:image/png;base64,${result.image}`;
+    img.alt = state.topic;
+    el.illustrationCard.appendChild(img);
+  } catch (err) {
+    el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
+  }
+}
+
+if (el.illustrateBtn) {
+  el.illustrateBtn.addEventListener("click", generateIllustration);
 }
