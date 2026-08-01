@@ -786,13 +786,18 @@ const SCOPE_ICONS = {
   local: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="3" y="10" width="5" height="11"/><rect x="10" y="5" width="5" height="16"/><rect x="17" y="13" width="4" height="8"/></svg>`
 };
 
-function scopeIcon(type, score, label) {
-  // Opacity + color both scale with score: faint gray at low relevance,
-  // full accent color at high relevance — same muted/accent language as
-  // fixedness badges and the stakes dial elsewhere in the app.
-  const opacity = (0.25 + score * 0.75).toFixed(2);
-  const color = score > 0.5 ? "var(--accent)" : "var(--muted)";
-  return `<span class="scope-icon" style="opacity:${opacity}; color:${color};" title="${label}: ${Math.round(score * 100)}%">${SCOPE_ICONS[type]}</span>`;
+function scopeRow(type, score, label) {
+  // Full row, always visible, no hover needed — the fill bar IS the graph.
+  // Icon stays a constant muted color (it identifies which scale, not the
+  // value); the bar length carries the magnitude.
+  const pct = Math.round(score * 100);
+  return `
+    <div class="scope-row" title="${label}: ${pct}%">
+      <span class="scope-icon">${SCOPE_ICONS[type]}</span>
+      <span class="scope-row-label">${label}</span>
+      <div class="scope-track"><div class="scope-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
 }
 
 async function generatePopularity() {
@@ -809,17 +814,17 @@ async function generatePopularity() {
       `<span class="volume-bar ${i < litBars ? "lit" : ""}" style="height:${16 + i * 8}px"></span>`
     ).join("");
 
-    const icons = [
-      scopeIcon("world", result.worldScore, "World"),
-      scopeIcon("national", result.nationalScore, "National"),
-      scopeIcon("local", result.localScore, "Local")
+    const rows = [
+      scopeRow("world", result.worldScore, "World"),
+      scopeRow("national", result.nationalScore, "National"),
+      scopeRow("local", result.localScore, "Local")
     ].join("");
 
     el.popularityCard.innerHTML = `
       <div class="popularity-display">
         <div class="volume-bars">${bars}</div>
         <div class="popularity-label">${label}</div>
-        <div class="scope-icons">${icons}</div>
+        <div class="scope-rows">${rows}</div>
       </div>
     `;
   } catch (err) {
