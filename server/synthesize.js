@@ -37,20 +37,31 @@ const GENRE_PRESETS = {
   }
 };
 
-function buildSystemPrompt(genre) {
+// Stakes doesn't change WHAT gets said (that's genre's job) — it changes how
+// confidently it's said. Independent of genre, threaded in alongside it.
+const STAKES_GUIDANCE = {
+  low: "Stakes are low. Write with full confidence — no hedging, no disclaimers, no \"consult a professional.\" Being direct serves the reader better than false caution here.",
+  medium: "Stakes are moderate. State things plainly, but flag the one or two points where getting it wrong would actually matter.",
+  high: "Stakes are high — real consequences if this is wrong or incomplete. Be precise about what's well-established vs. what depends on specifics only the reader knows. Where a professional (medical, legal, financial) should actually be involved, say so plainly, once, without being repetitive about it."
+};
+
+function buildSystemPrompt(genre, stakes) {
   const preset = GENRE_PRESETS[genre] || GENRE_PRESETS.summary;
+  const stakesGuidance = STAKES_GUIDANCE[stakes] || STAKES_GUIDANCE.medium;
   return `You are the synthesis engine for Domainify. You take a distilled set of selections about a subject and turn them into a finished piece of writing.
 
 Structural mode (${preset.mode}): ${preset.modeGuidance}
 
 Voice: ${preset.voiceGuidance}
 
+Confidence level: ${stakesGuidance}
+
 Write only the finished piece. No preamble, no "here is your summary," no meta-commentary about what you're doing.`;
 }
 
-async function runSynthesis({ topic, selections, genre }) {
+async function runSynthesis({ topic, selections, genre, stakes }) {
   const preset = GENRE_PRESETS[genre] ? genre : "summary";
-  const system = buildSystemPrompt(preset);
+  const system = buildSystemPrompt(preset, stakes);
   const prompt = `Subject: ${topic}\n\nSelected elements to weave in:\n${selections.map(s => `- ${s}`).join("\n")}`;
 
   const text = await callText({ system, prompt });

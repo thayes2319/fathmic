@@ -222,6 +222,43 @@ button:disabled { opacity: 0.5; cursor: default; }
 .fixedness-mixed { background: rgba(127, 127, 127, 0.1); color: var(--fg); border: 1px solid var(--border); }
 .fixedness-explore { background: var(--accent); color: #fff; }
 
+#stakes-control { margin-bottom: 1.25rem; }
+.stakes-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; }
+.stakes-dial { max-width: 280px; }
+.stakes-track {
+  position: relative;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 8px 0.6rem;
+}
+.stakes-indicator {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+  transform: translate(-50%, -50%);
+  transition: left 0.2s ease;
+}
+.stakes-track[data-active="medium"] .stakes-indicator { left: 50%; }
+.stakes-track[data-active="high"] .stakes-indicator { left: 100%; }
+.stakes-positions { display: flex; justify-content: space-between; }
+.stakes-pos {
+  margin-top: 0;
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+.stakes-pos.active { color: var(--accent); font-weight: 600; border-color: var(--accent); }
+
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); transition: background 0.15s ease, color 0.15s ease; }
 #genre-buttons button:hover { background: var(--accent); color: #fff; }

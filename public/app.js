@@ -9,7 +9,9 @@ const state = {
   lastResultText: "",
   lastGenre: null,
   lastGenreLabel: null,
-  resultSelectionsSnapshot: null
+  resultSelectionsSnapshot: null,
+  stakes: "medium",
+  lastStakesUsed: null
 };
 
 const el = {
@@ -39,7 +41,9 @@ const el = {
   expandAllBtn: document.getElementById("expand-all-btn"),
   collapseAllBtn: document.getElementById("collapse-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
-  regenerateBtn: document.getElementById("regenerate-btn")
+  regenerateBtn: document.getElementById("regenerate-btn"),
+  stakesPositions: document.querySelectorAll(".stakes-pos"),
+  stakesIndicator: document.querySelector(".stakes-indicator")
 };
 
 async function postJSON(path, body) {
@@ -63,6 +67,7 @@ function resetDownstream() {
   state.expandedSubcategories.clear();
   state.resultSelectionsSnapshot = null;
   state.lastGenre = null;
+  state.lastStakesUsed = null;
 }
 
 el.distillBtn.addEventListener("click", async () => {
@@ -76,6 +81,9 @@ el.distillBtn.addEventListener("click", async () => {
 
   try {
     const gate = await postJSON("/api/gate", { input });
+
+    state.stakes = gate.stakes || "medium";
+    renderStakesDial();
 
     if (gate.status === "block") {
       el.gateStatus.textContent = gate.note || "Needs one more detail before this can be distilled.";
@@ -476,9 +484,29 @@ function checkStaleness() {
   }
   const current = state.selected;
   const snapshot = state.resultSelectionsSnapshot;
-  const changed = current.size !== snapshot.size || Array.from(current).some(v => !snapshot.has(v));
-  el.staleBanner.hidden = !changed;
+  const selectionsChanged = current.size !== snapshot.size || Array.from(current).some(v => !snapshot.has(v));
+  const stakesChanged = state.stakes !== state.lastStakesUsed;
+  el.staleBanner.hidden = !(selectionsChanged || stakesChanged);
 }
+
+// Visual-only — tracks the selected position, doesn't itself receive clicks
+// (the three buttons underneath do). Rightward = higher, the same convention
+// as a volume knob or thermostat.
+function renderStakesDial() {
+  el.stakesPositions.forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
+  });
+  const track = document.querySelector(".stakes-track");
+  if (track) track.dataset.active = state.stakes;
+}
+
+el.stakesPositions.forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.stakes = btn.dataset.stakes;
+    renderStakesDial();
+    checkStaleness();
+  });
+});
 
 async function runSynthesisForGenre(genre, genreLabel) {
   Array.from(el.genreButtons.children).forEach(btn => btn.classList.remove("active"));
@@ -497,13 +525,15 @@ async function runSynthesisForGenre(genre, genreLabel) {
     const result = await postJSON("/api/synthesize", {
       topic: state.topic,
       selections: Array.from(state.selected),
-      genre
+      genre,
+      stakes: state.stakes
     });
     el.outputText.textContent = result.text;
     state.lastResultText = result.text;
     state.lastGenre = genre;
     state.lastGenreLabel = genreLabel;
     state.resultSelectionsSnapshot = new Set(state.selected);
+    state.lastStakesUsed = state.stakes;
     generateIllustration(); // fire-and-forget: don't block the text result on image generation
     generatePhoto(); // fire-and-forget: same
     generatePopularity(); // fire-and-forget: same
@@ -554,6 +584,8 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
       state.topic = demo.topic;
       state.categories = demo.categories || [];
       state.selected = new Set(demo.selections || []);
+      state.stakes = "medium"; // demo fixtures skip the gate, so no inferred stakes exists
+      renderStakesDial();
 
       renderTaxonomy();
       el.gateStatus.textContent = `Loaded demo case — try "${demo.genre}" below, or pick your own.`;
@@ -670,6 +702,8 @@ async function generatePopularity() {
 if (el.popularityBtn) {
   el.popularityBtn.addEventListener("click", generatePopularity);
 }
+
+renderStakesDial();
 
 if (el.photoBtn) {
   el.photoBtn.addEventListener("click", generatePhoto);

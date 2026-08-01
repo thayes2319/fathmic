@@ -31,9 +31,14 @@ const GATE_TOOL = {
       firstBranch: {
         type: "string",
         description: "If gapType is system-resolvable, name the branch/category this gap should become in the taxonomy. Empty string otherwise."
+      },
+      stakes: {
+        type: "string",
+        enum: ["low", "medium", "high"],
+        description: "How much is riding on this being right. High: real consequences if wrong or incomplete — medical, legal, financial, safety, an actual deadline/grade/contract. Low: casual curiosity or a hobby, wrong is cheap to fix. Medium: matters, but isn't high-stakes. This is a default the user can override, not a judgment on them."
       }
     },
-    required: ["status", "domainClarity", "gapType", "note", "clarifyingQuestion", "firstBranch"]
+    required: ["status", "domainClarity", "gapType", "note", "clarifyingQuestion", "firstBranch", "stakes"]
   }
 };
 
@@ -47,7 +52,9 @@ Two kinds of gaps are NOT the same:
 
 2. user-only — the input is missing detail that only the user possesses, and no amount of general knowledge can substitute for it. Generating a full answer anyway risks producing something confident-looking but irrelevant to what the user actually needs. Example: "I need to write a fictional story for my 7th grade English class" — without knowing whether the teacher gave a specific prompt, theme, or rubric, a generated story might not satisfy the actual assignment at all. Status should be "block" in this case, with one targeted clarifying question.
 
-Default to "pass" unless the gap is genuinely of the user-only kind. Most inputs should pass.`;
+Default to "pass" unless the gap is genuinely of the user-only kind. Most inputs should pass.
+
+Also estimate "stakes" — how much is actually riding on getting this right. This sets a default for how hedged vs. confident the eventual output should be; the user can always override it. Don't default to "medium" reflexively — most everyday inputs (hobbies, curiosity, casual planning) are genuinely low stakes.`;
 
 async function runGate(input) {
   const result = await callStructured({
@@ -62,7 +69,8 @@ async function runGate(input) {
     gapType: ["none", "system-resolvable", "user-only"].includes(result.gapType) ? result.gapType : "none",
     note: result.note || "",
     clarifyingQuestion: result.clarifyingQuestion || null,
-    firstBranch: result.firstBranch || null
+    firstBranch: result.firstBranch || null,
+    stakes: ["low", "medium", "high"].includes(result.stakes) ? result.stakes : "medium"
   };
 }
 

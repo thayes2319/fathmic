@@ -43,11 +43,11 @@ app.post("/api/taxonomy", async (req, res) => {
 
 app.post("/api/synthesize", async (req, res) => {
   try {
-    const { topic, selections, genre } = req.body || {};
+    const { topic, selections, genre, stakes } = req.body || {};
     if (!topic || !Array.isArray(selections) || !selections.length) {
       return res.status(400).json({ error: "topic and a non-empty selections array are required" });
     }
-    const result = await runSynthesis({ topic, selections, genre });
+    const result = await runSynthesis({ topic, selections, genre, stakes });
     res.json(result);
   } catch (err) {
     console.error("[synthesize]", err);
