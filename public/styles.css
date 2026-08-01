@@ -403,7 +403,12 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .stakes-marker-text { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
 .stakes-marker.active .stakes-marker-text { color: var(--accent); font-weight: 600; }
-.stakes-caption { margin-top: 0.25rem; font-size: 0.8rem; color: var(--muted); }
+/* The knob's own box is a fixed 260px square, but the Low/High markers sit
+   at ~69% down it (top:68.75%) — everything below their labels (~40-50px)
+   is dead space within that box. Pull the caption up into it rather than
+   sitting after the box's true bottom edge, so it reads as paired with the
+   knob instead of a separate line far below. */
+.stakes-caption { margin-top: -42px; font-size: 0.95rem; color: var(--muted); }
 
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); transition: background 0.15s ease, color 0.15s ease; }
