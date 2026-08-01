@@ -5,6 +5,7 @@ const express = require("express");
 const { runGate } = require("./gate");
 const { runTaxonomy } = require("./taxonomy");
 const { runSynthesis } = require("./synthesize");
+const { runIllustration } = require("./illustrate");
 
 const app = express();
 app.use(express.json());
@@ -48,6 +49,20 @@ app.post("/api/synthesize", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("[synthesize]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/illustrate", async (req, res) => {
+  try {
+    const { topic, resultText } = req.body || {};
+    if (!topic || !resultText) {
+      return res.status(400).json({ error: "topic and resultText are required" });
+    }
+    const result = await runIllustration({ topic, resultText });
+    res.json(result);
+  } catch (err) {
+    console.error("[illustrate]", err);
     res.status(500).json({ error: err.message });
   }
 });
