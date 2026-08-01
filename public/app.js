@@ -786,16 +786,15 @@ const SCOPE_ICONS = {
   local: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="3" y="10" width="5" height="11"/><rect x="10" y="5" width="5" height="16"/><rect x="17" y="13" width="4" height="8"/></svg>`
 };
 
-function scopeRow(type, score, label) {
-  // Full row, always visible, no hover needed — the fill bar IS the graph.
-  // Icon stays a constant muted color (it identifies which scale, not the
-  // value); the bar length carries the magnitude.
+function scopeColumn(type, score, label) {
+  // Vertical column, bar grows from the bottom — uses the card's full height
+  // instead of squeezing into thin horizontal rows. Icon sits below as the
+  // axis label, same role a category name plays under a bar in any chart.
   const pct = Math.round(score * 100);
   return `
-    <div class="scope-row" title="${label}: ${pct}%">
+    <div class="scope-column" title="${label}: ${pct}%">
+      <div class="scope-bar-track"><div class="scope-bar-fill" style="height:${pct}%"></div></div>
       <span class="scope-icon">${SCOPE_ICONS[type]}</span>
-      <span class="scope-row-label">${label}</span>
-      <div class="scope-track"><div class="scope-fill" style="width:${pct}%"></div></div>
     </div>
   `;
 }
@@ -807,17 +806,13 @@ async function generatePopularity() {
   try {
     const result = await postJSON("/api/popularity", { topic: state.topic });
 
-    const rows = [
-      scopeRow("world", result.worldScore, "World"),
-      scopeRow("national", result.nationalScore, "National"),
-      scopeRow("local", result.localScore, "Local")
+    const columns = [
+      scopeColumn("world", result.worldScore, "World"),
+      scopeColumn("national", result.nationalScore, "National"),
+      scopeColumn("local", result.localScore, "Local")
     ].join("");
 
-    el.popularityCard.innerHTML = `
-      <div class="popularity-display">
-        <div class="scope-rows">${rows}</div>
-      </div>
-    `;
+    el.popularityCard.innerHTML = `<div class="scope-columns">${columns}</div>`;
   } catch (err) {
     el.popularityCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
   }
