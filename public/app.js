@@ -106,18 +106,18 @@ function renderTaxonomy() {
   el.taxonomyTree.innerHTML = "";
 
   state.categories.forEach(category => {
-    const catEl = document.createElement("div");
+    const catEl = document.createElement("details");
     catEl.className = "category";
 
-    const catTitle = document.createElement("h3");
+    const catTitle = document.createElement("summary");
     catTitle.textContent = category.name;
     catEl.appendChild(catTitle);
 
     (category.subcategories || []).forEach(sub => {
-      const subEl = document.createElement("div");
+      const subEl = document.createElement("details");
       subEl.className = "subcategory";
 
-      const subTitle = document.createElement("h4");
+      const subTitle = document.createElement("summary");
       subTitle.textContent = sub.name;
       subEl.appendChild(subTitle);
 
