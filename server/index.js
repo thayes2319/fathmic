@@ -7,6 +7,7 @@ const { runTaxonomy } = require("./taxonomy");
 const { runSynthesis } = require("./synthesize");
 const { runIllustration } = require("./illustrate");
 const { runPhotoSearch } = require("./photo");
+const { runPopularity } = require("./popularity");
 
 const app = express();
 app.use(express.json());
@@ -78,6 +79,20 @@ app.post("/api/photo", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("[photo]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/popularity", async (req, res) => {
+  try {
+    const { topic } = req.body || {};
+    if (!topic) {
+      return res.status(400).json({ error: "topic is required" });
+    }
+    const result = await runPopularity(topic);
+    res.json(result);
+  } catch (err) {
+    console.error("[popularity]", err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -34,6 +34,8 @@ const el = {
   illustrationCard: document.querySelector('.ref-card[data-card="illustration"]'),
   photoBtn: document.getElementById("photo-btn"),
   photoCard: document.querySelector('.ref-card[data-card="photo"]'),
+  popularityBtn: document.getElementById("popularity-btn"),
+  popularityCard: document.querySelector('.ref-card[data-card="popularity"]'),
   expandAllBtn: document.getElementById("expand-all-btn"),
   collapseAllBtn: document.getElementById("collapse-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
@@ -489,6 +491,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   el.staleBanner.hidden = true;
   resetIllustrationCard();
   resetPhotoCard();
+  resetPopularityCard();
 
   try {
     const result = await postJSON("/api/synthesize", {
@@ -503,6 +506,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
     state.resultSelectionsSnapshot = new Set(state.selected);
     generateIllustration(); // fire-and-forget: don't block the text result on image generation
     generatePhoto(); // fire-and-forget: same
+    generatePopularity(); // fire-and-forget: same
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
@@ -629,6 +633,42 @@ async function generatePhoto() {
   } catch (err) {
     el.photoCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
   }
+}
+
+function resetPopularityCard() {
+  if (!el.popularityCard) return;
+  el.popularityCard.innerHTML = '<button id="popularity-btn">Check topic reach</button>';
+  el.popularityBtn = document.getElementById("popularity-btn");
+  el.popularityBtn.addEventListener("click", generatePopularity);
+}
+
+async function generatePopularity() {
+  if (!el.popularityCard) return;
+  el.popularityCard.innerHTML = '<div class="ref-card-placeholder">Checking...</div>';
+
+  try {
+    const result = await postJSON("/api/popularity", { topic: state.topic });
+    const score = result.score;
+    const label = score < 0.35 ? "Exclusive Topic" : score > 0.65 ? "Popular Topic" : "Balanced Reach";
+
+    const litBars = Math.max(1, Math.round(score * 5));
+    const bars = Array.from({ length: 5 }, (_, i) =>
+      `<span class="volume-bar ${i < litBars ? "lit" : ""}" style="height:${16 + i * 8}px"></span>`
+    ).join("");
+
+    el.popularityCard.innerHTML = `
+      <div class="popularity-display">
+        <div class="volume-bars">${bars}</div>
+        <div class="popularity-label">${label}</div>
+      </div>
+    `;
+  } catch (err) {
+    el.popularityCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
+  }
+}
+
+if (el.popularityBtn) {
+  el.popularityBtn.addEventListener("click", generatePopularity);
 }
 
 if (el.photoBtn) {
