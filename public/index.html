@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Domainify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Domainify</h1>
+      <p class="tagline">Take a word or a sentence. Evolve it into understanding.</p>
+    </header>
+
+    <section id="input-section">
+      <label for="subject-input">What do you want to understand?</label>
+      <textarea id="subject-input" rows="2" placeholder="e.g. I want to plant a food garden in Georgia, U.S."></textarea>
+      <button id="distill-btn">Distill</button>
+      <p id="gate-status" class="status"></p>
+    </section>
+
+    <section id="clarify-section" hidden>
+      <p id="clarify-question"></p>
+      <input id="clarify-answer" type="text" placeholder="Your answer" />
+      <button id="clarify-submit-btn">Continue</button>
+    </section>
+
+    <section id="taxonomy-section" hidden>
+      <h2 id="topic-heading"></h2>
+      <div id="taxonomy-tree"></div>
+    </section>
+
+    <section id="genre-section" hidden>
+      <h2>How should this come together?</h2>
+      <div id="genre-buttons">
+        <button data-genre="summary">Summary</button>
+        <button data-genre="essay">Essay</button>
+        <button data-genre="story">Story</button>
+        <button data-genre="argument">Argument</button>
+        <button data-genre="action_item">Action items</button>
+        <button data-genre="definition">Definition</button>
+      </div>
+    </section>
+
+    <section id="output-section" hidden>
+      <h2>Result</h2>
+      <pre id="output-text"></pre>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

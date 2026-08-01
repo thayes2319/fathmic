@@ -1,0 +1,82 @@
+:root {
+  color-scheme: light dark;
+  --fg: #1a1a1a;
+  --bg: #fafaf8;
+  --muted: #6b6b6b;
+  --accent: #7a5c3e;
+  --border: #ddd8cf;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #eee;
+    --bg: #171613;
+    --muted: #999;
+    --accent: #c9a877;
+    --border: #3a382f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+header { margin-bottom: 2rem; }
+h1 { margin-bottom: 0.25rem; }
+.tagline { color: var(--muted); margin-top: 0; }
+
+section { margin-bottom: 2rem; }
+
+label { display: block; margin-bottom: 0.4rem; font-weight: 600; }
+
+textarea, input[type="text"] {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+button {
+  margin-top: 0.6rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.5; cursor: default; }
+
+.status { color: var(--muted); font-size: 0.9rem; }
+
+.category { margin-bottom: 1.25rem; border-left: 2px solid var(--border); padding-left: 0.9rem; }
+.category h3 { margin-bottom: 0.3rem; }
+.subcategory { margin-bottom: 0.75rem; }
+.subcategory h4 { margin: 0.3rem 0; color: var(--muted); font-size: 0.95rem; }
+.elements { display: flex; flex-direction: column; gap: 0.25rem; }
+.elements label { font-weight: normal; display: flex; align-items: center; gap: 0.4rem; }
+
+#genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+#genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); }
+#genre-buttons button:hover { background: var(--accent); color: #fff; }
+
+#output-text {
+  white-space: pre-wrap;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  background: rgba(127, 127, 127, 0.05);
+}
