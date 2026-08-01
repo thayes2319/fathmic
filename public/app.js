@@ -682,6 +682,7 @@ async function generatePopularity() {
     const result = await postJSON("/api/popularity", { topic: state.topic });
     const score = result.score;
     const label = score < 0.35 ? "Exclusive Topic" : score > 0.65 ? "Popular Topic" : "Balanced Reach";
+    const scopeLabel = { world: "World", national: "National", local: "Local" }[result.scope] || "National";
 
     const litBars = Math.max(1, Math.round(score * 5));
     const bars = Array.from({ length: 5 }, (_, i) =>
@@ -692,6 +693,7 @@ async function generatePopularity() {
       <div class="popularity-display">
         <div class="volume-bars">${bars}</div>
         <div class="popularity-label">${label}</div>
+        <div class="scope-badge scope-${result.scope}">${scopeLabel}</div>
       </div>
     `;
   } catch (err) {

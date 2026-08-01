@@ -322,6 +322,17 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--muted);
   text-align: center;
 }
+.scope-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.scope-badge.scope-world { border-color: var(--accent); color: var(--accent); }
 
 #output-text {
   white-space: pre-wrap;

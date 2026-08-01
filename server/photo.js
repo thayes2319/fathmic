@@ -6,9 +6,32 @@ const QUERY_SYSTEM = `You are composing an Unsplash stock photo search query for
 
 Write 2-4 words, nothing else. No punctuation. Strip location/proper-noun specifics and qualifiers that a stock photo library won't have tagged (e.g. "Planning a Food Garden in Georgia, U.S." becomes "vegetable garden", not "Georgia food garden planning"). Favor the most visually concrete, universal noun in the topic.`;
 
+const BROADER_QUERY_SYSTEM = `A specific Unsplash search query just came up with zero results. Give a broader, more generic, more commonly-photographed term that still relates to the topic — sacrifice specificity for the sake of actually finding something. 1-2 words, nothing else, no punctuation. (e.g. if "3D printed gears" found nothing, try "gears" or "machine parts" or even "manufacturing".)`;
+
 async function composeSearchQuery(topic) {
   const query = await callText({ system: QUERY_SYSTEM, prompt: `Topic: ${topic}` });
   return query.trim().replace(/["'.]/g, "");
+}
+
+async function composeBroaderQuery(topic, failedQuery) {
+  const query = await callText({
+    system: BROADER_QUERY_SYSTEM,
+    prompt: `Topic: ${topic}\nFailed query: "${failedQuery}"`
+  });
+  return query.trim().replace(/["'.]/g, "");
+}
+
+async function searchUnsplash(query, accessKey) {
+  const url = `${API_URL}?query=${encodeURIComponent(query)}`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Client-ID ${accessKey}` }
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "");
+    throw new Error(`Unsplash API error ${response.status}: ${errText}`);
+  }
+  return response.json();
 }
 
 // Two Unsplash API compliance requirements, not optional:
@@ -44,24 +67,20 @@ async function runPhotoSearch({ topic }) {
   }
 
   const searchQuery = await composeSearchQuery(topic);
-  const url = `${API_URL}?query=${encodeURIComponent(searchQuery)}`;
-  const response = await fetch(url, {
-    headers: { Authorization: `Client-ID ${accessKey}` }
-  });
+  let photo = await searchUnsplash(searchQuery, accessKey);
+  let usedQuery = searchQuery;
 
-  if (response.status === 404) {
-    // Zero matches for even a short, generic keyword query — a real
-    // possibility for unusual/niche topics, not just a bug. Surface it
-    // honestly rather than pretending a photo exists.
-    throw new Error(`No stock photo found for "${searchQuery}". Unsplash's library doesn't cover everything.`);
+  if (!photo) {
+    // Specific query found nothing — try once more with a broader term
+    // before giving up. Real for unusual/niche topics, not necessarily a bug.
+    const broaderQuery = await composeBroaderQuery(topic, searchQuery);
+    photo = await searchUnsplash(broaderQuery, accessKey);
+    usedQuery = broaderQuery;
   }
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => "");
-    throw new Error(`Unsplash API error ${response.status}: ${errText}`);
+  if (!photo) {
+    throw new Error(`No stock photo found for "${searchQuery}" or "${usedQuery}". Unsplash's library doesn't cover everything.`);
   }
-
-  const photo = await response.json();
 
   if (photo.links && photo.links.download_location) {
     triggerDownload(photo.links.download_location, accessKey); // fire-and-forget
