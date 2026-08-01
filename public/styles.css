@@ -151,8 +151,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 #output-text {
   white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 1.05rem;
+  line-height: 1.65;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 1.25rem 1.4rem;
   background: rgba(127, 127, 127, 0.05);
 }
