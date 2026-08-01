@@ -43,7 +43,8 @@ const el = {
   pickAllBtn: document.getElementById("pick-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
   regenerateBtn: document.getElementById("regenerate-btn"),
-  stakesPositions: document.querySelectorAll(".stakes-pos")
+  stakesPositions: document.querySelectorAll(".stakes-marker"),
+  stakesNeedle: document.querySelector(".stakes-knob-needle")
 };
 
 async function postJSON(path, body) {
@@ -590,10 +591,21 @@ function checkStaleness() {
 // Visual-only — tracks the selected position, doesn't itself receive clicks
 // (the three buttons underneath do). Rightward = higher, the same convention
 // as a volume knob or thermostat.
+// Needle rotation: -90/0/90deg from vertical maps exactly to 9/12/3 o'clock,
+// the same 270/0/90 (clockwise-from-top) angles the markers sit at.
+const STAKES_NEEDLE_ANGLE = { low: -90, medium: 0, high: 90 };
+const STAKES_NEEDLE_COLOR = { low: "#5b8dd6", medium: "var(--accent)", high: "#d64545" };
+
 function renderStakesDial() {
   el.stakesPositions.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
   });
+  if (el.stakesNeedle) {
+    const angle = STAKES_NEEDLE_ANGLE[state.stakes] ?? 0;
+    const color = STAKES_NEEDLE_COLOR[state.stakes] || "var(--accent)";
+    el.stakesNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    el.stakesNeedle.style.background = color;
+  }
 }
 
 el.stakesPositions.forEach(btn => {

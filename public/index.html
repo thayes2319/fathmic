@@ -54,21 +54,24 @@
     <section id="genre-section" hidden>
       <div id="stakes-control">
         <div class="stakes-knob">
-          <div class="stakes-knob-label">Stakes</div>
-          <div class="stakes-positions">
-            <button class="stakes-pos" data-stakes="low">
-              <span class="stakes-dot"></span>
-              <span class="stakes-pos-text">Low</span>
-            </button>
-            <button class="stakes-pos" data-stakes="medium">
-              <span class="stakes-dot"></span>
-              <span class="stakes-pos-text">Medium</span>
-            </button>
-            <button class="stakes-pos" data-stakes="high">
-              <span class="stakes-dot"></span>
-              <span class="stakes-pos-text">High</span>
-            </button>
+          <div class="stakes-knob-perimeter"></div>
+          <div class="stakes-knob-arc"></div>
+          <div class="stakes-knob-face">
+            <div class="stakes-knob-label">Stakes</div>
+            <div class="stakes-knob-needle"></div>
           </div>
+          <button class="stakes-marker" data-stakes="low" title="Low stakes" style="left:8%; top:50%;">
+            <span class="stakes-marker-dot"></span>
+            <span class="stakes-marker-text">Low</span>
+          </button>
+          <button class="stakes-marker" data-stakes="medium" title="Medium stakes" style="left:50%; top:8%;">
+            <span class="stakes-marker-dot"></span>
+            <span class="stakes-marker-text">Medium</span>
+          </button>
+          <button class="stakes-marker" data-stakes="high" title="High stakes" style="left:92%; top:50%;">
+            <span class="stakes-marker-dot"></span>
+            <span class="stakes-marker-text">High</span>
+          </button>
         </div>
         <span class="stakes-caption">How much is riding on this?</span>
       </div>
