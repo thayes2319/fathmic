@@ -146,8 +146,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .subcategory.excluded-subcategory { display: none; }
 
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-#genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); }
+#genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); transition: background 0.15s ease, color 0.15s ease; }
 #genre-buttons button:hover { background: var(--accent); color: #fff; }
+#genre-buttons button.active { background: var(--accent); color: #fff; outline: 2px solid var(--accent); outline-offset: 2px; }
 
 #output-text {
   white-space: pre-wrap;

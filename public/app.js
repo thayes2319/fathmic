@@ -21,6 +21,7 @@ const el = {
   genreSection: document.getElementById("genre-section"),
   genreButtons: document.getElementById("genre-buttons"),
   outputSection: document.getElementById("output-section"),
+  outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text")
 };
 
@@ -336,7 +337,11 @@ el.genreButtons.addEventListener("click", async event => {
   const genre = event.target.dataset.genre;
   if (!genre) return;
 
+  Array.from(el.genreButtons.children).forEach(btn => btn.classList.remove("active"));
+  event.target.classList.add("active");
+
   el.outputSection.hidden = false;
+  el.outputHeading.textContent = `Result — ${event.target.textContent}`;
   el.outputText.textContent = "Synthesizing...";
 
   try {
