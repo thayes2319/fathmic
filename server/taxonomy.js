@@ -51,9 +51,15 @@ const SYSTEM_PROMPT = `You are the taxonomy generator for Domainify. Given a sub
 
 The goal is not a generic outline. The goal is to surface what someone asking this question doesn't know to ask — the "unknown unknowns" of the subject. Prefer specific, concrete elements (named things, real distinctions, real trade-offs) over generic placeholders.
 
+Two rules keep the levels from collapsing into each other:
+
+1. Names carry the orienting facts. If a category or subcategory has a defining characteristic the reader needs to know just to make sense of it (a zone number, a scale, a boundary condition), fold it into the NAME itself — e.g. "North Georgia Mountains (Zone 6b–7b, cooler microclimate)" — rather than listing that fact as a separate element below it.
+
+2. Elements are only things you'd actually select. Every entry in an "elements" array must be a concrete, choosable item — a specific named thing, technique, or option a person would pick between. Background facts, general characteristics, or context do NOT belong in elements — if the reader wouldn't check a box next to it as a decision, it doesn't go there. Fold it into the name instead, or leave it out.
+
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 
-You must produce 4-7 categories, each with 1-4 subcategories, each with 3-8 concrete elements. An empty or thin taxonomy is a failed response — do the actual work of thinking through the subject before calling the tool.`;
+You must produce 4-7 categories, each with 1-4 subcategories, each with 3-8 concrete, selectable elements. An empty or thin taxonomy is a failed response — do the actual work of thinking through the subject before calling the tool.`;
 
 async function runTaxonomy(input, firstBranch) {
   const branchNote = firstBranch
