@@ -62,8 +62,29 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .status { color: var(--muted); font-size: 0.9rem; }
 
-.category {
+.category-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
   margin-bottom: 0.6rem;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.category-row.dragging { opacity: 0.4; }
+.category-row.drag-over { background: rgba(127, 127, 127, 0.12); }
+
+.drag-handle {
+  cursor: grab;
+  color: var(--muted);
+  padding: 0.75rem 0.2rem 0 0;
+  user-select: none;
+  line-height: 1;
+}
+.drag-handle:active { cursor: grabbing; }
+
+.category {
+  flex: 1;
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0 0.9rem;
@@ -111,6 +132,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   gap: 0.5rem;
 }
 .elements label:has(input:checked) { color: var(--fg); }
+.elements label.excluded { display: none; }
 
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); }

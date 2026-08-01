@@ -32,7 +32,21 @@ const TAXONOMY_TOOL = {
                     minItems: 3,
                     maxItems: 8,
                     description: "Concrete, specific elements — never an empty array.",
-                    items: { type: "string" }
+                    items: {
+                      type: "object",
+                      properties: {
+                        text: { type: "string" },
+                        axis: {
+                          type: "string",
+                          description: "Optional. A short slug naming a real either/or dimension this element belongs to (e.g. 'climate-direction'). Only set this if choosing this element should rule out other elements anywhere in the taxonomy that represent the opposite side of the same dimension. Omit for elements that don't participate in a genuine exclusivity."
+                        },
+                        direction: {
+                          type: "string",
+                          description: "Optional. Which side of the axis this element represents (e.g. 'cool' vs 'warm'). Required if axis is set."
+                        }
+                      },
+                      required: ["text"]
+                    }
                   }
                 },
                 required: ["name", "elements"]
@@ -57,6 +71,8 @@ Two rules keep the levels from collapsing into each other:
 
 2. Elements are only things you'd actually select. Every entry in an "elements" array must be a concrete, choosable item — a specific named thing, technique, or option a person would pick between. Background facts, general characteristics, or context do NOT belong in elements — if the reader wouldn't check a box next to it as a decision, it doesn't go there. Fold it into the name instead, or leave it out.
 
+3. Tag genuine either/or conflicts with axis + direction. This tool is meant to converge the user toward ONE coherent plan, not let them assemble a self-contradictory pile of choices. Whenever two or more elements — anywhere in the taxonomy, not just in the same subcategory — are genuinely mutually exclusive (choosing one makes the other wrong, not just less relevant), tag every element on both sides with the same "axis" slug and their respective "direction". Example: a cool-season crop and a warm-season crop that can't both be planted for the same purpose might share axis "climate-direction" with directions "cool" and "warm". A subject can have zero, one, or several such axes — invent whatever axis names actually fit the subject, don't force a conflict that isn't real. Most elements will have no axis at all; only tag the ones where selecting it should genuinely rule out its opposite.
+
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 
 You must produce 4-7 categories, each with 1-4 subcategories, each with 3-8 concrete, selectable elements. An empty or thin taxonomy is a failed response — do the actual work of thinking through the subject before calling the tool.`;
@@ -70,7 +86,7 @@ async function runTaxonomy(input, firstBranch) {
     system: SYSTEM_PROMPT,
     prompt: `Subject: "${input}"${branchNote}`,
     tool: TAXONOMY_TOOL,
-    maxTokens: 4096
+    maxTokens: 6144
   });
 
   return {
