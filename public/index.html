@@ -53,17 +53,24 @@
 
     <section id="genre-section" hidden>
       <div id="stakes-control">
-        <span class="stakes-label">How much is riding on this?</span>
-        <div class="stakes-dial">
-          <div class="stakes-track">
-            <div class="stakes-indicator"></div>
-          </div>
+        <div class="stakes-knob">
+          <div class="stakes-knob-label">Stakes</div>
           <div class="stakes-positions">
-            <button class="stakes-pos" data-stakes="low">Low</button>
-            <button class="stakes-pos" data-stakes="medium">Medium</button>
-            <button class="stakes-pos" data-stakes="high">High</button>
+            <button class="stakes-pos" data-stakes="low">
+              <span class="stakes-dot"></span>
+              <span class="stakes-pos-text">Low</span>
+            </button>
+            <button class="stakes-pos" data-stakes="medium">
+              <span class="stakes-dot"></span>
+              <span class="stakes-pos-text">Medium</span>
+            </button>
+            <button class="stakes-pos" data-stakes="high">
+              <span class="stakes-dot"></span>
+              <span class="stakes-pos-text">High</span>
+            </button>
           </div>
         </div>
+        <span class="stakes-caption">How much is riding on this?</span>
       </div>
 
       <h2>How should this come together?</h2>

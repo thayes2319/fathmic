@@ -43,8 +43,7 @@ const el = {
   pickAllBtn: document.getElementById("pick-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
   regenerateBtn: document.getElementById("regenerate-btn"),
-  stakesPositions: document.querySelectorAll(".stakes-pos"),
-  stakesIndicator: document.querySelector(".stakes-indicator")
+  stakesPositions: document.querySelectorAll(".stakes-pos")
 };
 
 async function postJSON(path, body) {
@@ -594,8 +593,6 @@ function renderStakesDial() {
   el.stakesPositions.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
   });
-  const track = document.querySelector(".stakes-track");
-  if (track) track.dataset.active = state.stakes;
 }
 
 el.stakesPositions.forEach(btn => {
@@ -786,15 +783,20 @@ const SCOPE_ICONS = {
   local: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="3" y="10" width="5" height="11"/><rect x="10" y="5" width="5" height="16"/><rect x="17" y="13" width="4" height="8"/></svg>`
 };
 
-function scopeColumn(type, score, label) {
-  // Vertical column, bar grows from the bottom — uses the card's full height
-  // instead of squeezing into thin horizontal rows. Icon sits below as the
-  // axis label, same role a category name plays under a bar in any chart.
+function scopeRow(type, score, label) {
+  // Discrete 5-segment meter (like a signal-strength indicator) per region —
+  // "3 out of 5," relative and quantized, not a continuous fill. Three rows
+  // stacked, spaced generously to actually fill the square card's height.
+  const litBars = Math.max(1, Math.round(score * 5));
   const pct = Math.round(score * 100);
+  const bars = Array.from({ length: 5 }, (_, i) =>
+    `<span class="scope-mini-bar ${i < litBars ? "lit" : ""}" style="height:${8 + i * 4}px"></span>`
+  ).join("");
+
   return `
-    <div class="scope-column" title="${label}: ${pct}%">
-      <div class="scope-bar-track"><div class="scope-bar-fill" style="height:${pct}%"></div></div>
+    <div class="scope-row" title="${label}: ${pct}% (${litBars} of 5)">
       <span class="scope-icon">${SCOPE_ICONS[type]}</span>
+      <div class="scope-mini-bars">${bars}</div>
     </div>
   `;
 }
@@ -806,13 +808,13 @@ async function generatePopularity() {
   try {
     const result = await postJSON("/api/popularity", { topic: state.topic });
 
-    const columns = [
-      scopeColumn("world", result.worldScore, "World"),
-      scopeColumn("national", result.nationalScore, "National"),
-      scopeColumn("local", result.localScore, "Local")
+    const rows = [
+      scopeRow("world", result.worldScore, "World"),
+      scopeRow("national", result.nationalScore, "National"),
+      scopeRow("local", result.localScore, "Local")
     ].join("");
 
-    el.popularityCard.innerHTML = `<div class="scope-columns">${columns}</div>`;
+    el.popularityCard.innerHTML = `<div class="scope-rows-fill">${rows}</div>`;
   } catch (err) {
     el.popularityCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
   }
