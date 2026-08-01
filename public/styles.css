@@ -486,20 +486,47 @@ button:disabled { opacity: 0.5; cursor: default; }
 .scope-mini-bar { width: 16%; border-radius: 3px; background: var(--border); }
 .scope-mini-bar.lit { background: var(--accent); }
 
-/* A soft, cloud-shaped callout — irregular rounded corners plus a puffy
-   drop-shadow read as "cloud" without needing a precise multi-blob outline
-   we can't verify the render of. Sits right under the Result heading so the
-   caveat is seen before the text underneath it is trusted. */
+/* A genuinely cloud-shaped callout. The box is a wide, short text banner
+   (a paragraph, not an icon), so a single blob border-radius reads as an
+   irregular pill, not a cloud -- an actual puffy edge needs a row of
+   overlapping circles. Fixed px sizing/spacing is deliberate: this app has
+   no responsive breakpoints and content width is reliably ~650-680px, so
+   circles tuned to that width tile with real overlap instead of the sparse
+   gaps that percentage-based sizing would leave at that aspect ratio.
+   isolation:isolate scopes the puffs' z-index below the text so they don't
+   leak into the page's stacking order. */
 #disclaimer-cloud {
+  position: relative;
+  isolation: isolate;
+  margin: 1.75rem 0 1rem;
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+.cloud-puff {
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: inherit;
+  /* No border on the puffs themselves -- overlapping bordered circles would
+     draw ugly crossing seams. The base rect's border still shows on the
+     sides/bottom; the puffs hide the top edge of it entirely. */
+  /* Relative to the puff's OWN size, not the parent's -- so this same rule
+     gives every circle (regardless of its width) the same ~58% poke-above /
+     42% sink-into split, fusing it into the box's top edge. */
+  transform: translate(-50%, -58%);
+  pointer-events: none;
+}
+.disclaimer-body {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
-  margin: 0.5rem 0 1rem;
   padding: 0.85rem 1.1rem;
-  background: rgba(127, 127, 127, 0.07);
-  border: 1px solid var(--border);
-  border-radius: 55% 45% 48% 52% / 35% 40% 35% 40%;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 #disclaimer-cloud svg {
   flex-shrink: 0;
