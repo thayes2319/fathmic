@@ -103,11 +103,13 @@ async function runTaxonomy() {
 }
 
 let elementRegistry = [];
+let subcategoryRegistry = [];
 
 function renderTaxonomy() {
   el.topicHeading.textContent = state.topic;
   el.taxonomyTree.innerHTML = "";
   elementRegistry = [];
+  subcategoryRegistry = [];
 
   state.categories.forEach((category, index) => {
     const row = document.createElement("div");
@@ -255,6 +257,19 @@ function renderTaxonomy() {
       }
       list.appendChild(specificsList);
 
+      // Cascade registration: if the subcategory itself is tagged, an exclusion
+      // hides the WHOLE block (summary + General + every element under it),
+      // regardless of whether the model also tagged the individual elements.
+      // Don't rely on the model tagging redundantly at both levels every time.
+      if (sub.axis && sub.direction) {
+        subcategoryRegistry.push({
+          subEl,
+          axis: sub.axis,
+          direction: sub.direction,
+          checkboxes: [{ checkbox: generalCheckbox, text: sub.name }, ...specificCheckboxes]
+        });
+      }
+
       subEl.appendChild(list);
       catEl.appendChild(subEl);
     });
@@ -294,6 +309,23 @@ function applyExclusions() {
     } else {
       entry.checkbox.disabled = false;
       entry.label.classList.remove("excluded");
+    }
+  });
+
+  subcategoryRegistry.forEach(entry => {
+    const activeForAxis = activeDirections.get(entry.axis);
+    const conflicts = activeForAxis && activeForAxis.size > 0 && !activeForAxis.has(entry.direction);
+
+    if (conflicts) {
+      entry.checkboxes.forEach(({ checkbox, text }) => {
+        if (checkbox.checked) {
+          checkbox.checked = false;
+          state.selected.delete(text);
+        }
+      });
+      entry.subEl.classList.add("excluded-subcategory");
+    } else {
+      entry.subEl.classList.remove("excluded-subcategory");
     }
   });
 

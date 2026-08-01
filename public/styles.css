@@ -143,6 +143,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .general-option:has(input:checked) { font-style: normal; font-weight: 600; }
 .specific-elements.collapsed-by-general { display: none; }
+.subcategory.excluded-subcategory { display: none; }
 
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); }
