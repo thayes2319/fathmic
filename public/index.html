@@ -2,26 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Rootpath</title>
+  <title>FATHmic</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main>
     <header>
-      <h1>Rootpath</h1>
+      <img id="brand-mark" src="images/brand-mark.png" alt="" aria-hidden="true" />
+      <h1>FATHmic</h1>
       <p class="tagline">Take a word or a sentence. Evolve it into understanding.</p>
     </header>
 
     <section id="input-section">
       <label for="subject-input">What do you want to understand?</label>
       <textarea id="subject-input" rows="2" placeholder="e.g. I want to plant a food garden in Georgia, U.S."></textarea>
+
+      <div id="persona-row">
+        <label for="persona-select">Searching as (optional):</label>
+        <select id="persona-select">
+          <option value="">Prefer not to say</option>
+          <option value="parent">Parent</option>
+          <option value="student">Student</option>
+          <option value="professional">Working Professional</option>
+          <option value="hobbyist">Hobbyist</option>
+          <option value="retiree">Retiree</option>
+          <option value="pet_owner">Pet Owner</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
       <button id="distill-btn">Distill</button>
       <p id="gate-status" class="status"></p>
 
       <div id="demo-cases">
-        <span class="demo-label">Or load a demo case:</span>
-        <div id="demo-buttons"></div>
+        <span class="demo-label">Fathmics to Explore</span>
+        <div id="demo-scroller-wrap">
+          <button id="demo-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+          <div id="demo-buttons"></div>
+          <button id="demo-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+        </div>
+      </div>
+
+      <div id="trending-section" hidden>
+        <div id="trending-header">
+          <span class="demo-label">Most Searched Here (at FATHmic):</span>
+          <select id="trending-filter"></select>
+        </div>
+        <div id="trending-groups"></div>
+      </div>
+
+      <div id="external-trending-section" hidden>
+        <span class="demo-label">Trending out there:</span>
+        <div id="external-trending-items"></div>
       </div>
     </section>
 
@@ -115,7 +148,7 @@
         <span class="cloud-puff" style="left:650px; width:60px;"></span>
         <div class="disclaimer-body">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 19a4.5 4.5 0 0 1-.5-8.97 5.5 5.5 0 0 1 10.6-1.98A4.5 4.5 0 0 1 17.5 19h-11Z"/></svg>
-          <p>Requests for clearly illegal content are declined automatically. Beyond that: this is a distillation, not an authority. Rootpath draws on general knowledge — it isn't a scientist, a doctor, a lawyer, or omniscient. What comes back is only as specific and as sound as what you put in and picked: a structured starting point, not a verified answer. Confirm anything that actually matters against a real source.</p>
+          <p>Requests for clearly illegal content are declined automatically. Beyond that: this is a distillation, not an authority. FATHmic draws on general knowledge — it isn't a scientist, a doctor, a lawyer, or omniscient. What comes back is only as specific and as sound as what you put in and picked: a structured starting point, not a verified answer. Confirm anything that actually matters against a real source.</p>
         </div>
       </div>
 

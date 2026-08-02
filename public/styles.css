@@ -19,6 +19,8 @@
 
 * { box-sizing: border-box; }
 
+html { overflow-x: hidden; } /* overflow-x:hidden on body alone doesn't stop the viewport itself from scrolling */
+
 body {
   font-family: -apple-system, "Segoe UI", sans-serif;
   color: var(--fg);
@@ -26,11 +28,29 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 2rem 1.25rem 4rem;
+  overflow-x: hidden; /* the brand mark deliberately bleeds past the reading column */
 }
 
-header { margin-bottom: 2rem; }
+header {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-top: 0.5rem;
+}
+header h1, header .tagline { position: relative; z-index: 1; }
 h1 { margin-bottom: 0.25rem; }
 .tagline { color: var(--muted); margin-top: 0; }
+
+#brand-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 850px;
+  max-width: none;
+  filter: sepia(1) saturate(1.4) opacity(0.16);
+  pointer-events: none;
+  z-index: 0;
+}
 
 section { margin-bottom: 2rem; }
 
@@ -133,9 +153,30 @@ button:disabled { opacity: 0.5; cursor: default; }
 #stale-banner button { margin-top: 0; padding: 0.35rem 0.8rem; font-size: 0.85rem; }
 #stale-banner[hidden] { display: none; }
 
+#persona-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.6rem; }
+#persona-row label { margin-bottom: 0; font-weight: normal; font-size: 0.85rem; color: var(--muted); }
+#persona-row select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
 #demo-cases { margin-top: 1rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
-#demo-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+#demo-scroller-wrap { display: flex; align-items: center; gap: 0.4rem; }
+#demo-buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+  scrollbar-width: thin;
+}
 .demo-btn {
   margin-top: 0;
   background: transparent;
@@ -144,8 +185,46 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-weight: normal;
   font-size: 0.85rem;
   padding: 0.4rem 0.8rem;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .demo-btn:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
+
+.scroll-arrow {
+  flex: 0 0 auto;
+  margin-top: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.scroll-arrow:hover { color: var(--fg); border-color: var(--muted); }
+
+#trending-section { margin-top: 1.25rem; }
+#trending-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+#trending-header .demo-label { margin-bottom: 0; }
+#trending-filter {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+#trending-groups { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.trending-btn { font-size: 0.8rem; }
+
+#external-trending-section { margin-top: 1.25rem; }
+#external-trending-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .skip-btn:hover { color: var(--fg); border-color: var(--muted); }
 
 .status { color: var(--muted); font-size: 0.9rem; }

@@ -33,6 +33,14 @@ const el = {
   outputText: document.getElementById("output-text"),
   copyOutputBtn: document.getElementById("copy-output-btn"),
   demoButtons: document.getElementById("demo-buttons"),
+  demoScrollLeft: document.getElementById("demo-scroll-left"),
+  demoScrollRight: document.getElementById("demo-scroll-right"),
+  personaSelect: document.getElementById("persona-select"),
+  trendingSection: document.getElementById("trending-section"),
+  trendingFilter: document.getElementById("trending-filter"),
+  trendingGroups: document.getElementById("trending-groups"),
+  externalTrendingSection: document.getElementById("external-trending-section"),
+  externalTrendingItems: document.getElementById("external-trending-items"),
   illustrateBtn: document.getElementById("illustrate-btn"),
   illustrationCard: document.querySelector('.ref-card[data-card="illustration"]'),
   photoBtn: document.getElementById("photo-btn"),
@@ -73,17 +81,19 @@ function resetDownstream() {
   state.lastStakesUsed = null;
 }
 
-el.distillBtn.addEventListener("click", async () => {
-  const input = el.subjectInput.value.trim();
+// Shared by the Distill button and the trending-search pills — both start
+// the same live gate -> taxonomy flow, just from a different input source.
+async function runDistill(input) {
   if (!input) return;
 
+  el.subjectInput.value = input;
   state.input = input;
   resetDownstream();
   el.gateStatus.textContent = "Checking specificity...";
   el.distillBtn.disabled = true;
 
   try {
-    const gate = await postJSON("/api/gate", { input });
+    const gate = await postJSON("/api/gate", { input, persona: el.personaSelect.value || null });
 
     state.stakes = gate.stakes || "medium";
     renderStakesDial();
@@ -103,7 +113,9 @@ el.distillBtn.addEventListener("click", async () => {
   } finally {
     el.distillBtn.disabled = false;
   }
-});
+}
+
+el.distillBtn.addEventListener("click", () => runDistill(el.subjectInput.value.trim()));
 
 el.clarifySubmitBtn.addEventListener("click", async () => {
   const answer = el.clarifyAnswer.value.trim();
@@ -734,7 +746,146 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
     });
     el.demoButtons.appendChild(btn);
   });
+
+  setupDemoScroller();
 }
+
+// Slow ambient auto-scroll left-to-right, loops back to the start at the
+// end. Pauses on hover/touch/manual arrow use so it never fights a user
+// trying to read or click something, and it's real scrollLeft movement (not
+// a transform), so buttons stay normally clickable throughout.
+function setupDemoScroller() {
+  const track = el.demoButtons;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let paused = false;
+  let resumeTimer = null;
+
+  function pauseIndefinitely() {
+    paused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = null;
+  }
+
+  function pauseThenResume(ms) {
+    paused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => { paused = false; resumeTimer = null; }, ms);
+  }
+
+  // scrollLeft reads back as an integer, so accumulating via `+= 0.4` off the
+  // read-back value never moves (0.4 always rounds down to 0 on write). Track
+  // the sub-pixel position separately instead. While paused, stay synced to
+  // the real scrollLeft so resuming (after an arrow click or manual scroll)
+  // continues from wherever the user left it instead of snapping back.
+  let position = 0;
+  function step() {
+    if (paused) {
+      position = track.scrollLeft;
+    } else if (track.scrollWidth > track.clientWidth) {
+      position += 0.4; // slow drift
+      const max = track.scrollWidth - track.clientWidth;
+      if (position >= max) position = 0;
+      track.scrollLeft = position;
+    }
+    requestAnimationFrame(step);
+  }
+
+  track.addEventListener("mouseenter", pauseIndefinitely);
+  track.addEventListener("mouseleave", () => pauseThenResume(800));
+  track.addEventListener("touchstart", () => pauseThenResume(4000), { passive: true });
+
+  el.demoScrollLeft.addEventListener("click", () => {
+    track.scrollBy({ left: -220, behavior: "smooth" });
+    pauseThenResume(4000);
+  });
+  el.demoScrollRight.addEventListener("click", () => {
+    track.scrollBy({ left: 220, behavior: "smooth" });
+    pauseThenResume(4000);
+  });
+
+  if (!reduceMotion) requestAnimationFrame(step);
+}
+
+// Trending: real, server-tracked query counts (see server/searchLog.js), not
+// canned data. /api/trending can return up to ~20 distinct groups once
+// personas and domains both have data, so instead of stacking every group
+// (unbounded vertical growth), a single dropdown picks which cut to view and
+// only that group's pills render below it.
+let trendingCategories = [];
+
+function renderTrendingItems(items) {
+  el.trendingGroups.innerHTML = "";
+  (items || []).forEach(item => {
+    const btn = document.createElement("button");
+    btn.className = "demo-btn trending-btn";
+    btn.textContent = item.count > 1 ? `${item.text} (${item.count})` : item.text;
+    btn.addEventListener("click", () => runDistill(item.text));
+    el.trendingGroups.appendChild(btn);
+  });
+}
+
+el.trendingFilter.addEventListener("change", () => {
+  const chosen = trendingCategories.find(c => c.key === el.trendingFilter.value);
+  renderTrendingItems(chosen ? chosen.items : []);
+});
+
+async function loadTrending() {
+  try {
+    const res = await fetch("/api/trending");
+    if (!res.ok) return;
+    const trending = await res.json();
+
+    trendingCategories = [
+      { key: "allTime", label: "Most popular here", items: trending.allTime },
+      { key: "today", label: "Today", items: trending.today },
+      { key: "thisWeek", label: "This week", items: trending.thisWeek },
+      ...Object.entries(trending.byPersona || {}).map(([key, p]) => ({ key: `persona:${key}`, label: `By ${p.label}`, items: p.items })),
+      ...Object.entries(trending.byDomain || {}).map(([key, d]) => ({ key: `domain:${key}`, label: d.label, items: d.items }))
+    ].filter(c => c.items && c.items.length);
+
+    if (!trendingCategories.length) return; // no searches logged yet — leave section hidden
+
+    el.trendingFilter.innerHTML = "";
+    trendingCategories.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.key;
+      opt.textContent = c.label;
+      el.trendingFilter.appendChild(opt);
+    });
+
+    renderTrendingItems(trendingCategories[0].items);
+    el.trendingSection.hidden = false;
+  } catch {
+    // Non-critical — trending is a nice-to-have browsing aid, not core flow.
+  }
+}
+loadTrending();
+
+// "Trending out there" — real Google Trends data (see server/externalTrends.js),
+// not internal to FATHmic. Separate section since it's a different kind of
+// signal (broad public interest, not what this tool's own users searched).
+async function loadExternalTrending() {
+  try {
+    const res = await fetch("/api/trending-external");
+    if (!res.ok) return;
+    const { items } = await res.json();
+    if (!items || !items.length) return; // source unavailable or empty — leave hidden
+
+    el.externalTrendingItems.innerHTML = "";
+    items.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "demo-btn trending-btn";
+      btn.textContent = item.text;
+      btn.addEventListener("click", () => runDistill(item.text));
+      el.externalTrendingItems.appendChild(btn);
+    });
+    el.externalTrendingSection.hidden = false;
+  } catch {
+    // Non-critical, and the server already degrades gracefully on its end.
+  }
+}
+loadExternalTrending();
 
 // Reference cards above the Result. Only the illustration card is built —
 // it reuses Muralizer's actual image-generation backend/account (a

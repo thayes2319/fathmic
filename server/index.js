@@ -8,6 +8,8 @@ const { runSynthesis } = require("./synthesize");
 const { runIllustration } = require("./illustrate");
 const { runPhotoSearch } = require("./photo");
 const { runPopularity } = require("./popularity");
+const { recordSearch, getTrending } = require("./searchLog");
+const { fetchExternalTrends } = require("./externalTrends");
 
 const app = express();
 app.set("trust proxy", 1); // so req.ip is the real client IP behind a host's reverse proxy, not the proxy itself
@@ -44,16 +46,27 @@ app.use("/api/illustrate", makeRateLimiter(10, "Too many illustration requests. 
 
 app.post("/api/gate", async (req, res) => {
   try {
-    const { input } = req.body || {};
+    const { input, persona } = req.body || {};
     if (!input || !String(input).trim()) {
       return res.status(400).json({ error: "input is required" });
     }
-    const result = await runGate(String(input).trim());
+    const trimmed = String(input).trim();
+    const result = await runGate(trimmed);
+    recordSearch({ input: trimmed, persona, domain: result.domain, ip: req.ip });
     res.json(result);
   } catch (err) {
     console.error("[gate]", err);
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get("/api/trending", (req, res) => {
+  res.json(getTrending());
+});
+
+app.get("/api/trending-external", async (req, res) => {
+  const items = await fetchExternalTrends();
+  res.json({ items });
 });
 
 app.post("/api/taxonomy", async (req, res) => {

@@ -56,6 +56,8 @@ Voice: ${preset.voiceGuidance}
 
 Confidence level: ${stakesGuidance}
 
+Real-world currency check: you have no live internet access — no current listings, prices, schedules, availability, or news. If a selection depends on a fact that changes over time and you can't verify it from general knowledge (e.g. what's currently playing/in stock/in season/on sale), do not describe it as if it were resolved or write around the gap. Say so plainly in the first sentence or two — name the specific thing you can't verify and what the reader should check instead — then continue with everything else that IS resolvable normally.
+
 Write only the finished piece. No preamble, no "here is your summary," no meta-commentary about what you're doing.`;
 }
 
