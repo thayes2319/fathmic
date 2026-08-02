@@ -128,5 +128,5 @@ app.post("/api/popularity", async (req, res) => {
 
 const port = process.env.PORT || 8788;
 app.listen(port, () => {
-  console.log(`Domainify server running on http://127.0.0.1:${port}`);
+  console.log(`Taproot server running on http://127.0.0.1:${port}`);
 });
