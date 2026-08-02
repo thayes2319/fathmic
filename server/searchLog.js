@@ -11,6 +11,10 @@ const PERSONA_LABELS = {
   hobbyist: "Hobbyists",
   retiree: "Retirees",
   pet_owner: "Pet Owners",
+  caregiver: "Caregivers",
+  small_business_owner: "Small Business Owners",
+  homeowner: "Homeowners",
+  creative: "Creatives",
   other: "Other"
 };
 
@@ -44,7 +48,7 @@ function load() {
 }
 load();
 
-function recordSearch({ input, persona, domain, ip }) {
+function recordSearch({ input, persona, domain, ip, blueprintFit, blueprintNewSubject }) {
   const text = String(input || "").trim();
   if (!text) return;
 
@@ -53,7 +57,9 @@ function recordSearch({ input, persona, domain, ip }) {
     persona: PERSONA_LABELS[persona] ? persona : null,
     domain: DOMAIN_LABELS[domain] ? domain : "other",
     ip: String(ip || ""),
-    ts: Date.now()
+    ts: Date.now(),
+    blueprintFit: blueprintFit === true,
+    blueprintNewSubject: blueprintNewSubject ? String(blueprintNewSubject).trim() : ""
   };
   records.push(entry);
 
@@ -117,4 +123,38 @@ function getTrending() {
   };
 }
 
-module.exports = { recordSearch, getTrending, PERSONA_LABELS };
+// Candidates for growing BLUEPRINT_SUBJECTS (public/app.js) — the gate
+// already judges novelty against the known list at classification time (see
+// KNOWN_BLUEPRINT_SUBJECTS in gate.js), so grouping here by normalized label
+// is just cleanup for minor phrasing variance across separate gate calls,
+// not a second uniqueness pass. Deliberately not auto-added to the live chip
+// list — that's hand-curated copy, so new subjects surface here for review
+// instead of shipping straight to users unreviewed.
+// "Chicken coop building" vs "Chicken coop builds" is the same subject asked
+// twice, but the gate doesn't label it identically call to call. A plain
+// lowercase/trim key treats those as different candidates, undercounting how
+// often a subject actually comes up — so fold the last word's trailing
+// "s"/"ing" before grouping, since that's specifically where build/builds/
+// building-style variance shows up. Only the last word, to keep this from
+// merging genuinely different subjects that happen to share earlier words.
+function normalizeSubjectKey(str) {
+  const words = str.toLowerCase().trim().replace(/[^\w\s]/g, "").split(/\s+/);
+  const last = words.length - 1;
+  if (last >= 0) words[last] = words[last].replace(/(ing|s)$/, "");
+  return words.join(" ");
+}
+
+function getBlueprintCandidates(limit = 10) {
+  const groups = new Map();
+  records.forEach(r => {
+    if (!r.blueprintNewSubject) return;
+    const key = normalizeSubjectKey(r.blueprintNewSubject);
+    const g = groups.get(key) || { subject: r.blueprintNewSubject, count: 0, examples: [] };
+    g.count += 1;
+    if (g.examples.length < 3 && !g.examples.includes(r.text)) g.examples.push(r.text);
+    groups.set(key, g);
+  });
+  return [...groups.values()].sort((a, b) => b.count - a.count).slice(0, limit);
+}
+
+module.exports = { recordSearch, getTrending, getBlueprintCandidates, PERSONA_LABELS };

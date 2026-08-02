@@ -39,24 +39,41 @@ const GENRE_PRESETS = {
 
 // Stakes doesn't change WHAT gets said (that's genre's job) — it changes how
 // confidently it's said. Independent of genre, threaded in alongside it.
+// Applies to the body of the piece only — the closing "Where it can go
+// wrong" section (below) is separate and always present regardless of
+// stakes, just scaled in depth by RISK_SECTION_GUIDANCE.
 const STAKES_GUIDANCE = {
-  low: "Stakes are low — curiosity or a casual hobby. Write with full confidence and zero hedging. No disclaimers, no caveats, no \"consult a professional.\" Treat every caveat as friction the reader doesn't need.",
-  medium: "Stakes are moderate. State things plainly, but flag the one or two points where getting it wrong would actually matter.",
-  high: "Stakes are high — real, possibly serious consequences (medical, legal, financial, safety) if this is wrong or incomplete. Be precise and explicit about what's well-established vs. uncertain or reader-specific. Clearly recommend involving the right professional before acting, stated plainly near the top, not buried. Precision over reassurance."
+  low: "Stakes are low — curiosity or a casual hobby. Write the body with full confidence and zero hedging. No disclaimers, no caveats woven into the body, no \"consult a professional.\" Treat every in-body caveat as friction the reader doesn't need — save risk framing entirely for the closing section.",
+  medium: "Stakes are moderate. State things plainly in the body, but flag the one or two points where getting it wrong would actually matter.",
+  high: "Stakes are high — real, possibly serious consequences (medical, legal, financial, safety) if this is wrong or incomplete. Be precise and explicit in the body about what's well-established vs. uncertain or reader-specific. Precision over reassurance."
+};
+
+// The closing risk section is mandatory on every result, at every stakes
+// level — confirmed choice: users want it reliably present, not something
+// that only shows up when the model happens to reach for it. What varies is
+// depth, so a low-stakes "what to grow this weekend" result still gets a
+// one-line gut check instead of either an alarming disclaimer or nothing.
+const RISK_SECTION_GUIDANCE = {
+  low: "One low-key sentence: name the realistic worst case and note plainly that it's cheap or easy to fix, or that it barely matters. Do not manufacture risk that isn't really there just to fill the section.",
+  medium: "A short paragraph or 2-3 bullets naming the specific points where getting it wrong would actually matter, and what to double-check.",
+  high: "The most substantive part of the piece. Be explicit about what's well-established vs. uncertain or reader-specific, name concrete failure modes, and state plainly that a qualified professional should be involved before acting on this — not buried, not softened."
 };
 
 function buildSystemPrompt(genre, stakes) {
   const preset = GENRE_PRESETS[genre] || GENRE_PRESETS.summary;
   const stakesGuidance = STAKES_GUIDANCE[stakes] || STAKES_GUIDANCE.medium;
+  const riskGuidance = RISK_SECTION_GUIDANCE[stakes] || RISK_SECTION_GUIDANCE.medium;
   return `You are the synthesis engine for Rootpath. You take a distilled set of selections about a subject and turn them into a finished piece of writing.
 
 Structural mode (${preset.mode}): ${preset.modeGuidance}
 
 Voice: ${preset.voiceGuidance}
 
-Confidence level: ${stakesGuidance}
+Confidence level (body only): ${stakesGuidance}
 
 Real-world currency check: you have no live internet access — no current listings, prices, schedules, availability, or news. If a selection depends on a fact that changes over time and you can't verify it from general knowledge (e.g. what's currently playing/in stock/in season/on sale), do not describe it as if it were resolved or write around the gap. Say so plainly in the first sentence or two — name the specific thing you can't verify and what the reader should check instead — then continue with everything else that IS resolvable normally.
+
+Always end the piece with a section headed exactly "Where it can go wrong" (formatted as its own heading, same style as any other section headings you use). ${riskGuidance}
 
 Write only the finished piece. No preamble, no "here is your summary," no meta-commentary about what you're doing.`;
 }

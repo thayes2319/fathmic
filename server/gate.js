@@ -18,6 +18,24 @@ const DOMAIN_LABELS = {
   other: "Other"
 };
 
+// BLUEPRINT: the taxonomy-to-full-spec pattern's native use case (see
+// Muralizer) — subjects precise enough, and expert-dense enough, that the
+// output is meant to be handed off and built/fabricated/produced rather than
+// just read. Keep this in sync by hand with BLUEPRINT_SUBJECTS in
+// public/app.js whenever that chip list changes — the gate uses it to judge
+// whether a new inquiry is a genuinely distinct subject worth surfacing as a
+// candidate, or just a rephrasing of one already covered.
+const KNOWN_BLUEPRINT_SUBJECTS = [
+  "Tattoo concepts",
+  "Custom furniture",
+  "Engagement rings",
+  "Garden design",
+  "Home theater builds",
+  "Instrument builds",
+  "Gaming PC builds",
+  "Window replacement"
+];
+
 const GATE_TOOL = {
   name: "submit_gate_result",
   description: "Report whether an input is specific enough to distill, and why.",
@@ -59,9 +77,17 @@ const GATE_TOOL = {
         type: "string",
         enum: Object.keys(DOMAIN_LABELS),
         description: "The single broad subject-matter bucket this input falls into. Pick the closest fit even if imperfect; use 'other' only when nothing else is close."
+      },
+      blueprintFit: {
+        type: "boolean",
+        description: "True if this input describes something meant to be specified precisely enough to hand off and build, fabricate, generate, or produce — not just explained or understood. Domains with real expert-level unknown-unknowns where the exact combination chosen materially changes a concrete deliverable (e.g. a custom tattoo, a furniture piece, an engagement ring, a garden layout, a renovation, an instrument build). False for anything that ends at understanding or writing (trip planning, career advice, a story, general research)."
+      },
+      blueprintNewSubject: {
+        type: "string",
+        description: `Only relevant if blueprintFit is true. If this input's subject is clearly one of the already-covered subjects (${KNOWN_BLUEPRINT_SUBJECTS.join(", ")}) even if phrased differently, leave this an empty string. If it's a genuinely distinct subject not on that list, give a short 2-4 word label in the same style (e.g. "Custom furniture", "Home theater builds"). Empty string if blueprintFit is false.`
       }
     },
-    required: ["status", "domainClarity", "gapType", "note", "clarifyingQuestion", "firstBranch", "stakes", "domain"]
+    required: ["status", "domainClarity", "gapType", "note", "clarifyingQuestion", "firstBranch", "stakes", "domain", "blueprintFit", "blueprintNewSubject"]
   }
 };
 
@@ -79,7 +105,9 @@ Default to "pass" unless the gap is genuinely of the user-only kind. Most inputs
 
 Also estimate "stakes" on the 3-point scale — how much is actually riding on getting this right. This sets a default for how hedged vs. confident the eventual output should be; the user can always override it. Don't default to "medium" reflexively — most everyday inputs (hobbies, curiosity, casual planning) genuinely land at low.
 
-Also classify "domain" — the single closest-fitting bucket from: ${Object.keys(DOMAIN_LABELS).join(", ")}. Pick the nearest fit even when imperfect; use "other" only when nothing else is close.`;
+Also classify "domain" — the single closest-fitting bucket from: ${Object.keys(DOMAIN_LABELS).join(", ")}. Pick the nearest fit even when imperfect; use "other" only when nothing else is close.
+
+Also classify "blueprintFit" and "blueprintNewSubject" per their schema descriptions — most inputs are not blueprint-fit, so default to false/empty unless the input genuinely describes something meant to be built, fabricated, generated, or produced from a precise spec.`;
 
 async function runGate(input) {
   const result = await callStructured({
@@ -96,8 +124,10 @@ async function runGate(input) {
     clarifyingQuestion: result.clarifyingQuestion || null,
     firstBranch: result.firstBranch || null,
     stakes: ["low", "medium", "high"].includes(result.stakes) ? result.stakes : "medium",
-    domain: Object.keys(DOMAIN_LABELS).includes(result.domain) ? result.domain : "other"
+    domain: Object.keys(DOMAIN_LABELS).includes(result.domain) ? result.domain : "other",
+    blueprintFit: result.blueprintFit === true,
+    blueprintNewSubject: result.blueprintFit === true ? String(result.blueprintNewSubject || "").trim() : ""
   };
 }
 
-module.exports = { runGate, DOMAIN_LABELS };
+module.exports = { runGate, DOMAIN_LABELS, KNOWN_BLUEPRINT_SUBJECTS };

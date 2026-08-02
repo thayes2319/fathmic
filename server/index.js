@@ -8,7 +8,8 @@ const { runSynthesis } = require("./synthesize");
 const { runIllustration } = require("./illustrate");
 const { runPhotoSearch } = require("./photo");
 const { runPopularity } = require("./popularity");
-const { recordSearch, getTrending } = require("./searchLog");
+const { recordSearch, getTrending, getBlueprintCandidates } = require("./searchLog");
+const { sendBlueprintCandidateEmail } = require("./notify");
 const { fetchExternalTrends } = require("./externalTrends");
 
 const app = express();
@@ -52,7 +53,23 @@ app.post("/api/gate", async (req, res) => {
     }
     const trimmed = String(input).trim();
     const result = await runGate(trimmed);
-    recordSearch({ input: trimmed, persona, domain: result.domain, ip: req.ip });
+    recordSearch({
+      input: trimmed,
+      persona,
+      domain: result.domain,
+      ip: req.ip,
+      blueprintFit: result.blueprintFit,
+      blueprintNewSubject: result.blueprintNewSubject
+    });
+    if (result.blueprintNewSubject) {
+      // Only the first time this subject shows up — otherwise every repeat
+      // inquiry on an already-flagged candidate would re-email.
+      const match = getBlueprintCandidates()
+        .find(c => c.subject.toLowerCase() === result.blueprintNewSubject.toLowerCase());
+      if (match && match.count === 1) {
+        sendBlueprintCandidateEmail({ subject: result.blueprintNewSubject, example: trimmed }).catch(() => {});
+      }
+    }
     res.json(result);
   } catch (err) {
     console.error("[gate]", err);
@@ -62,6 +79,13 @@ app.post("/api/gate", async (req, res) => {
 
 app.get("/api/trending", (req, res) => {
   res.json(getTrending());
+});
+
+// Not linked from the UI — a plain lookup for reviewing which new BLUEPRINT
+// subjects real traffic is surfacing before any of them get hand-added to
+// BLUEPRINT_SUBJECTS in public/app.js.
+app.get("/api/blueprint-candidates", (req, res) => {
+  res.json({ candidates: getBlueprintCandidates() });
 });
 
 app.get("/api/trending-external", async (req, res) => {

@@ -33,12 +33,63 @@ body {
 
 header {
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
   padding-top: 0.5rem;
 }
-header h1, header .tagline { position: relative; z-index: 1; }
+header .tagline { position: relative; z-index: 1; }
 h1 { margin-bottom: 0.25rem; }
 .tagline { color: var(--muted); margin-top: 0; }
+
+#brand-lockup { position: relative; z-index: 1; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+#brand-lockup h1 { margin-bottom: 0; }
+
+#prompt-icon {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  cursor: default;
+}
+#prompt-icon svg { width: 100%; height: 100%; overflow: visible; }
+.prompt-icon-void {
+  stroke: var(--border);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.prompt-icon-node {
+  stroke: var(--accent);
+  fill: var(--accent);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateY(7px) scale(0.35);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+  transition-delay: var(--delay);
+}
+/* The small logo icon rises out of its "void" on hover — same motif as the
+   large schematic sequence below, just a persistent miniature version.
+   Triggered by hovering the whole lockup (icon + wordmark), not just the
+   tiny icon itself, since that's a much more forgiving hit target. */
+#brand-lockup:hover .prompt-icon-node {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* While a distill is actually running (gate + taxonomy), the same nodes
+   loop continuously instead of waiting for hover — the logo itself becomes
+   the "working on it" indicator, staggered per node via --delay so it reads
+   as a small cascade rather than three dots blinking in unison. Shared by
+   the header icon (toggled on/off in app.js) and the modal's copy of it
+   (permanently .icon-processing in the HTML, since the modal only ever
+   exists while something is actually processing). */
+.icon-processing .prompt-icon-node {
+  animation: iconProcessPulse 1.3s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+@keyframes iconProcessPulse {
+  0%, 100% { transform: translateY(7px) scale(0.35); opacity: 0.25; }
+  50% { transform: translateY(0) scale(1); opacity: 1; }
+}
 
 #brand-mark {
   position: absolute;
@@ -119,6 +170,17 @@ button:disabled { opacity: 0.5; cursor: default; }
 .icon-btn svg { width: 14px; height: 14px; }
 .icon-btn:hover { color: var(--fg); border-color: var(--muted); }
 
+/* Bolder than its icon-btn siblings on purpose — this is the default,
+   primary way most people now move through a fresh taxonomy, not a peer
+   utility button like Expand/Collapse all. */
+#interview-toggle-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+#interview-toggle-btn:hover { opacity: 0.88; color: #fff; border-color: var(--accent); }
+
 .pick-btn {
   margin-top: 0;
   margin-left: auto;
@@ -136,7 +198,13 @@ button:disabled { opacity: 0.5; cursor: default; }
 .pick-btn svg { width: 15px; height: 15px; }
 .pick-btn:hover { opacity: 0.85; }
 
-.category-controls { display: flex; gap: 0.9rem; margin: 0 0 0.5rem 1.6rem; }
+.pick-btn-sm {
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+}
+.pick-btn-sm svg { width: 12px; height: 12px; }
+
+.category-controls { display: flex; align-items: center; gap: 0.9rem; margin: 0 0 0.5rem 1.6rem; }
 .category-controls .link-btn { margin: 0; }
 
 #stale-banner {
@@ -165,11 +233,41 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-size: 0.85rem;
 }
 
+/* Deliberately NOT setting display: on this rule, even though it's toggled
+   via .hidden alongside demo-cases/trending-section — an ID selector doing
+   that outranks the browser's default [hidden]{display:none} and silently
+   defeats the toggle (see the process-modal-backdrop incident). Block is the
+   default for a div, so leaving it alone gets the same effect safely. */
+#blueprint-section {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: rgba(127, 127, 127, 0.08);
+}
+#blueprint-tagline { margin: 0 0 0.55rem; font-size: 0.88rem; }
+#blueprint-tagline strong { color: var(--accent); }
+.blueprint-chip {
+  margin-top: 0;
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.blueprint-chip:hover { opacity: 0.85; }
+
 #demo-cases { margin-top: 1rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
 
-#demo-scroller-wrap { display: flex; align-items: center; gap: 0.4rem; }
-#demo-buttons {
+/* Shared by all three horizontal pill lists (Fathmics to Explore, Most
+   Searched Here, Trending out there) — manual arrow-scroll only, no
+   auto-drift on any of them. */
+.hscroll-wrap { display: flex; align-items: center; gap: 0.4rem; }
+.hscroll-track {
   display: flex;
   flex-wrap: nowrap;
   gap: 0.5rem;
@@ -220,25 +318,111 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-family: inherit;
   font-size: 0.85rem;
 }
-#trending-groups { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .trending-btn { font-size: 0.8rem; }
 
-#external-trending-section { margin-top: 1.25rem; }
-#external-trending-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .skip-btn:hover { color: var(--fg); border-color: var(--muted); }
 
 .status { color: var(--muted); font-size: 0.9rem; }
+.status-pulsing { animation: statusPulse 1.6s ease-in-out infinite; }
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
 
 .category-row {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 1.25rem;
   border-radius: 8px;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, opacity 0.25s ease, filter 0.25s ease;
 }
 .category-row.dragging { opacity: 0.4; }
 .category-row.drag-over { background: rgba(127, 127, 127, 0.12); }
+
+/* Soft spotlight: once any category is open, everything else dims instead
+   of competing for attention at full weight — no toggle, no separate mode,
+   just a state that already exists (<details open>). Pure CSS via :has(),
+   reverts automatically the moment nothing is open. */
+#taxonomy-tree:has(.category[open]) .category-row:not(:has(.category[open])) {
+  opacity: 0.45;
+  filter: saturate(0.5);
+}
+
+/* Brief attention cue when interview mode lands on a new category — fades
+   out on its own via app.js removing the class ~1.2s later. */
+.category-row-flash .category {
+  animation: categoryFlash 1.2s ease-out;
+}
+@keyframes categoryFlash {
+  0% { box-shadow: 0 0 0 3px var(--accent); }
+  100% { box-shadow: 0 0 0 3px transparent; }
+}
+
+.interview-nav-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0.4rem;
+}
+.interview-nav-row .skip-btn { margin: 0; }
+.interview-circleback-prompt {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.interview-next-btn {
+  display: block;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0.55rem 1.1rem;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  animation: nextBtnFlash 1s ease-out;
+}
+@keyframes nextBtnFlash {
+  0% { transform: scale(0.9); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* The category currently being interviewed lifts out of the list into a
+   floating card — deliberately no click-blocking backdrop behind it (that
+   would break "still clickable if you're struck"); the existing
+   dim-siblings rule already recedes everything else, so this only needs to
+   handle its own elevation. No entrance keyframe here (opacity/transform
+   are handled by category-row-flash already) — this class only needs to
+   change where and how the row is positioned. */
+.category-row.interview-float {
+  position: fixed;
+  top: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  z-index: 60;
+  margin: 0;
+  padding: 0.6rem;
+  background: var(--bg);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  opacity: 1 !important; /* never dimmed by the sibling-dim rule, regardless of what else is open */
+}
+.category-row.interview-float .drag-handle { display: none; }
+.category-row.interview-float .category { border: none; padding: 0; }
+.category-row.interview-float .interview-nav-row {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  padding-top: 0.4rem;
+}
 
 .drag-handle {
   cursor: grab;
@@ -489,6 +673,68 @@ button:disabled { opacity: 0.5; cursor: default; }
    knob instead of a separate line far below. */
 .stakes-caption { margin-top: -42px; font-size: 0.95rem; color: var(--muted); }
 
+.info-tooltip { position: relative; display: inline-block; }
+.info-icon-btn {
+  margin-top: 0;
+  margin-left: 0.3rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  vertical-align: middle;
+}
+
+/* Second tooltip trigger, same content as the caption's — sits on the dial
+   face itself in the empty gap between the Low (-120deg) and Medium (0deg)
+   markers, i.e. -60deg/10 o'clock, the angular midpoint. Positioned in the
+   face's own coordinate space (118px box, so this is independent of the
+   outer knob's 260px marker-ring math) at a radius comfortably inside the
+   face's 59px edge so it doesn't crowd the perimeter. */
+.stakes-knob-hint {
+  position: absolute;
+  left: 17%;
+  top: 31%;
+  transform: translate(-50%, -50%);
+}
+.stakes-knob-hint .info-icon-btn { margin-left: 0; }
+.info-icon-btn:hover, .info-icon-btn:focus-visible { color: var(--accent); border-color: var(--accent); }
+.info-tooltip-text {
+  position: absolute;
+  bottom: 135%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: 320px;
+  max-width: 80vw;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  font-weight: normal;
+  text-align: left;
+  padding: 0.65rem 0.8rem;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 20;
+}
+.info-tooltip:hover .info-tooltip-text,
+.info-icon-btn:focus + .info-tooltip-text {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 #genre-buttons button { margin-top: 0; background: transparent; color: var(--accent); transition: background 0.15s ease, color 0.15s ease; }
 #genre-buttons button:hover { background: var(--accent); color: #fff; }
@@ -535,32 +781,61 @@ button:disabled { opacity: 0.5; cursor: default; }
   align-items: stretch;
   width: 100%;
   height: 100%;
-  padding: 1.2rem;
-  gap: 0.9rem;
+  padding: 0.9rem 1.1rem;
   box-sizing: border-box;
+}
+.scope-card-title {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.6rem;
+}
+.scope-rows-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.5rem;
 }
 .scope-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   width: 100%;
-  flex: 1; /* each row claims an equal third of the card's real height */
+  flex: 1; /* each row claims an equal third of the remaining height */
   min-height: 0; /* let flex children shrink/size correctly instead of overflowing */
+  gap: 0.3rem;
+}
+.scope-row-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 .scope-icon {
-  height: 65%;
+  height: 0.9rem;
   width: auto;
   aspect-ratio: 1 / 1;
   flex-shrink: 0;
   color: var(--muted);
 }
 .scope-icon svg { width: 100%; height: 100%; }
+.scope-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
 .scope-mini-bars {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  width: 100%;
   flex: 1;
-  height: 100%; /* resolves against .scope-row's real (flex:1) height */
-  margin-left: 1rem;
+  min-height: 0;
 }
 .scope-mini-bar { width: 16%; border-radius: 3px; background: var(--border); }
 .scope-mini-bar.lit { background: var(--accent); }
@@ -639,7 +914,6 @@ button:disabled { opacity: 0.5; cursor: default; }
 #copy-output-btn.copied { color: var(--accent); border-color: var(--accent); }
 
 #output-text {
-  white-space: pre-wrap;
   font-family: inherit;
   font-size: 1.05rem;
   line-height: 1.65;
@@ -648,3 +922,272 @@ button:disabled { opacity: 0.5; cursor: default; }
   padding: 1.25rem 3.2rem 1.25rem 1.4rem;
   background: rgba(127, 127, 127, 0.05);
 }
+#output-text h4 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+#output-text h4:first-child { margin-top: 0; }
+#output-text p { margin: 0 0 0.9rem; }
+#output-text ul, #output-text ol { margin: 0 0 0.9rem; padding-left: 1.4rem; }
+#output-text li { margin-bottom: 0.35rem; }
+#output-text p:last-child,
+#output-text ul:last-child,
+#output-text ol:last-child { margin-bottom: 0; }
+#output-text li:last-child { margin-bottom: 0; }
+#output-text strong { color: var(--fg); }
+
+/* Schematic sequence: a large wireframe replay of the actual mechanism
+   (input -> gate check -> taxonomy branching -> selection -> synthesis),
+   emerging from the prompt field. Takes over the space demo-cases/trending
+   normally occupy while it plays (see app.js), then hands it back. Every
+   element starts invisible/collapsed by default (below) and only animates
+   once JS adds .is-playing to #schematic-sequence — until then this block
+   is inert, so nothing plays without the class regardless of the keyframes
+   existing. */
+#schematic-sequence {
+  position: relative;
+  margin-top: 1rem;
+  padding: 0.5rem 0 0;
+}
+#schematic-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sq-input, .sq-node {
+  fill: var(--accent);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.2);
+}
+.sq-gate {
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0;
+}
+.sq-branch, .sq-converge {
+  stroke: var(--border);
+  stroke-width: 1.5;
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.sq-leaf { fill: var(--muted); }
+.sq-selected { fill: var(--accent); }
+.sq-output {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.7);
+}
+.sq-output-line {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  opacity: 0;
+}
+/* Each label is a small bordered chip (rect + text) rather than bare text,
+   so crossing branch/converge lines never mix into it — a real background
+   fill, not just a halo. .sq-label-bg starts at zero size; app.js measures
+   the paired .sq-label's actual rendered width via getBBox() once on load
+   and sizes/positions the rect to match with a small pad, so it fits each
+   label's real length instead of a guessed fixed box. */
+.sq-label-group { opacity: 0; }
+.sq-label-bg {
+  fill: var(--bg);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.sq-label {
+  fill: var(--muted);
+  font-size: 15px;
+  font-style: italic;
+}
+
+.sq-dismiss-btn {
+  cursor: pointer;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.2);
+}
+.sq-dismiss-btn rect {
+  fill: var(--accent);
+  transition: opacity 0.15s ease;
+}
+.sq-dismiss-btn:hover rect { opacity: 0.85; }
+.sq-dismiss-btn text {
+  fill: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+#schematic-sequence.is-playing .sq-input {
+  animation: sqPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+#schematic-sequence.is-playing .sq-gate {
+  animation: sqRingPulse 0.7s ease-out 0.3s forwards;
+}
+#schematic-sequence.is-playing .sq-branch {
+  animation: sqDraw 0.35s ease forwards;
+  animation-delay: var(--d);
+}
+#schematic-sequence.is-playing .sq-node {
+  animation: sqPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: var(--d);
+}
+#schematic-sequence.is-playing .sq-selected {
+  animation: sqPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, sqGlow 0.6s ease forwards;
+  animation-delay: var(--d), var(--gd);
+}
+#schematic-sequence.is-playing .sq-converge {
+  animation: sqDraw 0.4s ease forwards;
+  animation-delay: var(--d);
+}
+#schematic-sequence.is-playing .sq-output {
+  animation: sqPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: var(--d);
+}
+#schematic-sequence.is-playing .sq-output-line {
+  animation: sqFadeIn 0.3s ease forwards;
+  animation-delay: var(--d);
+}
+#schematic-sequence.is-playing .sq-label-group {
+  animation: sqFadeIn 0.5s ease forwards;
+  animation-delay: var(--d);
+}
+#schematic-sequence.is-playing .sq-dismiss-btn {
+  animation: sqPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: var(--d);
+}
+
+@keyframes sqPopIn {
+  from { opacity: 0; transform: scale(0.2); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes sqRingPulse {
+  0% { opacity: 0; r: 16; }
+  40% { opacity: 1; }
+  100% { opacity: 0; r: 24; }
+}
+@keyframes sqDraw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes sqGlow {
+  0% { filter: none; }
+  50% { filter: drop-shadow(0 0 5px var(--accent)); }
+  100% { filter: drop-shadow(0 0 2px var(--accent)); }
+}
+@keyframes sqFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Process modal: shown for the duration of a live distill (gate + taxonomy).
+   Real granular progress isn't available — taxonomy generation is a single
+   non-streaming model call — so steps 2-6 are a timed-release simulation of
+   the real work described in the taxonomy prompt (categories -> subcats ->
+   conflict tagging -> fixedness scoring), reconciled against the real
+   response the moment it actually lands (see app.js). Dismissible without
+   canceling the underlying request. */
+#process-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 14, 0.4);
+  z-index: 100;
+  padding: 1.25rem;
+}
+/* An ID selector setting `display` unconditionally would outrank the
+   browser's default `[hidden] { display: none }` rule and defeat the
+   `hidden` attribute entirely — this element is position:fixed + inset:0,
+   so that would mean it silently blocks clicks across the whole page even
+   while "hidden". Scoping display to :not([hidden]) keeps the two in sync. */
+#process-modal-backdrop:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#process-modal {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+#modal-prompt-icon {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.2rem;
+  width: 30px;
+  height: 30px;
+}
+#modal-prompt-icon svg { width: 100%; height: 100%; overflow: visible; }
+#process-modal h3 { margin: 0 1.6rem 0.3rem 0; font-size: 1.05rem; }
+#process-modal-verb {
+  margin: 0 0 1.1rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--accent);
+  min-height: 1.2em; /* reserve space so the step list below doesn't jump as the word changes length */
+}
+#process-steps {
+  list-style: none;
+  margin: 0 0 1.1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+#process-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+#process-steps li.active { color: var(--fg); font-weight: 600; }
+
+.step-icon {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  position: relative;
+}
+#process-steps li.active .step-icon {
+  border-color: var(--accent);
+  animation: stepPulse 1s ease-in-out infinite;
+}
+#process-steps li.done .step-icon {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+#process-steps li.done .step-icon::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+@keyframes stepPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.6; }
+}
+#process-modal-dismiss { display: block; margin: 0 auto; }

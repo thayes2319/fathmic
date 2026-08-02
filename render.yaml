@@ -10,3 +10,7 @@ services:
         sync: false
       - key: LLM_MODEL
         value: claude-sonnet-5
+      - key: RESEND_API_KEY
+        sync: false
+      - key: BLUEPRINT_NOTIFY_EMAIL
+        value: thomas@gohw.net

@@ -7,16 +7,146 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div id="process-modal-backdrop" hidden>
+    <div id="process-modal" role="status" aria-live="polite">
+      <div id="modal-prompt-icon" class="icon-processing" aria-hidden="true">
+        <svg viewBox="0 0 32 32">
+          <path class="prompt-icon-void" d="M4 23 Q16 31 28 23" fill="none" />
+          <g class="prompt-icon-node" style="--delay:0s">
+            <line x1="10" y1="23" x2="10" y2="17" />
+            <circle cx="10" cy="15" r="2.1" />
+          </g>
+          <g class="prompt-icon-node" style="--delay:0.12s">
+            <line x1="16" y1="23" x2="16" y2="12" />
+            <circle cx="16" cy="10" r="2.1" />
+          </g>
+          <g class="prompt-icon-node" style="--delay:0.24s">
+            <line x1="22" y1="23" x2="22" y2="15" />
+            <circle cx="22" cy="13" r="2.1" />
+          </g>
+        </svg>
+      </div>
+      <h3>Doing big things</h3>
+      <p id="process-modal-verb"></p>
+      <ul id="process-steps"></ul>
+      <button id="process-modal-dismiss" class="link-btn" type="button">Hide — I'll wait</button>
+    </div>
+  </div>
+
   <main>
     <header>
       <img id="brand-mark" src="images/brand-mark.png" alt="" aria-hidden="true" />
-      <h1>FATHmic</h1>
-      <p class="tagline">Take a word or a sentence. Evolve it into understanding.</p>
+      <div id="brand-lockup">
+        <div id="prompt-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path class="prompt-icon-void" d="M4 23 Q16 31 28 23" fill="none" />
+            <g class="prompt-icon-node" style="--delay:0s">
+              <line x1="10" y1="23" x2="10" y2="17" />
+              <circle cx="10" cy="15" r="2.1" />
+            </g>
+            <g class="prompt-icon-node" style="--delay:0.12s">
+              <line x1="16" y1="23" x2="16" y2="12" />
+              <circle cx="16" cy="10" r="2.1" />
+            </g>
+            <g class="prompt-icon-node" style="--delay:0.24s">
+              <line x1="22" y1="23" x2="22" y2="15" />
+              <circle cx="22" cy="13" r="2.1" />
+            </g>
+          </svg>
+        </div>
+        <h1>FATHmic</h1>
+      </div>
+      <p class="tagline">Discover the unknown unknowns</p>
     </header>
 
     <section id="input-section">
-      <label for="subject-input">What do you want to understand?</label>
-      <textarea id="subject-input" rows="2" placeholder="e.g. I want to plant a food garden in Georgia, U.S."></textarea>
+      <textarea id="subject-input" rows="3" aria-label="What do you want to understand?" placeholder="Know it all now, not after an hour of typing and reading.
+What do you want to fathom?"></textarea>
+
+      <div id="schematic-sequence" hidden>
+        <svg id="schematic-svg" viewBox="0 0 640 350" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <!-- Stage 1: input node -->
+          <circle class="sq-input" cx="320" cy="18" r="7" />
+
+          <!-- Stage 2: gate check ring -->
+          <circle class="sq-gate" cx="320" cy="18" r="16" fill="none" />
+
+          <!-- Stage 3: taxonomy branches, depth-first — each full branch
+               (category + its 2 elements) completes before the next branch
+               starts, instead of everything blooming at once. Each label is
+               a <g class="sq-label-group"> (background chip + text) sized
+               by JS from the text's real measured width, and placed last in
+               the document so it always paints on top of any line beneath
+               it. -->
+          <g class="sq-stage3">
+            <!-- Branch 1 -->
+            <line class="sq-branch" pathLength="1" style="--d:1.0s" x1="320" y1="25" x2="120" y2="110" />
+            <circle class="sq-node" style="--d:1.25s" cx="120" cy="114" r="5.5" />
+            <line class="sq-branch" pathLength="1" style="--d:1.45s" x1="120" y1="119" x2="80" y2="190" />
+            <circle class="sq-node sq-leaf" style="--d:1.65s" cx="80" cy="194" r="4.5" />
+            <line class="sq-branch" pathLength="1" style="--d:1.8s" x1="120" y1="119" x2="160" y2="190" />
+            <circle class="sq-node sq-leaf sq-selected" style="--d:2.0s; --gd:2.15s" cx="160" cy="194" r="4.5" />
+
+            <!-- Branch 2 -->
+            <line class="sq-branch" pathLength="1" style="--d:2.2s" x1="320" y1="25" x2="260" y2="110" />
+            <circle class="sq-node" style="--d:2.45s" cx="260" cy="114" r="5.5" />
+            <line class="sq-branch" pathLength="1" style="--d:2.65s" x1="260" y1="119" x2="225" y2="190" />
+            <circle class="sq-node sq-leaf" style="--d:2.85s" cx="225" cy="194" r="4.5" />
+            <line class="sq-branch" pathLength="1" style="--d:3.0s" x1="260" y1="119" x2="300" y2="190" />
+            <circle class="sq-node sq-leaf sq-selected" style="--d:3.2s; --gd:3.35s" cx="300" cy="194" r="4.5" />
+
+            <!-- Branch 3 -->
+            <line class="sq-branch" pathLength="1" style="--d:3.4s" x1="320" y1="25" x2="380" y2="110" />
+            <circle class="sq-node" style="--d:3.65s" cx="380" cy="114" r="5.5" />
+            <line class="sq-branch" pathLength="1" style="--d:3.85s" x1="380" y1="119" x2="345" y2="190" />
+            <circle class="sq-node sq-leaf sq-selected" style="--d:4.05s; --gd:4.2s" cx="345" cy="194" r="4.5" />
+            <line class="sq-branch" pathLength="1" style="--d:4.2s" x1="380" y1="119" x2="420" y2="190" />
+            <circle class="sq-node sq-leaf" style="--d:4.4s" cx="420" cy="194" r="4.5" />
+
+            <!-- Branch 4 -->
+            <line class="sq-branch" pathLength="1" style="--d:4.6s" x1="320" y1="25" x2="520" y2="110" />
+            <circle class="sq-node" style="--d:4.85s" cx="520" cy="114" r="5.5" />
+            <line class="sq-branch" pathLength="1" style="--d:5.05s" x1="520" y1="119" x2="480" y2="190" />
+            <circle class="sq-node sq-leaf" style="--d:5.25s" cx="480" cy="194" r="4.5" />
+            <line class="sq-branch" pathLength="1" style="--d:5.4s" x1="520" y1="119" x2="560" y2="190" />
+            <circle class="sq-node sq-leaf sq-selected" style="--d:5.6s; --gd:5.75s" cx="560" cy="194" r="4.5" />
+
+            <g class="sq-label-group" style="--d:0.9s"><rect class="sq-label-bg" /><text class="sq-label" x="320" y="88" text-anchor="middle">a map of what matters</text></g>
+
+            <!-- One word per choice node, revealed as that node is chosen —
+                 "you choose what fits" spread across the actual nodes it
+                 describes instead of sitting in open space. -->
+            <g class="sq-label-group" style="--d:2.15s"><rect class="sq-label-bg" /><text class="sq-label" x="160" y="220" text-anchor="middle">you</text></g>
+            <g class="sq-label-group" style="--d:3.35s"><rect class="sq-label-bg" /><text class="sq-label" x="286" y="220" text-anchor="middle">choose</text></g>
+            <g class="sq-label-group" style="--d:4.2s"><rect class="sq-label-bg" /><text class="sq-label" x="360" y="220" text-anchor="middle">what</text></g>
+            <g class="sq-label-group" style="--d:5.75s"><rect class="sq-label-bg" /><text class="sq-label" x="560" y="220" text-anchor="middle">fits</text></g>
+          </g>
+
+          <!-- Stage 5: convergence into a single output — lines run from
+               beneath the "you / choose / what / fits" words themselves,
+               not the raw nodes, since the words are the point now. -->
+          <g class="sq-stage5">
+            <line class="sq-converge" pathLength="1" style="--d:6.5s" x1="160" y1="228" x2="320" y2="260" />
+            <line class="sq-converge" pathLength="1" style="--d:6.7s" x1="286" y1="228" x2="320" y2="260" />
+            <line class="sq-converge" pathLength="1" style="--d:6.9s" x1="360" y1="228" x2="320" y2="260" />
+            <line class="sq-converge" pathLength="1" style="--d:7.1s" x1="560" y1="228" x2="320" y2="260" />
+            <rect class="sq-output" style="--d:7.5s" x="284" y="258" width="72" height="46" rx="4" />
+            <line class="sq-output-line" style="--d:7.95s" x1="296" y1="272" x2="344" y2="272" />
+            <line class="sq-output-line" style="--d:8.07s" x1="296" y1="282" x2="344" y2="282" />
+            <line class="sq-output-line" style="--d:8.19s" x1="296" y1="292" x2="330" y2="292" />
+
+            <g class="sq-label-group" style="--d:8.35s"><rect class="sq-label-bg" /><text class="sq-label" x="320" y="326" text-anchor="middle">→ synthesized into your answer</text></g>
+
+            <!-- Dismiss button lives right next to the answer card itself,
+                 not off in a corner — appears once there's actually an
+                 answer to look at, and stays put (no fade-out). -->
+            <g id="schematic-dismiss" class="sq-dismiss-btn" style="--d:8.45s">
+              <rect x="372" y="266" width="104" height="32" rx="7" />
+              <text x="424" y="286" text-anchor="middle">I'm ready</text>
+            </g>
+          </g>
+        </svg>
+      </div>
 
       <div id="persona-row">
         <label for="persona-select">Searching as (optional):</label>
@@ -28,33 +158,46 @@
           <option value="hobbyist">Hobbyist</option>
           <option value="retiree">Retiree</option>
           <option value="pet_owner">Pet Owner</option>
+          <option value="caregiver">Caregiver</option>
+          <option value="small_business_owner">Small Business Owner</option>
+          <option value="homeowner">Homeowner</option>
+          <option value="creative">Creative</option>
           <option value="other">Other</option>
         </select>
       </div>
 
       <button id="distill-btn">Distill</button>
+      <button id="other-toggle-btn" class="skip-btn" type="button" hidden>Other</button>
       <p id="gate-status" class="status"></p>
+
+      <div id="blueprint-section">
+        <p id="blueprint-tagline">This site is tuned especially for <strong>blueprinting your build</strong></p>
+        <div class="hscroll-wrap">
+          <button id="blueprint-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+          <div id="blueprint-chips" class="hscroll-track"></div>
+          <button id="blueprint-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+        </div>
+      </div>
 
       <div id="demo-cases">
         <span class="demo-label">Fathmics to Explore</span>
-        <div id="demo-scroller-wrap">
+        <div class="hscroll-wrap">
           <button id="demo-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
-          <div id="demo-buttons"></div>
+          <div id="demo-buttons" class="hscroll-track"></div>
           <button id="demo-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
         </div>
       </div>
 
       <div id="trending-section" hidden>
         <div id="trending-header">
-          <span class="demo-label">Most Searched Here (at FATHmic):</span>
+          <span class="demo-label">Most Searched:</span>
           <select id="trending-filter"></select>
         </div>
-        <div id="trending-groups"></div>
-      </div>
-
-      <div id="external-trending-section" hidden>
-        <span class="demo-label">Trending out there:</span>
-        <div id="external-trending-items"></div>
+        <div class="hscroll-wrap">
+          <button id="trending-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+          <div id="trending-groups" class="hscroll-track"></div>
+          <button id="trending-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+        </div>
       </div>
     </section>
 
@@ -68,6 +211,10 @@
     <section id="taxonomy-section" hidden>
       <h2 id="topic-heading"></h2>
       <div id="expand-controls">
+        <button id="interview-toggle-btn" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>
+          <span class="interview-toggle-label">Interview me</span>
+        </button>
         <button id="expand-all-btn" class="icon-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           Expand all
@@ -99,6 +246,10 @@
             <div class="stakes-knob-face">
               <div class="stakes-knob-label">Stakes</div>
               <div class="stakes-knob-needle"></div>
+              <span class="info-tooltip stakes-knob-hint">
+                <button type="button" class="info-icon-btn" aria-label="Why this is here">?</button>
+                <span class="info-tooltip-text" role="tooltip">FATHmic tries to match the judgment a thoughtful person would use — a quick, confident answer for something casual; more care and caveats for something with real consequences. Same facts, different carefulness. This sets which one you're getting: Low — full confidence, no hedging. Medium — plain, with the point or two that actually matters flagged. High — explicit about what's certain vs. not, with a clear nudge to check with a professional before acting.</span>
+              </span>
             </div>
           </div>
           <button class="stakes-marker" data-stakes="low" title="Low stakes — 8 o'clock" style="left:17.53%; top:68.75%;">
@@ -114,7 +265,13 @@
             <span class="stakes-marker-text">High</span>
           </button>
         </div>
-        <span class="stakes-caption">How much is riding on this?</span>
+        <span class="stakes-caption">
+          How much is riding on this?
+          <span class="info-tooltip">
+            <button type="button" class="info-icon-btn" aria-label="Why this is here">?</button>
+            <span class="info-tooltip-text" role="tooltip">FATHmic tries to match the judgment a thoughtful person would use — a quick, confident answer for something casual; more care and caveats for something with real consequences. Same facts, different carefulness. This sets which one you're getting: Low — full confidence, no hedging. Medium — plain, with the point or two that actually matters flagged. High — explicit about what's certain vs. not, with a clear nudge to check with a professional before acting.</span>
+          </span>
+        </span>
       </div>
 
       <h2>How should this come together?</h2>
@@ -159,19 +316,19 @@
 
       <div id="reference-cards">
         <div class="ref-card" data-card="popularity">
-          <button id="popularity-btn">Check topic reach</button>
+          <div class="ref-card-placeholder">Checking...</div>
         </div>
         <div class="ref-card" data-card="photo">
-          <button id="photo-btn">Get relevant photo</button>
+          <div class="ref-card-placeholder">Searching...</div>
         </div>
         <div class="ref-card" data-card="illustration">
-          <button id="illustrate-btn">Generate illustration</button>
+          <div class="ref-card-placeholder">Generating...</div>
         </div>
       </div>
 
       <div id="output-text-wrap">
         <button id="copy-output-btn" title="Copy result to clipboard">Copy</button>
-        <pre id="output-text"></pre>
+        <div id="output-text"></div>
       </div>
     </section>
   </main>

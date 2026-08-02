@@ -17,7 +17,12 @@ const state = {
 const el = {
   subjectInput: document.getElementById("subject-input"),
   distillBtn: document.getElementById("distill-btn"),
+  otherToggleBtn: document.getElementById("other-toggle-btn"),
   gateStatus: document.getElementById("gate-status"),
+  processModalBackdrop: document.getElementById("process-modal-backdrop"),
+  processModalVerb: document.getElementById("process-modal-verb"),
+  processSteps: document.getElementById("process-steps"),
+  processModalDismiss: document.getElementById("process-modal-dismiss"),
   clarifySection: document.getElementById("clarify-section"),
   clarifyQuestion: document.getElementById("clarify-question"),
   clarifyAnswer: document.getElementById("clarify-answer"),
@@ -32,21 +37,28 @@ const el = {
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
   copyOutputBtn: document.getElementById("copy-output-btn"),
+  demoCases: document.getElementById("demo-cases"),
   demoButtons: document.getElementById("demo-buttons"),
+  blueprintSection: document.getElementById("blueprint-section"),
+  blueprintChips: document.getElementById("blueprint-chips"),
+  blueprintScrollLeft: document.getElementById("blueprint-scroll-left"),
+  blueprintScrollRight: document.getElementById("blueprint-scroll-right"),
   demoScrollLeft: document.getElementById("demo-scroll-left"),
   demoScrollRight: document.getElementById("demo-scroll-right"),
+  promptIcon: document.getElementById("prompt-icon"),
+  brandLockup: document.getElementById("brand-lockup"),
+  schematicSequence: document.getElementById("schematic-sequence"),
+  schematicDismiss: document.getElementById("schematic-dismiss"),
   personaSelect: document.getElementById("persona-select"),
   trendingSection: document.getElementById("trending-section"),
   trendingFilter: document.getElementById("trending-filter"),
   trendingGroups: document.getElementById("trending-groups"),
-  externalTrendingSection: document.getElementById("external-trending-section"),
-  externalTrendingItems: document.getElementById("external-trending-items"),
-  illustrateBtn: document.getElementById("illustrate-btn"),
+  trendingScrollLeft: document.getElementById("trending-scroll-left"),
+  trendingScrollRight: document.getElementById("trending-scroll-right"),
   illustrationCard: document.querySelector('.ref-card[data-card="illustration"]'),
-  photoBtn: document.getElementById("photo-btn"),
   photoCard: document.querySelector('.ref-card[data-card="photo"]'),
-  popularityBtn: document.getElementById("popularity-btn"),
   popularityCard: document.querySelector('.ref-card[data-card="popularity"]'),
+  interviewToggleBtn: document.getElementById("interview-toggle-btn"),
   expandAllBtn: document.getElementById("expand-all-btn"),
   collapseAllBtn: document.getElementById("collapse-all-btn"),
   pickAllBtn: document.getElementById("pick-all-btn"),
@@ -56,6 +68,73 @@ const el = {
   stakesNeedle: document.querySelector(".stakes-knob-needle"),
   stakesPointer: document.querySelector(".stakes-pointer")
 };
+
+// The synthesis model writes in light markdown (bold pseudo-headers, `- `
+// bullets, the occasional real `#` heading) with no instruction either way —
+// it's just how it naturally organizes a multi-part answer. Rendering it
+// properly instead of dumping raw asterisks/dashes into a <pre> is the
+// "pretty print" this feeds. Escapes HTML first so nothing in the model's
+// output can inject markup — the only real tags introduced are the ones
+// built here.
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderMarkdown(text) {
+  function inline(s) {
+    return s
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, "$1<em>$2</em>");
+  }
+
+  const html = [];
+  let listType = null;
+  let para = [];
+
+  function flushPara() {
+    if (para.length) { html.push(`<p>${para.join(" ")}</p>`); para = []; }
+  }
+  function closeList() {
+    if (listType) { html.push(`</${listType}>`); listType = null; }
+  }
+
+  escapeHtml(text).split("\n").forEach(rawLine => {
+    const line = rawLine.trim();
+
+    if (!line) { flushPara(); closeList(); return; }
+
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
+    if (heading) { flushPara(); closeList(); html.push(`<h4>${inline(heading[2])}</h4>`); return; }
+
+    // A line that's entirely **bold**, nothing else — the model's default
+    // way of writing a section header when it doesn't reach for real `#`.
+    const boldHeading = line.match(/^\*\*(.+)\*\*$/);
+    if (boldHeading) { flushPara(); closeList(); html.push(`<h4>${inline(boldHeading[1])}</h4>`); return; }
+
+    const bullet = line.match(/^[-*]\s+(.*)$/);
+    if (bullet) {
+      flushPara();
+      if (listType !== "ul") { closeList(); html.push("<ul>"); listType = "ul"; }
+      html.push(`<li>${inline(bullet[1])}</li>`);
+      return;
+    }
+
+    const numbered = line.match(/^\d+[.)]\s+(.*)$/);
+    if (numbered) {
+      flushPara();
+      if (listType !== "ol") { closeList(); html.push("<ol>"); listType = "ol"; }
+      html.push(`<li>${inline(numbered[1])}</li>`);
+      return;
+    }
+
+    closeList();
+    para.push(inline(line));
+  });
+
+  flushPara();
+  closeList();
+  return html.join("\n");
+}
 
 async function postJSON(path, body) {
   const res = await fetch(path, {
@@ -79,7 +158,133 @@ function resetDownstream() {
   state.resultSelectionsSnapshot = null;
   state.lastGenre = null;
   state.lastStakesUsed = null;
+  interviewModeActive = false;
+  interviewIndex = -1;
+  exitActiveSession();
 }
+
+// Fathmics-to-Explore / Most-Searched are worth full visibility for a new
+// visitor deciding what to try, but once an actual taxonomy is on screen —
+// live or from a loaded demo case — they're just competing for attention
+// with the task at hand. Collapse them behind "Other" at that point, back
+// to full visibility the moment a new attempt starts (resetDownstream).
+let trendingHasData = false;
+let browseCollapsed = false;
+
+function setBrowseVisibility(visible) {
+  el.blueprintSection.hidden = !visible;
+  el.demoCases.hidden = !visible;
+  el.trendingSection.hidden = visible ? !trendingHasData : true;
+}
+
+function enterActiveSession() {
+  browseCollapsed = true;
+  setBrowseVisibility(false);
+  el.otherToggleBtn.hidden = false;
+  el.otherToggleBtn.textContent = "Other";
+}
+
+function exitActiveSession() {
+  browseCollapsed = false;
+  setBrowseVisibility(true);
+  el.otherToggleBtn.hidden = true;
+}
+
+el.otherToggleBtn.addEventListener("click", () => {
+  browseCollapsed = !browseCollapsed;
+  setBrowseVisibility(!browseCollapsed);
+  el.otherToggleBtn.textContent = browseCollapsed ? "Other" : "Hide";
+});
+
+// Process modal: one real, trackable step ("gate") plus a timed-release
+// simulation of taxonomy generation's internal work, since that's a single
+// non-streaming model call with no real granular progress to report. The
+// simulated steps are an honest reflection of what server/taxonomy.js's
+// system prompt actually instructs the model to do (categories -> subcats
+// -> conflict tagging -> fixedness scoring) — reconciled against the real
+// response the instant it arrives, whether that's before or after the
+// scripted sequence finishes.
+const PROCESS_STEPS = [
+  { key: "gate", label: "Checking specificity" },
+  { key: "categories", label: "Identifying core categories" },
+  { key: "subcategories", label: "Mapping subcategories and options" },
+  { key: "conflicts", label: "Tagging trade-offs and conflicts" },
+  { key: "fixedness", label: "Scoring what's fixed vs. open" },
+  { key: "finalize", label: "Finalizing your map" }
+];
+const TAXONOMY_STEP_SCHEDULE = [
+  { key: "categories", delay: 0 },
+  { key: "subcategories", delay: 4000 },
+  { key: "conflicts", delay: 9000 },
+  { key: "fixedness", delay: 14000 },
+  { key: "finalize", delay: 19000 }
+];
+
+let processTimers = [];
+function clearProcessTimers() {
+  processTimers.forEach(t => clearTimeout(t));
+  processTimers = [];
+}
+
+function buildProcessSteps() {
+  el.processSteps.innerHTML = "";
+  PROCESS_STEPS.forEach(step => {
+    const li = document.createElement("li");
+    li.className = "pending";
+    li.dataset.step = step.key;
+    li.innerHTML = `<span class="step-icon"></span>${step.label}`;
+    el.processSteps.appendChild(li);
+  });
+}
+
+function setStepState(key, stateName) {
+  const li = el.processSteps.querySelector(`[data-step="${key}"]`);
+  if (li) li.className = stateName;
+}
+
+function markAllStepsDone() {
+  el.processSteps.querySelectorAll("li").forEach(li => { li.className = "done"; });
+}
+
+// Pure flavor, independent of the real step tracking below it — rotates for
+// as long as the modal is open regardless of which phase (gate or taxonomy)
+// is actually running, so it's wired to open/close rather than threaded
+// through each caller separately.
+const PROCESS_VERBS = ["Actionating", "Formulating", "Strategerating", "Situating", "Determinating"];
+let verbRotateTimer = null;
+
+function startVerbRotation() {
+  clearInterval(verbRotateTimer); // defensive: dismiss doesn't stop this (matches the schematic's same "dismiss only hides" pattern), so a rapid re-trigger before real completion could otherwise stack a second interval
+  let i = 0;
+  el.processModalVerb.textContent = PROCESS_VERBS[0] + "…";
+  verbRotateTimer = setInterval(() => {
+    i = (i + 1) % PROCESS_VERBS.length;
+    el.processModalVerb.textContent = PROCESS_VERBS[i] + "…";
+  }, 1800);
+}
+
+function stopVerbRotation() {
+  clearInterval(verbRotateTimer);
+  verbRotateTimer = null;
+}
+
+function openProcessModal() {
+  buildProcessSteps();
+  el.processModalBackdrop.hidden = false;
+  startVerbRotation();
+}
+
+function closeProcessModal() {
+  el.processModalBackdrop.hidden = true;
+  clearProcessTimers();
+  stopVerbRotation();
+}
+
+el.processModalDismiss.addEventListener("click", () => {
+  // Only hides the visual — the underlying gate/taxonomy request keeps
+  // running regardless, same as dismissing the schematic sequence.
+  el.processModalBackdrop.hidden = true;
+});
 
 // Shared by the Distill button and the trending-search pills — both start
 // the same live gate -> taxonomy flow, just from a different input source.
@@ -91,6 +296,9 @@ async function runDistill(input) {
   resetDownstream();
   el.gateStatus.textContent = "Checking specificity...";
   el.distillBtn.disabled = true;
+  el.promptIcon.classList.add("icon-processing");
+  openProcessModal();
+  setStepState("gate", "active");
 
   try {
     const gate = await postJSON("/api/gate", { input, persona: el.personaSelect.value || null });
@@ -99,19 +307,24 @@ async function runDistill(input) {
     renderStakesDial();
 
     if (gate.status === "block") {
+      closeProcessModal();
       el.gateStatus.textContent = gate.note || "Needs one more detail before this can be distilled.";
       el.clarifyQuestion.textContent = gate.clarifyingQuestion || "Can you clarify?";
       el.clarifySection.hidden = false;
+      enterActiveSession(); // answering a clarifying question is just as "mid-session" as an active taxonomy
       return;
     }
 
+    setStepState("gate", "done");
     state.firstBranch = gate.firstBranch || null;
     el.gateStatus.textContent = gate.note || "Looks good.";
     await runTaxonomy();
   } catch (err) {
+    closeProcessModal();
     el.gateStatus.textContent = `Error: ${err.message}`;
   } finally {
     el.distillBtn.disabled = false;
+    el.promptIcon.classList.remove("icon-processing");
   }
 }
 
@@ -128,10 +341,22 @@ el.clarifySubmitBtn.addEventListener("click", async () => {
   el.clarifySection.hidden = true;
   el.gateStatus.textContent = "Thanks — distilling now.";
 
+  // This path calls runTaxonomy() directly, skipping runDistill() entirely —
+  // it has to open the modal and start the icon itself, or both silently
+  // never appear (exactly the bug: this path was the one place still
+  // falling back to the old text-only status, since only runDistill did
+  // this setup before).
+  el.promptIcon.classList.add("icon-processing");
+  openProcessModal();
+  setStepState("gate", "done"); // already passed — no gate re-check on this path
+
   try {
     await runTaxonomy();
   } catch (err) {
+    closeProcessModal();
     el.gateStatus.textContent = `Error: ${err.message}`;
+  } finally {
+    el.promptIcon.classList.remove("icon-processing");
   }
 });
 
@@ -143,28 +368,159 @@ el.clarifySkipBtn.addEventListener("click", async () => {
   el.clarifySection.hidden = true;
   el.gateStatus.textContent = "Skipping — building something general instead.";
 
+  el.promptIcon.classList.add("icon-processing");
+  openProcessModal();
+  setStepState("gate", "done");
+
   try {
     await runTaxonomy();
   } catch (err) {
+    closeProcessModal();
     el.gateStatus.textContent = `Error: ${err.message}`;
+  } finally {
+    el.promptIcon.classList.remove("icon-processing");
   }
 });
 
+// Taxonomy generation is a single big structured-output call (min 15 nodes,
+// full category/subcategory/element hierarchy, conflict tagging, fixedness
+// scoring) and genuinely takes a while — 20-30s isn't unusual. A static
+// "Building the map..." sitting there that whole time reads as stuck.
+// Rotating through messages that explain *why* it takes a moment turns the
+// wait into part of the pitch instead of just friction to sit through.
+const TAXONOMY_WAIT_MESSAGES = [
+  "Building the map...",
+  "Mapping the unknown unknowns in this topic...",
+  "Not guessing at one answer — laying out all of them.",
+  "This is the part a search engine skips.",
+  "Structuring categories, tensions, and trade-offs...",
+  "Almost there — assembling the full shape."
+];
+
 async function runTaxonomy() {
-  el.gateStatus.textContent = "Building the map...";
-  const taxonomy = await postJSON("/api/taxonomy", {
-    input: state.input,
-    firstBranch: state.firstBranch
+  let msgIndex = 0;
+  el.gateStatus.textContent = TAXONOMY_WAIT_MESSAGES[0];
+  el.gateStatus.classList.add("status-pulsing");
+  const rotateTimer = setInterval(() => {
+    msgIndex = (msgIndex + 1) % TAXONOMY_WAIT_MESSAGES.length;
+    el.gateStatus.textContent = TAXONOMY_WAIT_MESSAGES[msgIndex];
+  }, 4000);
+
+  let prevStepKey = "gate";
+  TAXONOMY_STEP_SCHEDULE.forEach(step => {
+    const t = setTimeout(() => {
+      setStepState(prevStepKey, "done");
+      setStepState(step.key, "active");
+      prevStepKey = step.key;
+    }, step.delay);
+    processTimers.push(t);
   });
 
-  state.topic = taxonomy.topic;
-  state.categories = taxonomy.categories || [];
-  renderTaxonomy();
-  el.gateStatus.textContent = "";
+  try {
+    const taxonomy = await postJSON("/api/taxonomy", {
+      input: state.input,
+      firstBranch: state.firstBranch
+    });
+
+    state.topic = taxonomy.topic;
+    state.categories = taxonomy.categories || [];
+    startInterview(); // renders internally; auto-starts interview mode on this fresh taxonomy
+    enterActiveSession();
+    el.gateStatus.textContent = "";
+
+    // Real response landed — stop any not-yet-fired scripted reveals so
+    // they can't later flip an already-done step back to "active", mark
+    // everything complete, and hold briefly so the checkmarks are actually
+    // visible before the modal closes rather than flashing shut instantly.
+    clearProcessTimers();
+    markAllStepsDone();
+    await new Promise(r => setTimeout(r, 500));
+    closeProcessModal();
+  } finally {
+    clearInterval(rotateTimer);
+    el.gateStatus.classList.remove("status-pulsing");
+    clearProcessTimers();
+  }
 }
 
 let elementRegistry = [];
 let subcategoryRegistry = [];
+
+// Interview mode: starts by default on a fresh taxonomy (a full flat list of
+// 5+ categories is intimidating on first sight) — one category open at a
+// time, everything else dimmed via the existing :has() spotlight rule, with
+// a "Next category" call-to-action that flashes when a new one comes into
+// focus. Nothing is ever locked: manually opening a different category is
+// treated as "I'd rather browse freely" and drops straight to normal
+// multi-open manual mode, same as clicking Stop. Restarting later (the
+// toggle button) only walks the categories that don't have a selection yet.
+let interviewModeActive = false;
+let interviewIndex = -1;
+
+function categoryHasSelection(category) {
+  if (state.selected.has(category.name)) return true; // category-level "General" pick
+  return (category.subcategories || []).some(subcategoryHasSelection);
+}
+
+function subcategoryHasSelection(sub) {
+  return state.selected.has(sub.name) ||
+    (sub.elements || []).some(e => state.selected.has(typeof e === "string" ? e : e.text));
+}
+
+function findNextUnansweredIndex(fromIndex) {
+  for (let i = fromIndex; i < state.categories.length; i++) {
+    if (!categoryHasSelection(state.categories[i])) return i;
+  }
+  return -1;
+}
+
+function goToInterviewCategory(index) {
+  interviewModeActive = true;
+  interviewIndex = index;
+  state.expandedCategories.clear();
+  if (state.categories[index]) state.expandedCategories.add(state.categories[index].name);
+  renderTaxonomy();
+  requestAnimationFrame(() => {
+    const row = el.taxonomyTree.querySelector(`.category-row[data-index="${index}"]`);
+    if (!row) return;
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.classList.add("category-row-flash");
+    setTimeout(() => row.classList.remove("category-row-flash"), 1200);
+  });
+}
+
+function startInterview() {
+  const start = findNextUnansweredIndex(0);
+  if (start === -1) {
+    // Nothing unanswered (e.g. a demo case that arrives pre-selected) —
+    // exitInterview() short-circuits when interview mode was never active,
+    // which would skip rendering entirely on a fresh taxonomy. Render
+    // directly instead so the flat view always actually appears.
+    interviewModeActive = false;
+    interviewIndex = -1;
+    renderTaxonomy();
+    return;
+  }
+  goToInterviewCategory(start);
+}
+
+function advanceInterview() {
+  const next = findNextUnansweredIndex(interviewIndex + 1);
+  if (next === -1) { exitInterview(); return; } // reached the end
+  goToInterviewCategory(next);
+}
+
+function exitInterview() {
+  if (!interviewModeActive) return;
+  interviewModeActive = false;
+  interviewIndex = -1;
+  renderTaxonomy(); // leaves state.expandedCategories exactly as it is -- whatever was open stays open
+}
+
+el.interviewToggleBtn.addEventListener("click", () => {
+  if (interviewModeActive) exitInterview();
+  else startInterview();
+});
 
 function renderTaxonomy() {
   el.topicHeading.textContent = state.topic;
@@ -172,10 +528,20 @@ function renderTaxonomy() {
   elementRegistry = [];
   subcategoryRegistry = [];
 
+  // Kept in sync here rather than at each call site that changes interview
+  // state — one place that can't drift out of sync with reality.
+  el.interviewToggleBtn.classList.toggle("active", interviewModeActive);
+  const toggleLabel = el.interviewToggleBtn.querySelector(".interview-toggle-label");
+  if (toggleLabel) toggleLabel.textContent = interviewModeActive ? "Stop interview" : "Interview me";
+
   state.categories.forEach((category, index) => {
     const row = document.createElement("div");
-    row.className = "category-row";
-    row.draggable = true;
+    const isInterviewFocus = interviewModeActive && index === interviewIndex;
+    row.className = isInterviewFocus ? "category-row interview-float" : "category-row";
+    // Native drag-and-drop on a position:fixed floating card behaves oddly
+    // (dragging a fixed overlay isn't a coherent reorder gesture), so it's
+    // off for the row currently lifted out of the list.
+    row.draggable = !isInterviewFocus;
     row.dataset.index = String(index);
 
     row.addEventListener("dragstart", () => {
@@ -213,8 +579,15 @@ function renderTaxonomy() {
     catEl.className = "category";
     catEl.open = state.expandedCategories.has(category.name);
     catEl.addEventListener("toggle", () => {
-      if (catEl.open) state.expandedCategories.add(category.name);
-      else state.expandedCategories.delete(category.name);
+      if (catEl.open) {
+        state.expandedCategories.add(category.name);
+        // Opening a category other than the current interview step reads as
+        // "let me look around" — drop to normal free-browse mode rather than
+        // fighting the click or silently ignoring it.
+        if (interviewModeActive && index !== interviewIndex) exitInterview();
+      } else {
+        state.expandedCategories.delete(category.name);
+      }
     });
 
     const catTitle = document.createElement("summary");
@@ -248,41 +621,71 @@ function renderTaxonomy() {
     // Placed outside <summary> deliberately — a button inside <summary> would
     // also trigger the native toggle-on-click behavior of the parent
     // <details>, fighting with this button's own click handler.
-    if ((category.subcategories || []).length > 1) {
+    //
+    // Expand/Collapse only make sense with more than one subcategory to bulk-
+    // act on. Pick for me doesn't share that requirement — it's still useful
+    // with exactly one subcategory, and even with zero for a "Given" category
+    // (fixedness < 0.35), since that branch picks at the category level, not
+    // per-subcategory. Bundling all three under the same ">1" guard was
+    // hiding Pick for me on any category that happened to have just one
+    // subcategory — most visibly the last category in a list, since a
+    // taxonomy's final "catch-all" category is often single-subcategory.
+    const hasMultipleSubs = (category.subcategories || []).length > 1;
+    const isGivenCategory = typeof category.fixedness === "number" && category.fixedness < 0.35;
+    const showPickForMe = (category.subcategories || []).length >= 1 || isGivenCategory;
+
+    if (hasMultipleSubs || showPickForMe) {
       const catControls = document.createElement("div");
       catControls.className = "category-controls";
 
-      const expandSubsBtn = document.createElement("button");
-      expandSubsBtn.className = "link-btn expand-subs-btn";
-      expandSubsBtn.textContent = "Expand subcategories";
-      expandSubsBtn.addEventListener("click", () => {
-        category.subcategories.forEach(sub => {
-          state.expandedSubcategories.add(`${category.name}::${sub.name}`);
+      if (hasMultipleSubs) {
+        const expandSubsBtn = document.createElement("button");
+        expandSubsBtn.className = "link-btn expand-subs-btn";
+        expandSubsBtn.textContent = "Expand subcategories";
+        expandSubsBtn.addEventListener("click", () => {
+          category.subcategories.forEach(sub => {
+            state.expandedSubcategories.add(`${category.name}::${sub.name}`);
+          });
+          renderTaxonomy();
         });
-        renderTaxonomy();
-      });
-      catControls.appendChild(expandSubsBtn);
+        catControls.appendChild(expandSubsBtn);
 
-      const collapseSubsBtn = document.createElement("button");
-      collapseSubsBtn.className = "link-btn collapse-subs-btn";
-      collapseSubsBtn.textContent = "Collapse subcategories";
-      collapseSubsBtn.addEventListener("click", () => {
-        category.subcategories.forEach(sub => {
-          state.expandedSubcategories.delete(`${category.name}::${sub.name}`);
+        const collapseSubsBtn = document.createElement("button");
+        collapseSubsBtn.className = "link-btn collapse-subs-btn";
+        collapseSubsBtn.textContent = "Collapse subcategories";
+        collapseSubsBtn.addEventListener("click", () => {
+          category.subcategories.forEach(sub => {
+            state.expandedSubcategories.delete(`${category.name}::${sub.name}`);
+          });
+          renderTaxonomy();
         });
-        renderTaxonomy();
-      });
-      catControls.appendChild(collapseSubsBtn);
+        catControls.appendChild(collapseSubsBtn);
+      }
 
-      const pickForMeBtn = document.createElement("button");
-      pickForMeBtn.className = "link-btn pick-for-me-btn";
-      pickForMeBtn.textContent = "Pick for me";
-      pickForMeBtn.title = "Accepts Given subcategories generally, picks one specific option per subcategory worth exploring. Won't touch anything you've already chosen.";
-      pickForMeBtn.addEventListener("click", () => {
-        pickForCategory(category);
-        renderTaxonomy();
-      });
-      catControls.appendChild(pickForMeBtn);
+      if (showPickForMe) {
+        const pickForMeBtn = document.createElement("button");
+        pickForMeBtn.className = "pick-btn pick-btn-sm pick-for-me-btn";
+        pickForMeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>Pick for me';
+        pickForMeBtn.title = "Accepts Given subcategories generally, picks one specific option per subcategory worth exploring. Won't touch anything you've already chosen.";
+        pickForMeBtn.addEventListener("click", () => {
+          pickForCategory(category);
+          // In interview mode the point is guided visibility — surface exactly
+          // what got picked instead of leaving it hidden behind a collapsed
+          // subcategory the user would have to think to expand. Only the ones
+          // that actually ended up with something selected — a "Given"
+          // category's pick never touches subcategories at all, so expanding
+          // them here would just show empty panels next to the real pick.
+          if (isInterviewFocus) {
+            (category.subcategories || []).forEach(sub => {
+              if (subcategoryHasSelection(sub)) {
+                state.expandedSubcategories.add(`${category.name}::${sub.name}`);
+              }
+            });
+          }
+          renderTaxonomy();
+        });
+        catControls.appendChild(pickForMeBtn);
+      }
 
       catEl.appendChild(catControls);
     }
@@ -459,6 +862,66 @@ function renderTaxonomy() {
     });
 
     catEl.appendChild(categorySubsWrapper);
+
+    if (isInterviewFocus) {
+      const navRow = document.createElement("div");
+      navRow.className = "interview-nav-row";
+
+      // Forward-only scan for the "Next" case; if nothing's left ahead, check
+      // behind for anything skipped before declaring the interview done —
+      // rather than silently looping back, ask, since jumping the user
+      // somewhere they didn't click without warning would be disorienting.
+      const nextForward = findNextUnansweredIndex(index + 1);
+      const firstUnanswered = findNextUnansweredIndex(0);
+      const hasSkippedEarlier = nextForward === -1 && firstUnanswered !== -1 && firstUnanswered < index;
+
+      if (index > 0) {
+        const prevBtn = document.createElement("button");
+        prevBtn.type = "button";
+        prevBtn.className = "skip-btn";
+        prevBtn.textContent = "← Previous category";
+        prevBtn.addEventListener("click", () => goToInterviewCategory(index - 1));
+        navRow.appendChild(prevBtn);
+      }
+
+      if (nextForward !== -1) {
+        const nextBtn = document.createElement("button");
+        nextBtn.type = "button";
+        nextBtn.className = "interview-next-btn";
+        nextBtn.textContent = "Next category →";
+        nextBtn.addEventListener("click", () => advanceInterview());
+        navRow.appendChild(nextBtn);
+      } else if (hasSkippedEarlier) {
+        const prompt = document.createElement("span");
+        prompt.className = "interview-circleback-prompt";
+        prompt.textContent = "Want to circle back to the unanswered?";
+        navRow.appendChild(prompt);
+
+        const circleBackBtn = document.createElement("button");
+        circleBackBtn.type = "button";
+        circleBackBtn.className = "interview-next-btn";
+        circleBackBtn.textContent = "Circle back";
+        circleBackBtn.addEventListener("click", () => goToInterviewCategory(firstUnanswered));
+        navRow.appendChild(circleBackBtn);
+
+        const doneBtn = document.createElement("button");
+        doneBtn.type = "button";
+        doneBtn.className = "link-btn";
+        doneBtn.textContent = "No, I'm done";
+        doneBtn.addEventListener("click", () => exitInterview());
+        navRow.appendChild(doneBtn);
+      } else {
+        const doneBtn = document.createElement("button");
+        doneBtn.type = "button";
+        doneBtn.className = "interview-next-btn";
+        doneBtn.textContent = "Done — see full picture";
+        doneBtn.addEventListener("click", () => exitInterview());
+        navRow.appendChild(doneBtn);
+      }
+
+      catEl.appendChild(navRow);
+    }
+
     row.appendChild(catEl);
     el.taxonomyTree.appendChild(row);
   });
@@ -659,7 +1122,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
       genre,
       stakes: state.stakes
     });
-    el.outputText.textContent = result.text;
+    el.outputText.innerHTML = renderMarkdown(result.text);
     state.lastResultText = result.text;
     state.lastGenre = genre;
     state.lastGenreLabel = genreLabel;
@@ -707,20 +1170,67 @@ el.expandAllBtn.addEventListener("click", () => {
   // every subcategory here would just dump the whole tree open at once,
   // defeating the point of collapsed-by-default; that's what the per-category
   // "Expand subcategories" button is for.
+  interviewModeActive = false; // "expand everything" is its own opt-out of the guided one-at-a-time flow
+  interviewIndex = -1;
   state.categories.forEach(cat => state.expandedCategories.add(cat.name));
   renderTaxonomy();
 });
 
 el.collapseAllBtn.addEventListener("click", () => {
+  interviewModeActive = false;
+  interviewIndex = -1;
   state.expandedCategories.clear();
   state.expandedSubcategories.clear();
   renderTaxonomy();
 });
 
 el.pickAllBtn.addEventListener("click", () => {
-  state.categories.forEach(cat => pickForCategory(cat));
+  interviewModeActive = false;
+  interviewIndex = -1;
+  // Same visibility reasoning as the per-category button, scaled up: show
+  // every pick it just made rather than leaving the result hidden behind
+  // collapsed categories with no indicator anything happened.
+  state.categories.forEach(cat => {
+    pickForCategory(cat);
+    state.expandedCategories.add(cat.name);
+    (cat.subcategories || []).forEach(sub => {
+      if (subcategoryHasSelection(sub)) {
+        state.expandedSubcategories.add(`${cat.name}::${sub.name}`);
+      }
+    });
+  });
   renderTaxonomy();
 });
+
+// BLUEPRINT subjects: the taxonomy-to-full-spec pattern's native use case
+// (see Muralizer) — a curated, high-attention shortcut distinct from the
+// general demo/trending rows below it. Unlike a demo case, this only seeds
+// the input text; there's no pre-captured taxonomy, so clicking one runs the
+// real live gate + taxonomy pipeline, same as typing it in by hand.
+const BLUEPRINT_SUBJECTS = [
+  { label: "Tattoo concepts", seed: "Designing a custom tattoo" },
+  { label: "Custom furniture", seed: "Designing a custom furniture piece" },
+  { label: "Engagement rings", seed: "Designing a custom engagement ring" },
+  { label: "Garden design", seed: "Designing a garden and landscape layout" },
+  { label: "Home theater builds", seed: "Planning a home theater build" },
+  { label: "Instrument builds", seed: "Designing a custom guitar build" },
+  { label: "Gaming PC builds", seed: "Designing a custom gaming PC build" },
+  { label: "Window replacement", seed: "Planning a home window replacement" }
+];
+if (el.blueprintChips) {
+  BLUEPRINT_SUBJECTS.forEach(subject => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "blueprint-chip";
+    chip.textContent = subject.label;
+    chip.addEventListener("click", () => {
+      el.subjectInput.value = subject.seed;
+      el.subjectInput.focus();
+    });
+    el.blueprintChips.appendChild(chip);
+  });
+  wireHScroll(el.blueprintChips, el.blueprintScrollLeft, el.blueprintScrollRight);
+}
 
 // Demo cases: real, pre-captured API responses (gate + taxonomy already run,
 // selections already made). Loading one skips straight past the slow gate
@@ -741,77 +1251,34 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
       state.stakes = "medium"; // demo fixtures skip the gate, so no inferred stakes exists
       renderStakesDial();
 
-      renderTaxonomy();
+      startInterview(); // demos arrive pre-selected, so this naturally resolves straight to the flat view
+      enterActiveSession();
       el.gateStatus.textContent = `Loaded demo case — try "${demo.genre}" below, or pick your own.`;
     });
     el.demoButtons.appendChild(btn);
   });
 
-  setupDemoScroller();
+  wireHScroll(el.demoButtons, el.demoScrollLeft, el.demoScrollRight);
 }
 
-// Slow ambient auto-scroll left-to-right, loops back to the start at the
-// end. Pauses on hover/touch/manual arrow use so it never fights a user
-// trying to read or click something, and it's real scrollLeft movement (not
-// a transform), so buttons stay normally clickable throughout.
-function setupDemoScroller() {
-  const track = el.demoButtons;
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  let paused = false;
-  let resumeTimer = null;
-
-  function pauseIndefinitely() {
-    paused = true;
-    clearTimeout(resumeTimer);
-    resumeTimer = null;
-  }
-
-  function pauseThenResume(ms) {
-    paused = true;
-    clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(() => { paused = false; resumeTimer = null; }, ms);
-  }
-
-  // scrollLeft reads back as an integer, so accumulating via `+= 0.4` off the
-  // read-back value never moves (0.4 always rounds down to 0 on write). Track
-  // the sub-pixel position separately instead. While paused, stay synced to
-  // the real scrollLeft so resuming (after an arrow click or manual scroll)
-  // continues from wherever the user left it instead of snapping back.
-  let position = 0;
-  function step() {
-    if (paused) {
-      position = track.scrollLeft;
-    } else if (track.scrollWidth > track.clientWidth) {
-      position += 0.4; // slow drift
-      const max = track.scrollWidth - track.clientWidth;
-      if (position >= max) position = 0;
-      track.scrollLeft = position;
-    }
-    requestAnimationFrame(step);
-  }
-
-  track.addEventListener("mouseenter", pauseIndefinitely);
-  track.addEventListener("mouseleave", () => pauseThenResume(800));
-  track.addEventListener("touchstart", () => pauseThenResume(4000), { passive: true });
-
-  el.demoScrollLeft.addEventListener("click", () => {
-    track.scrollBy({ left: -220, behavior: "smooth" });
-    pauseThenResume(4000);
-  });
-  el.demoScrollRight.addEventListener("click", () => {
-    track.scrollBy({ left: 220, behavior: "smooth" });
-    pauseThenResume(4000);
-  });
-
-  if (!reduceMotion) requestAnimationFrame(step);
+// Manual-only horizontal scroll — left/right arrows nudge the track, no
+// auto-drift. Shared by all three pill lists (Fathmics to Explore, Most
+// Searched Here, Trending out there).
+function wireHScroll(track, leftBtn, rightBtn) {
+  leftBtn.addEventListener("click", () => track.scrollBy({ left: -220, behavior: "smooth" }));
+  rightBtn.addEventListener("click", () => track.scrollBy({ left: 220, behavior: "smooth" }));
 }
 
-// Trending: real, server-tracked query counts (see server/searchLog.js), not
-// canned data. /api/trending can return up to ~20 distinct groups once
-// personas and domains both have data, so instead of stacking every group
-// (unbounded vertical growth), a single dropdown picks which cut to view and
-// only that group's pills render below it.
+wireHScroll(el.trendingGroups, el.trendingScrollLeft, el.trendingScrollRight);
+
+// Trending: real, server-tracked query counts (see server/searchLog.js) plus
+// the free Google Trends feed (see server/externalTrends.js), unified into
+// one dropdown + one row rather than two separate labeled sections — was
+// two full blocks of clutter under Distill for what's really one feature
+// ("what's trending"), just from different sources. /api/trending alone can
+// return up to ~20 distinct groups once personas and domains both have
+// data, so a dropdown was already necessary; "Trending out there" is just
+// one more option in the same list now instead of its own block.
 let trendingCategories = [];
 
 function renderTrendingItems(items) {
@@ -832,19 +1299,23 @@ el.trendingFilter.addEventListener("change", () => {
 
 async function loadTrending() {
   try {
-    const res = await fetch("/api/trending");
-    if (!res.ok) return;
-    const trending = await res.json();
+    const [internalRes, externalRes] = await Promise.all([
+      fetch("/api/trending").catch(() => null),
+      fetch("/api/trending-external").catch(() => null)
+    ]);
+    const trending = internalRes && internalRes.ok ? await internalRes.json() : {};
+    const external = externalRes && externalRes.ok ? await externalRes.json() : { items: [] };
 
     trendingCategories = [
       { key: "allTime", label: "Most popular here", items: trending.allTime },
       { key: "today", label: "Today", items: trending.today },
       { key: "thisWeek", label: "This week", items: trending.thisWeek },
       ...Object.entries(trending.byPersona || {}).map(([key, p]) => ({ key: `persona:${key}`, label: `By ${p.label}`, items: p.items })),
-      ...Object.entries(trending.byDomain || {}).map(([key, d]) => ({ key: `domain:${key}`, label: d.label, items: d.items }))
+      ...Object.entries(trending.byDomain || {}).map(([key, d]) => ({ key: `domain:${key}`, label: d.label, items: d.items })),
+      { key: "external", label: "Trending out there", items: external.items }
     ].filter(c => c.items && c.items.length);
 
-    if (!trendingCategories.length) return; // no searches logged yet — leave section hidden
+    if (!trendingCategories.length) return; // nothing from either source yet — leave section hidden
 
     el.trendingFilter.innerHTML = "";
     trendingCategories.forEach(c => {
@@ -855,37 +1326,13 @@ async function loadTrending() {
     });
 
     renderTrendingItems(trendingCategories[0].items);
+    trendingHasData = true;
     el.trendingSection.hidden = false;
   } catch {
     // Non-critical — trending is a nice-to-have browsing aid, not core flow.
   }
 }
 loadTrending();
-
-// "Trending out there" — real Google Trends data (see server/externalTrends.js),
-// not internal to FATHmic. Separate section since it's a different kind of
-// signal (broad public interest, not what this tool's own users searched).
-async function loadExternalTrending() {
-  try {
-    const res = await fetch("/api/trending-external");
-    if (!res.ok) return;
-    const { items } = await res.json();
-    if (!items || !items.length) return; // source unavailable or empty — leave hidden
-
-    el.externalTrendingItems.innerHTML = "";
-    items.forEach(item => {
-      const btn = document.createElement("button");
-      btn.className = "demo-btn trending-btn";
-      btn.textContent = item.text;
-      btn.addEventListener("click", () => runDistill(item.text));
-      el.externalTrendingItems.appendChild(btn);
-    });
-    el.externalTrendingSection.hidden = false;
-  } catch {
-    // Non-critical, and the server already degrades gracefully on its end.
-  }
-}
-loadExternalTrending();
 
 // Reference cards above the Result. Only the illustration card is built —
 // it reuses Muralizer's actual image-generation backend/account (a
@@ -894,11 +1341,15 @@ loadExternalTrending();
 // prompt instead of Muralizer's painterly-mural rules. The other two cards
 // (news pull, photo pull) are real placeholders, not hidden — each needs its
 // own external service decision before it's buildable.
+// All three cards auto-generate the moment the text result lands (see the
+// fire-and-forget calls in runSynthesisForGenre) — there was never actually
+// a click required, so showing an idle "Generate..." button in the meantime
+// was misleading. Reset now shows the same in-progress text the real
+// generate function shows once it starts, so there's no visible flicker —
+// it just reads as continuously working from the moment the card appears.
 function resetIllustrationCard() {
   if (!el.illustrationCard) return;
-  el.illustrationCard.innerHTML = '<button id="illustrate-btn">Generate illustration</button>';
-  el.illustrateBtn = document.getElementById("illustrate-btn");
-  el.illustrateBtn.addEventListener("click", generateIllustration);
+  el.illustrationCard.innerHTML = '<div class="ref-card-placeholder">Generating...</div>';
 }
 
 async function generateIllustration() {
@@ -920,15 +1371,9 @@ async function generateIllustration() {
   }
 }
 
-if (el.illustrateBtn) {
-  el.illustrateBtn.addEventListener("click", generateIllustration);
-}
-
 function resetPhotoCard() {
   if (!el.photoCard) return;
-  el.photoCard.innerHTML = '<button id="photo-btn">Get relevant photo</button>';
-  el.photoBtn = document.getElementById("photo-btn");
-  el.photoBtn.addEventListener("click", generatePhoto);
+  el.photoCard.innerHTML = '<div class="ref-card-placeholder">Searching...</div>';
 }
 
 async function generatePhoto() {
@@ -962,9 +1407,7 @@ async function generatePhoto() {
 
 function resetPopularityCard() {
   if (!el.popularityCard) return;
-  el.popularityCard.innerHTML = '<button id="popularity-btn">Check topic reach</button>';
-  el.popularityBtn = document.getElementById("popularity-btn");
-  el.popularityBtn.addEventListener("click", generatePopularity);
+  el.popularityCard.innerHTML = '<div class="ref-card-placeholder">Checking...</div>';
 }
 
 // Thin-line wireframe icons, stroke-only, currentColor — opacity/color set
@@ -978,8 +1421,10 @@ const SCOPE_ICONS = {
 
 function scopeRow(type, score, label) {
   // Discrete 5-segment meter (like a signal-strength indicator) per region —
-  // "3 out of 5," relative and quantized, not a continuous fill. Three rows
-  // stacked, spaced generously to actually fill the square card's height.
+  // "3 out of 5," relative and quantized, not a continuous fill. Label is
+  // real, visible text now, not just a title="" hover tooltip — the
+  // globe/star/building icons alone don't read as "world/national/local"
+  // without it.
   const litBars = Math.max(1, Math.round(score * 5));
   const pct = Math.round(score * 100);
   // Percentage heights, not fixed px — scales to whatever size the row's
@@ -990,7 +1435,10 @@ function scopeRow(type, score, label) {
 
   return `
     <div class="scope-row" title="${label}: ${pct}% (${litBars} of 5)">
-      <span class="scope-icon">${SCOPE_ICONS[type]}</span>
+      <div class="scope-row-header">
+        <span class="scope-icon">${SCOPE_ICONS[type]}</span>
+        <span class="scope-label">${label}</span>
+      </div>
       <div class="scope-mini-bars">${bars}</div>
     </div>
   `;
@@ -1009,18 +1457,156 @@ async function generatePopularity() {
       scopeRow("local", result.localScore, "Local")
     ].join("");
 
-    el.popularityCard.innerHTML = `<div class="scope-rows-fill">${rows}</div>`;
+    el.popularityCard.innerHTML = `
+      <div class="scope-rows-fill">
+        <div class="scope-card-title">Topic Reach</div>
+        <div class="scope-rows-body">${rows}</div>
+      </div>
+    `;
   } catch (err) {
     el.popularityCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
   }
 }
 
-if (el.popularityBtn) {
-  el.popularityBtn.addEventListener("click", generatePopularity);
-}
-
 renderStakesDial();
 
-if (el.photoBtn) {
-  el.photoBtn.addEventListener("click", generatePhoto);
+// Each schematic label is a background chip sized to its own text rather
+// than a guessed fixed box — measure the real rendered width once (getBBox
+// works even while the group is opacity:0, since it's still laid out) and
+// set the paired rect to match with a small pad.
+function sizeSchematicLabels() {
+  document.querySelectorAll(".sq-label-group").forEach(group => {
+    const text = group.querySelector(".sq-label");
+    const bg = group.querySelector(".sq-label-bg");
+    if (!text || !bg) return;
+    const box = text.getBBox();
+    const padX = 6, padY = 4;
+    bg.setAttribute("x", box.x - padX);
+    bg.setAttribute("y", box.y - padY);
+    bg.setAttribute("width", box.width + padX * 2);
+    bg.setAttribute("height", box.height + padY * 2);
+    bg.setAttribute("rx", 4);
+  });
+}
+// NOTE: can't run this at load time — #schematic-sequence starts with the
+// `hidden` attribute (display:none) so the whole page doesn't reserve blank
+// space for it at rest, and getBBox() on anything inside a display:none
+// ancestor returns an all-zero box. Has to wait until the container is
+// actually unhidden for the first time (see playSchematic below).
+let schematicLabelsSized = false;
+
+// Schematic sequence: a large wireframe replay of the mechanism, emerging
+// from the prompt field. Two parts: (1) real example queries get typed,
+// character by character, into the actual input box — literal proof this
+// is the same box you'd really use, not a mockup — cycling through a couple
+// of Fathmics-to-Explore examples; then (2) a CSS-driven wireframe shows
+// input -> gate -> taxonomy branching -> selection -> synthesis, labeled
+// so the abstract diagram explains itself. Plays automatically once per
+// visitor (not every page load — that'd get old fast on repeat visits), and
+// can be replayed anytime by hovering the logo (icon or "FATHmic" text —
+// the whole lockup, not just the tiny icon). Takes over the space
+// demo-cases/trending normally occupy while it plays, and is instantly
+// cancelable — skip button, or just starting to actually use the input —
+// since nobody should ever feel stuck watching it.
+// The sequence itself finishes around ~9s into the branching stage (cascade
+// + convergence + output), but this timer isn't meant to be the normal end
+// point — it's a distant safety net so an abandoned tab doesn't stay stuck in takeover mode
+// forever. The "I'm ready" button is the intended way most people dismiss it.
+const SCHEMATIC_HOLD_MS = 90000;
+let schematicPlaying = false;
+
+function typeIntoInput(text, charDelayMs, isCancelled) {
+  return new Promise(resolve => {
+    el.subjectInput.value = "";
+    let i = 0;
+    (function tick() {
+      if (isCancelled() || i >= text.length) return resolve();
+      el.subjectInput.value += text[i];
+      i++;
+      setTimeout(tick, charDelayMs);
+    })();
+  });
+}
+
+async function playSchematic() {
+  if (schematicPlaying || !el.schematicSequence) return;
+  schematicPlaying = true;
+
+  const prevDemoHidden = el.demoCases.hidden;
+  const prevTrendingHidden = el.trendingSection.hidden;
+  const prevInputValue = el.subjectInput.value;
+
+  el.demoCases.hidden = true;
+  el.trendingSection.hidden = true;
+
+  let cancelled = false;
+  let autoFinishTimer;
+
+  function finish() {
+    if (cancelled) return;
+    cancelled = true;
+    clearTimeout(autoFinishTimer);
+    el.schematicSequence.classList.remove("is-playing");
+    el.schematicSequence.hidden = true;
+    el.demoCases.hidden = prevDemoHidden;
+    el.trendingSection.hidden = prevTrendingHidden;
+    el.subjectInput.value = prevInputValue;
+    schematicPlaying = false;
+    el.schematicDismiss.removeEventListener("click", finish);
+    el.subjectInput.removeEventListener("focus", finish);
+  }
+
+  el.schematicDismiss.addEventListener("click", finish, { once: true });
+  el.subjectInput.addEventListener("focus", finish, { once: true });
+
+  // Just one example now, not several in a row — the branching schematic
+  // (the actual point of the sequence) should start right after it, not
+  // after a longer multi-example typing warm-up. Picking randomly from
+  // DEMO_CASES keeps some "revolving" variety across replays/visits even
+  // though only one shows per play.
+  const example = (typeof DEMO_CASES !== "undefined" && DEMO_CASES.length)
+    ? DEMO_CASES[Math.floor(Math.random() * DEMO_CASES.length)].input
+    : "I want to plant a food garden in Georgia";
+
+  if (!cancelled) {
+    await typeIntoInput(example, 26, () => cancelled);
+    if (!cancelled) await new Promise(r => setTimeout(r, 500));
+  }
+  if (cancelled) return;
+  if (cancelled) return;
+  el.subjectInput.value = "";
+
+  el.schematicSequence.hidden = false;
+  if (!schematicLabelsSized) {
+    sizeSchematicLabels();
+    schematicLabelsSized = true;
+  }
+  void el.schematicSequence.offsetWidth; // force reflow so replays restart the CSS animations
+  el.schematicSequence.classList.add("is-playing");
+  autoFinishTimer = setTimeout(finish, SCHEMATIC_HOLD_MS);
+}
+
+if (el.schematicSequence && el.brandLockup) {
+  // A same-tick mouseenter->play felt too trigger-happy in real use — even
+  // just passing the cursor near the logo on the way somewhere else fired
+  // it. Require a short dwell before it actually starts, and cancel
+  // cleanly if the mouse leaves before then.
+  let hoverDwellTimer = null;
+  el.brandLockup.addEventListener("mouseenter", () => {
+    hoverDwellTimer = setTimeout(() => { hoverDwellTimer = null; playSchematic(); }, 450);
+  });
+  el.brandLockup.addEventListener("mouseleave", () => {
+    if (hoverDwellTimer) { clearTimeout(hoverDwellTimer); hoverDwellTimer = null; }
+  });
+
+  try {
+    if (!localStorage.getItem("fathmic_schematic_seen")) {
+      localStorage.setItem("fathmic_schematic_seen", "1");
+      setTimeout(playSchematic, 700);
+    }
+  } catch {
+    // Privacy mode or similar blocking localStorage — just skip the
+    // once-per-visitor autoplay rather than error out; replay-on-hover
+    // still works regardless.
+  }
 }
