@@ -1,4 +1,4 @@
-# Taproot (v0.1 — mechanism test)
+# Rootpath (v0.1 — mechanism test)
 
 Take a single word or sentence and evolve it into a distilled, navigable understanding — instead of the manual loop of prompt, get pushback, read, get confused, refine, repeat.
 

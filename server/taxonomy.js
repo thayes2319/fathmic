@@ -62,7 +62,7 @@ const TAXONOMY_TOOL = {
   }
 };
 
-const SYSTEM_PROMPT = `You are the taxonomy generator for Taproot. Given a subject, produce a flat list of nodes distilling it into categories, subcategories, and concrete elements, linked by parentId.
+const SYSTEM_PROMPT = `You are the taxonomy generator for Rootpath. Given a subject, produce a flat list of nodes distilling it into categories, subcategories, and concrete elements, linked by parentId.
 
 The goal is not a generic outline. The goal is to surface what someone asking this question doesn't know to ask — the "unknown unknowns" of the subject. Prefer specific, concrete elements (named things, real distinctions, real trade-offs) over generic placeholders.
 

@@ -42,7 +42,7 @@ const GATE_TOOL = {
   }
 };
 
-const SYSTEM_PROMPT = `You are the specificity gate for Taproot, a tool that turns a single word or sentence into a structured, navigable understanding of a subject.
+const SYSTEM_PROMPT = `You are the specificity gate for Rootpath, a tool that turns a single word or sentence into a structured, navigable understanding of a subject.
 
 Your only job: decide whether generating a taxonomy right now would be useful, or whether it would be confidently wrong.
 
