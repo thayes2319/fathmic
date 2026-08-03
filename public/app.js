@@ -75,6 +75,17 @@ const el = {
 // showing both lines at once. Stops the instant there's real focus or
 // input (same as a native placeholder disappearing once you start typing),
 // and resumes from the top if the field goes back to empty on blur.
+//
+// stopPlaceholderCycle is exposed at module scope (no-op default, replaced
+// below if the element exists) because several places set subjectInput.value
+// directly via JS — the schematic's typewriter effect, demo case buttons,
+// BLUEPRINT chips — and a direct .value assignment doesn't fire a real
+// "input" event, so the cycle's own listener never sees it. Just hiding the
+// element at those call sites wouldn't be enough either, since the cycle's
+// setTimeout chain would keep running in the background and re-show it a
+// few seconds later — has to go through the real stop function to clear
+// that timer too.
+let stopPlaceholderCycle = () => {};
 if (el.placeholderCycle) {
   const lines = Array.from(el.placeholderCycle.querySelectorAll(".placeholder-line"));
   const HOLD_MS = 3200;
@@ -118,6 +129,8 @@ if (el.placeholderCycle) {
   el.subjectInput.addEventListener("blur", () => {
     if (!el.subjectInput.value) startCycle();
   });
+
+  stopPlaceholderCycle = stopCycle;
 
   startCycle();
 }
@@ -1296,6 +1309,7 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
     btn.textContent = demo.label;
     btn.addEventListener("click", () => {
       resetDownstream();
+      stopPlaceholderCycle();
       el.subjectInput.value = demo.input;
       state.input = demo.input;
       state.topic = demo.topic;
@@ -1584,6 +1598,7 @@ function typeIntoInput(text, charDelayMs, isCancelled) {
 async function playSchematic() {
   if (schematicPlaying || !el.schematicSequence) return;
   schematicPlaying = true;
+  stopPlaceholderCycle(); // about to type into subjectInput directly, below
 
   const prevDemoHidden = el.demoCases.hidden;
   const prevTrendingHidden = el.trendingSection.hidden;
