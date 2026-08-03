@@ -239,7 +239,7 @@ function showHistoryDetail(index) {
 // illustration/photo/popularity reference cards -- their content (a base64
 // image, an Unsplash URL) was never persisted (would bloat localStorage for
 // little benefit), so those regenerate fresh, same as any normal run.
-function loadHistoryEntry(entry) {
+function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   resetDownstream();
   state.input = entry.input || entry.topic;
   el.subjectInput.value = state.input;
@@ -286,7 +286,15 @@ function loadHistoryEntry(entry) {
   generatePhoto();
   generatePopularity();
 
-  requestAnimationFrame(() => el.taxonomySection.scrollIntoView({ behavior: "smooth", block: "start" }));
+  // Only scroll down when reopening from the history modal, where you're
+  // already scrolled away from the top and need to be shown where you
+  // landed. Landing fresh via a ?share= link starts at the top of the page
+  // already -- auto-scrolling there just carries the shared-view banner (and
+  // its dismiss button) off-screen while someone's mid-read of it, which is
+  // the actual bug being fixed here, not a real UX need.
+  if (scrollToTaxonomy) {
+    requestAnimationFrame(() => el.taxonomySection.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
 }
 
 function openHistoryModal() {
@@ -1952,7 +1960,7 @@ if (sharedResultId) {
       const res = await fetch(`/api/share/${encodeURIComponent(sharedResultId)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Share link not found.");
-      loadHistoryEntry(data);
+      loadHistoryEntry(data, { scrollToTaxonomy: false });
       if (el.sharedViewBanner) el.sharedViewBanner.hidden = false;
     } catch (err) {
       el.gateStatus.textContent = `Error: ${err.message}`;
