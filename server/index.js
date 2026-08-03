@@ -11,6 +11,8 @@ const { runPopularity } = require("./popularity");
 const { recordSearch, getTrending, getBlueprintCandidates } = require("./searchLog");
 const { sendBlueprintCandidateEmail } = require("./notify");
 const { fetchExternalTrends } = require("./externalTrends");
+const { recordFeedback } = require("./feedbackLog");
+const { saveShare, getShare } = require("./shareLog");
 
 const app = express();
 app.set("trust proxy", 1); // so req.ip is the real client IP behind a host's reverse proxy, not the proxy itself
@@ -161,6 +163,47 @@ app.post("/api/popularity", async (req, res) => {
     console.error("[popularity]", err);
     res.status(500).json({ error: err.message });
   }
+});
+
+app.post("/api/feedback", (req, res) => {
+  try {
+    const { topic, genre, stakes, blueprintFit, rating, comment } = req.body || {};
+    if (rating !== "up" && rating !== "down") {
+      return res.status(400).json({ error: "rating must be 'up' or 'down'" });
+    }
+    if (!topic || !String(topic).trim()) {
+      return res.status(400).json({ error: "topic is required" });
+    }
+    recordFeedback({ topic, genre, stakes, blueprintFit, rating, comment });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[feedback]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Shareable permalinks: an explicit opt-in action (the Share button), unlike
+// the search log above -- this only ever stores what someone deliberately
+// chose to share, and only the text/selections/taxonomy behind it, never the
+// generated image (see shareLog.js for why).
+app.post("/api/share", (req, res) => {
+  try {
+    const { topic, categories, selections, genre, genreLabel, resultText } = req.body || {};
+    if (!topic || !resultText || !Array.isArray(selections) || !Array.isArray(categories)) {
+      return res.status(400).json({ error: "topic, resultText, selections, and categories are required" });
+    }
+    const id = saveShare(req.body || {});
+    res.json({ id });
+  } catch (err) {
+    console.error("[share:create]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/share/:id", (req, res) => {
+  const entry = getShare(req.params.id);
+  if (!entry) return res.status(404).json({ error: "Share link not found — it may be mistyped, or the link has expired." });
+  res.json(entry);
 });
 
 const port = process.env.PORT || 8788;

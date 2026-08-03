@@ -31,6 +31,13 @@ const el = {
   reviseTopicSubmitBtn: document.getElementById("revise-topic-submit-btn"),
   reviseTopicCancelBtn: document.getElementById("revise-topic-cancel-btn"),
   printOutputBtn: document.getElementById("print-output-btn"),
+  shareOutputBtn: document.getElementById("share-output-btn"),
+  sharedViewBanner: document.getElementById("shared-view-banner"),
+  sharedViewDismissBtn: document.getElementById("shared-view-dismiss-btn"),
+  resultFeedback: document.getElementById("result-feedback"),
+  feedbackUpBtn: document.getElementById("feedback-up-btn"),
+  feedbackDownBtn: document.getElementById("feedback-down-btn"),
+  resultFeedbackThanks: document.getElementById("result-feedback-thanks"),
   distillBtn: document.getElementById("distill-btn"),
   otherToggleBtn: document.getElementById("other-toggle-btn"),
   gateStatus: document.getElementById("gate-status"),
@@ -88,6 +95,12 @@ const el = {
   cardLightboxContent: document.getElementById("card-lightbox-content"),
   cardLightboxClose: document.getElementById("card-lightbox-close")
 };
+
+// A ?share=<id> URL loads someone else's shared result instead of the normal
+// empty-input landing state -- checked once, up front, since it also gates
+// the schematic autoplay below (a returning-via-share-link visitor shouldn't
+// get the "welcome, here's how this works" sequence shoved at them).
+const sharedResultId = new URLSearchParams(location.search).get("share");
 
 // Reference cards zoom into a lightbox on click — most useful on mobile,
 // where even the stacked full-width cards top out around 320-390px.
@@ -268,6 +281,7 @@ function loadHistoryEntry(entry) {
   resetIllustrationCard();
   resetPhotoCard();
   resetPopularityCard();
+  resetResultFeedback();
   generateIllustration(); // fire-and-forget -- not persisted, so regenerated fresh
   generatePhoto();
   generatePopularity();
@@ -1616,6 +1630,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   resetIllustrationCard();
   resetPhotoCard();
   resetPopularityCard();
+  resetResultFeedback();
 
   try {
     const result = await postJSON("/api/synthesize", {
@@ -1648,6 +1663,70 @@ async function runSynthesisForGenre(genre, genreLabel) {
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
+}
+
+// One rating per result -- re-enabled by resetResultFeedback() whenever a
+// new result is generated or an old one is reopened, rather than allowed to
+// carry over and silently attach to the wrong result.
+function resetResultFeedback() {
+  if (!el.resultFeedback) return;
+  el.resultFeedback.hidden = false;
+  el.resultFeedbackThanks.hidden = true;
+  [el.feedbackUpBtn, el.feedbackDownBtn].forEach(btn => {
+    btn.hidden = false;
+    btn.disabled = false;
+    btn.classList.remove("selected");
+  });
+}
+
+function submitResultFeedback(rating) {
+  el.feedbackUpBtn.disabled = true;
+  el.feedbackDownBtn.disabled = true;
+  (rating === "up" ? el.feedbackUpBtn : el.feedbackDownBtn).classList.add("selected");
+  el.resultFeedbackThanks.hidden = false;
+  postJSON("/api/feedback", {
+    topic: state.topic,
+    genre: state.lastGenre,
+    stakes: state.stakes,
+    blueprintFit: state.blueprintFit,
+    rating
+  }).catch(() => {}); // best-effort -- feedback UI already confirmed regardless
+}
+
+if (el.feedbackUpBtn) {
+  el.feedbackUpBtn.addEventListener("click", () => submitResultFeedback("up"));
+  el.feedbackDownBtn.addEventListener("click", () => submitResultFeedback("down"));
+}
+
+if (el.shareOutputBtn) {
+  el.shareOutputBtn.addEventListener("click", async () => {
+    if (!state.lastResultText) return;
+    const original = el.shareOutputBtn.textContent;
+    el.shareOutputBtn.textContent = "Sharing...";
+    try {
+      const { id } = await postJSON("/api/share", {
+        input: state.input,
+        topic: state.topic,
+        categories: state.categories,
+        selections: Array.from(state.selected),
+        stakes: state.stakes,
+        blueprintFit: state.blueprintFit,
+        genre: state.lastGenre,
+        genreLabel: state.lastGenreLabel,
+        resultText: state.lastResultText
+      });
+      const url = `${location.origin}${location.pathname}?share=${id}`;
+      await navigator.clipboard.writeText(url);
+      el.shareOutputBtn.textContent = "Link copied!";
+      el.shareOutputBtn.classList.add("copied");
+    } catch (err) {
+      el.shareOutputBtn.textContent = "Share failed";
+    }
+    setTimeout(() => {
+      el.shareOutputBtn.textContent = original;
+      el.shareOutputBtn.classList.remove("copied");
+    }, 2000);
+  });
 }
 
 el.genreButtons.addEventListener("click", event => {
@@ -1860,6 +1939,30 @@ async function loadTrending() {
   }
 }
 loadTrending();
+
+// Loads a ?share=<id> result on landing, reusing the exact same restore path
+// as reopening a history entry -- the two are the same shape of data, just
+// sourced from the server instead of localStorage. Runs after loadHistoryEntry
+// and friends are defined above, but since these are all function
+// declarations (hoisted) it would work regardless of placement; kept here
+// alongside the other page-load init calls for readability.
+if (sharedResultId) {
+  (async () => {
+    try {
+      const res = await fetch(`/api/share/${encodeURIComponent(sharedResultId)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Share link not found.");
+      loadHistoryEntry(data);
+      if (el.sharedViewBanner) el.sharedViewBanner.hidden = false;
+    } catch (err) {
+      el.gateStatus.textContent = `Error: ${err.message}`;
+    }
+  })();
+}
+
+if (el.sharedViewDismissBtn) {
+  el.sharedViewDismissBtn.addEventListener("click", () => { el.sharedViewBanner.hidden = true; });
+}
 
 // Reference cards above the Result. Only the illustration card is built —
 // it reuses Muralizer's actual image-generation backend/account (a
@@ -2137,7 +2240,7 @@ if (el.schematicSequence && el.brandLockup) {
   });
 
   try {
-    if (!localStorage.getItem("fathmic_schematic_seen")) {
+    if (!sharedResultId && !localStorage.getItem("fathmic_schematic_seen")) {
       localStorage.setItem("fathmic_schematic_seen", "1");
       setTimeout(playSchematic, 700);
     }

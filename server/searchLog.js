@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
+const { DATA_DIR } = require("./dataDir");
 
-const DATA_DIR = path.join(__dirname, "data");
 const LOG_PATH = path.join(DATA_DIR, "search-log.jsonl");
 
 const PERSONA_LABELS = {
@@ -15,6 +15,42 @@ const PERSONA_LABELS = {
   small_business_owner: "Small Business Owners",
   homeowner: "Homeowners",
   creative: "Creatives",
+  // Trade/sector-specific titles -- see #persona-select in index.html for
+  // the matching <optgroup> structure. Kept as their own keys (not folded
+  // into the general personas above) so trending-by-persona can surface,
+  // say, "Most searched by Electricians" distinctly once real data exists.
+  accountant: "Accountants",
+  financial_advisor: "Financial Advisors",
+  marketing_manager: "Marketing Managers",
+  sales_representative: "Sales Representatives",
+  carpenter: "Carpenters",
+  electrician: "Electricians",
+  general_contractor: "General Contractors",
+  plumber: "Plumbers",
+  architect: "Architects",
+  graphic_designer: "Graphic Designers",
+  interior_designer: "Interior Designers",
+  photographer: "Photographers",
+  professor: "Professors",
+  school_administrator: "School Administrators",
+  teacher: "Teachers",
+  tutor: "Tutors",
+  chef: "Chefs",
+  event_planner: "Event Planners",
+  hotel_manager: "Hotel Managers",
+  restaurant_manager: "Restaurant Managers",
+  nurse: "Nurses",
+  pharmacist: "Pharmacists",
+  physical_therapist: "Physical Therapists",
+  physician: "Physicians",
+  attorney: "Attorneys",
+  compliance_officer: "Compliance Officers",
+  legal_assistant: "Legal Assistants",
+  paralegal: "Paralegals",
+  data_analyst: "Data Analysts",
+  it_manager: "IT Managers",
+  software_engineer: "Software Engineers",
+  ux_designer: "UX Designers",
   other: "Other"
 };
 

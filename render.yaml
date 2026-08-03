@@ -2,9 +2,13 @@ services:
   - type: web
     name: fathmic
     env: node
-    plan: free
+    plan: starter
     buildCommand: npm install
     startCommand: npm start
+    disk:
+      name: fathmic-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false
@@ -18,3 +22,5 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: DATA_DIR
+        value: /data

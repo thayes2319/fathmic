@@ -2,8 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>FATHmic</title>
+  <title>FATHmic — Turn any topic into a clear, custom-built answer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="FATHmic maps out the real decision points hiding inside any topic, then writes a structured answer built around what you actually chose — not a generic search result." />
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <link rel="apple-touch-icon" href="images/favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="FATHmic" />
+  <meta property="og:title" content="FATHmic — Turn any topic into a clear, custom-built answer" />
+  <meta property="og:description" content="FATHmic maps out the real decision points hiding inside any topic, then writes a structured answer built around what you actually chose." />
+  <meta property="og:image" content="https://fathmic.ai/images/og-image.png" />
+  <meta property="og:url" content="https://fathmic.ai/" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FATHmic — Turn any topic into a clear, custom-built answer" />
+  <meta name="twitter:description" content="FATHmic maps out the real decision points hiding inside any topic, then writes a structured answer built around what you actually chose." />
+  <meta name="twitter:image" content="https://fathmic.ai/images/og-image.png" />
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -64,6 +80,11 @@
       </div>
       <button id="history-btn" class="link-btn" type="button" hidden>My previous FATHmics</button>
     </header>
+
+    <div id="shared-view-banner" hidden>
+      <span>Viewing a shared FATHmic — pick different options or a different genre any time to make it your own.</span>
+      <button id="shared-view-dismiss-btn" type="button" aria-label="Dismiss">&times;</button>
+    </div>
 
     <section id="input-section">
       <p id="how-it-works-line">
@@ -181,6 +202,54 @@
             <option value="small_business_owner">Small Business Owner</option>
             <option value="homeowner">Homeowner</option>
             <option value="creative">Creative</option>
+            <optgroup label="Business &amp; Finance">
+              <option value="accountant">Accountant</option>
+              <option value="financial_advisor">Financial Advisor</option>
+              <option value="marketing_manager">Marketing Manager</option>
+              <option value="sales_representative">Sales Representative</option>
+            </optgroup>
+            <optgroup label="Construction &amp; Trades">
+              <option value="carpenter">Carpenter</option>
+              <option value="electrician">Electrician</option>
+              <option value="general_contractor">General Contractor</option>
+              <option value="plumber">Plumber</option>
+            </optgroup>
+            <optgroup label="Design &amp; Creative Services">
+              <option value="architect">Architect</option>
+              <option value="graphic_designer">Graphic Designer</option>
+              <option value="interior_designer">Interior Designer</option>
+              <option value="photographer">Photographer</option>
+            </optgroup>
+            <optgroup label="Education">
+              <option value="professor">Professor</option>
+              <option value="school_administrator">School Administrator</option>
+              <option value="teacher">Teacher</option>
+              <option value="tutor">Tutor</option>
+            </optgroup>
+            <optgroup label="Food &amp; Hospitality">
+              <option value="chef">Chef</option>
+              <option value="event_planner">Event Planner</option>
+              <option value="hotel_manager">Hotel Manager</option>
+              <option value="restaurant_manager">Restaurant Manager</option>
+            </optgroup>
+            <optgroup label="Healthcare">
+              <option value="nurse">Nurse</option>
+              <option value="pharmacist">Pharmacist</option>
+              <option value="physical_therapist">Physical Therapist</option>
+              <option value="physician">Physician</option>
+            </optgroup>
+            <optgroup label="Legal">
+              <option value="attorney">Attorney</option>
+              <option value="compliance_officer">Compliance Officer</option>
+              <option value="legal_assistant">Legal Assistant</option>
+              <option value="paralegal">Paralegal</option>
+            </optgroup>
+            <optgroup label="Technology">
+              <option value="data_analyst">Data Analyst</option>
+              <option value="it_manager">IT Manager</option>
+              <option value="software_engineer">Software Engineer</option>
+              <option value="ux_designer">UX Designer</option>
+            </optgroup>
             <option value="other">Other</option>
           </select>
         </div>
@@ -190,7 +259,7 @@
 
       <div id="blueprint-section">
         <div id="blueprint-header">
-          <span id="blueprint-stamp">Blueprint &amp; Spec</span>
+          <span id="blueprint-stamp">Spec &amp; Blueprint</span>
           <span id="blueprint-caption">tuned especially for your build</span>
         </div>
         <div class="hscroll-wrap">
@@ -360,12 +429,27 @@
 
       <div id="output-text-wrap">
         <span id="blueprint-result-badge">BLUEPRINT</span>
+        <button id="share-output-btn" title="Copy a shareable link to this result">Share</button>
         <button id="print-output-btn" title="Print this result">Print</button>
         <button id="copy-output-btn" title="Copy result to clipboard">Copy</button>
         <div id="output-text"></div>
       </div>
+
+      <div id="result-feedback">
+        <span id="result-feedback-prompt">Was this useful?</span>
+        <button id="feedback-up-btn" type="button" aria-label="Yes, this was useful">&#128077;</button>
+        <button id="feedback-down-btn" type="button" aria-label="No, this wasn't useful">&#128078;</button>
+        <span id="result-feedback-thanks" hidden>Thanks for the feedback.</span>
+      </div>
     </section>
   </main>
+
+  <footer id="site-footer">
+    <span>&copy; 2026 FATHmic</span>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="mailto:thomas@gohw.net">Contact</a>
+  </footer>
 
   <div id="card-lightbox-backdrop" hidden>
     <div id="card-lightbox">

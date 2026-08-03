@@ -1000,6 +1000,48 @@ button:disabled { opacity: 0.5; cursor: default; }
 .history-detail-text { margin: 0.75rem 0; line-height: 1.6; }
 .history-reopen-btn { margin-top: 0.5rem; }
 
+#site-footer {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+#site-footer a { color: var(--muted); }
+#site-footer a:hover { color: var(--accent); }
+
+#shared-view-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--logo-dot);
+  border-radius: 8px;
+  background: rgba(52, 209, 248, 0.08);
+  font-size: 0.85rem;
+}
+#shared-view-banner button {
+  margin-top: 0;
+  padding: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+#shared-view-banner button:hover { color: var(--fg); }
+
 .photo-credit {
   position: absolute;
   left: 0;
@@ -1186,6 +1228,44 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 #print-output-btn:hover { color: var(--accent); border-color: var(--accent); }
 
+#share-output-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 8.3rem;
+  margin-top: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+#share-output-btn:hover { color: var(--accent); border-color: var(--accent); }
+#share-output-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+#result-feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+#result-feedback button {
+  margin-top: 0;
+  padding: 0.25rem 0.55rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+#result-feedback button:hover { border-color: var(--accent); }
+#result-feedback button.selected { border-color: var(--accent); background: rgba(122, 92, 62, 0.1); }
+#result-feedback button:disabled { opacity: 0.5; cursor: default; }
+#result-feedback[hidden] { display: none; }
+
 /* Print only the result itself -- not the input form, disclaimer cloud,
    reference cards, or action buttons -- so "Print" produces a clean, useful
    page instead of a screenshot of the whole app chrome. */
@@ -1198,7 +1278,7 @@ button:disabled { opacity: 0.5; cursor: default; }
     left: 0;
     width: 100%;
   }
-  #copy-output-btn, #print-output-btn { display: none; }
+  #copy-output-btn, #print-output-btn, #share-output-btn { display: none; }
 }
 
 #output-text {

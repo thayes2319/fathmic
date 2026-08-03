@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Privacy Policy — FATHmic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .legal-page { max-width: 640px; }
+    .legal-page h1 { margin-bottom: 0.25rem; }
+    .legal-page .updated { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .legal-page h2 { font-size: 1.1rem; margin-top: 2rem; }
+    .legal-page p, .legal-page li { line-height: 1.65; }
+    .legal-page .note { font-size: 0.85rem; color: var(--muted); font-style: italic; border-left: 2px solid var(--border); padding-left: 0.8rem; margin: 1.25rem 0; }
+    .back-link { display: inline-block; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main class="legal-page">
+    <a class="back-link link-btn" href="/">&larr; Back to FATHmic</a>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: August 2026</p>
+
+    <p class="note">This is a plain-language description of what FATHmic actually does with your data, written by the person who built it — not a law firm. It's accurate as of the date above, but it isn't formal legal advice, and it will get a proper legal review before FATHmic adds accounts or payments.</p>
+
+    <h2>What gets stored, and where</h2>
+    <p>When you submit a topic, FATHmic's server records the text you typed, the persona you optionally selected, a broad subject category, your IP address, and a timestamp. This powers the "Most Searched" / trending browsing feature and helps prevent abuse of the API (rate limiting by IP). This is kept indefinitely at this time — there's no automatic deletion yet.</p>
+    <p><strong>"My previous FATHmics"</strong> (your history of past results) is stored only in your browser's local storage. It is never sent to or stored on FATHmic's servers, and clearing your browser data or switching devices will lose it.</p>
+    <p><strong>Sharing a result</strong> is the one action that explicitly sends more to the server: if you click Share on a result, that specific topic, your selections, the underlying taxonomy, and the written result are stored server-side so the link works for anyone you send it to. It does not include your name, email, or IP address unless you typed that into the topic yourself.</p>
+
+    <h2>Who else sees your input</h2>
+    <p>Generating a result involves sending your topic (and, for illustrations, a short excerpt of the result) to a few third-party AI services that do the actual generation:</p>
+    <ul>
+      <li><strong>Anthropic</strong> (Claude) — generates the taxonomy and the written result. See <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a>.</li>
+      <li><strong>Stability AI</strong> — generates the illustration image. See <a href="https://stability.ai/privacy-policy" target="_blank" rel="noopener">Stability AI's privacy policy</a>.</li>
+      <li><strong>Unsplash</strong> — provides a matching stock photo. See <a href="https://unsplash.com/privacy" target="_blank" rel="noopener">Unsplash's privacy policy</a>.</li>
+    </ul>
+    <p>Each of these receives only the topic/result text needed to do its part of the job — you're not creating a separate account with any of them.</p>
+
+    <h2>What FATHmic doesn't do</h2>
+    <p>No accounts exist yet, so there's no password, email, or payment information to collect. No data is sold. No advertising trackers are on this page.</p>
+
+    <h2>Children's privacy</h2>
+    <p>FATHmic isn't directed at children under 13, and we don't knowingly collect information from them.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>This page may be updated as the product changes, particularly if accounts or payments are introduced. The date at the top reflects the latest version.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about any of this: <a href="mailto:thomas@gohw.net">thomas@gohw.net</a></p>
+  </main>
+</body>
+</html>
