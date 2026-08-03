@@ -196,19 +196,26 @@ function showHistoryDetail(index) {
   el.historyListContent.hidden = true;
   el.historyDetailContent.hidden = false;
   el.historyDetailContent.innerHTML = `
-    <button id="history-back-btn" class="link-btn" type="button">&larr; Back</button>
+    <div id="history-detail-header">
+      <button id="history-back-btn" class="link-btn" type="button">&larr; Back</button>
+      <button class="history-reopen-btn pick-btn pick-btn-sm" type="button">Reopen this FATHmic</button>
+    </div>
     <h4>${escapeHtml(entry.topic)}</h4>
     <p class="history-item-meta">${escapeHtml(entry.genreLabel)} · ${new Date(entry.timestamp).toLocaleString()}</p>
     <div class="history-detail-text">${renderMarkdown(entry.resultText)}</div>
-    <button id="history-reopen-btn" class="pick-btn pick-btn-sm" type="button">Reopen this FATHmic</button>
+    <button class="history-reopen-btn pick-btn pick-btn-sm" type="button">Reopen this FATHmic</button>
   `;
   el.historyDetailContent.querySelector("#history-back-btn").addEventListener("click", () => {
     el.historyDetailContent.hidden = true;
     el.historyListContent.hidden = false;
   });
-  el.historyDetailContent.querySelector("#history-reopen-btn").addEventListener("click", () => {
-    closeHistoryModal();
-    loadHistoryEntry(entry);
+  // Two instances -- top (so a long result doesn't force scrolling to find
+  // it) and bottom (where it was originally) -- both do the same thing.
+  el.historyDetailContent.querySelectorAll(".history-reopen-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      closeHistoryModal();
+      loadHistoryEntry(entry);
+    });
   });
 }
 

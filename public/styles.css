@@ -994,8 +994,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 .history-item-topic { font-weight: 600; }
 .history-item-meta { font-size: 0.78rem; color: var(--muted); }
 
+#history-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
+#history-detail-header .link-btn { margin-top: 0; }
+#history-detail-header .history-reopen-btn { margin-top: 0; }
 .history-detail-text { margin: 0.75rem 0; line-height: 1.6; }
-#history-reuse-btn { margin-top: 0.5rem; }
+.history-reopen-btn { margin-top: 0.5rem; }
 
 .photo-credit {
   position: absolute;
