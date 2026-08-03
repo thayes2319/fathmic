@@ -1054,6 +1054,22 @@ el.interviewToggleBtn.addEventListener("click", () => {
   else startInterview();
 });
 
+// Interview mode's floating card isn't a true modal (no backdrop element to
+// click) -- opening a DIFFERENT category already exits it (see the toggle
+// listener above), but that left every other click on the page (blank
+// space, header, other buttons) doing nothing to it. This makes any click
+// outside the floating card a valid way to dismiss it, matching how people
+// expect a modal-like overlay to behave. Deliberately passive: it doesn't
+// prevent the click's own effect, so clicking, say, the History button
+// exits interview mode AND opens history, rather than swallowing the click.
+document.addEventListener("click", event => {
+  if (!interviewModeActive) return;
+  const floatingCard = document.querySelector(".category-row.interview-float");
+  if (floatingCard && !floatingCard.contains(event.target)) {
+    exitInterview();
+  }
+});
+
 function renderTaxonomy() {
   el.topicHeading.textContent = state.topic;
   el.taxonomyTree.innerHTML = "";
