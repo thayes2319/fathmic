@@ -1041,6 +1041,11 @@ button:disabled { opacity: 0.5; cursor: default; }
   cursor: pointer;
 }
 #shared-view-banner button:hover { color: var(--fg); }
+/* An ID selector setting display: outranks the browser's default
+   [hidden]{display:none}, so toggling the hidden attribute alone did
+   nothing visually -- same class of bug as the process-modal-backdrop
+   incident, fixed the same way #stale-banner already handles it. */
+#shared-view-banner[hidden] { display: none; }
 
 .photo-credit {
   position: absolute;
