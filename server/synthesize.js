@@ -63,7 +63,7 @@ function buildSystemPrompt(genre, stakes) {
   const preset = GENRE_PRESETS[genre] || GENRE_PRESETS.summary;
   const stakesGuidance = STAKES_GUIDANCE[stakes] || STAKES_GUIDANCE.medium;
   const riskGuidance = RISK_SECTION_GUIDANCE[stakes] || RISK_SECTION_GUIDANCE.medium;
-  return `You are the synthesis engine for Rootpath. You take a distilled set of selections about a subject and turn them into a finished piece of writing.
+  return `You are the synthesis engine for FATHmic. You take a distilled set of selections about a subject and turn them into a finished piece of writing.
 
 Structural mode (${preset.mode}): ${preset.modeGuidance}
 

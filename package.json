@@ -1,5 +1,5 @@
 {
-  "name": "rootpath",
+  "name": "fathmic",
   "version": "0.1.0",
   "private": true,
   "description": "Take a single word or sentence and evolve it into a distilled, navigable understanding.",

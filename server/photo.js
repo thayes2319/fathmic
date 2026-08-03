@@ -42,7 +42,7 @@ async function searchUnsplash(query, accessKey) {
 //    whenever it "uses" a photo (displaying it as a standing reference card
 //    counts, same as the "set as a header image" example in their guidelines,
 //    not just an explicit file-save action).
-const UTM = "utm_source=rootpath&utm_medium=referral";
+const UTM = "utm_source=fathmic&utm_medium=referral";
 
 function withUtm(url) {
   return url.includes("?") ? `${url}&${UTM}` : `${url}?${UTM}`;

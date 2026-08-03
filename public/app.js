@@ -1610,3 +1610,14 @@ if (el.schematicSequence && el.brandLockup) {
     // still works regardless.
   }
 }
+
+// Small logo icon plays its cascade a few times on every load, unprompted —
+// unlike the schematic above (once per visitor), this one repeats every
+// visit, since it's a quiet few-second flourish rather than something that'd
+// wear out its welcome.
+if (el.promptIcon) {
+  setTimeout(() => {
+    el.promptIcon.classList.add("icon-intro");
+    setTimeout(() => el.promptIcon.classList.remove("icon-intro"), 1300 * 4);
+  }, 400);
+}

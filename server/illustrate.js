@@ -11,7 +11,7 @@ const { callText } = require("./llm");
 // prompt instead.
 const MURALIZER_GENERATE_URL = "https://muralizer.onrender.com/api/generate";
 
-const PROMPT_SYSTEM = `You are composing a visual generation prompt for Rootpath — an illustration capturing the essence of a distilled topic, for ANY subject, not decorative wall art.
+const PROMPT_SYSTEM = `You are composing a visual generation prompt for FATHmic — an illustration capturing the essence of a distilled topic, for ANY subject, not decorative wall art.
 
 Unlike a mural, the visual treatment should suit the subject itself: a technical topic might call for a clean, symbolic editorial illustration; a personal or emotional topic might call for a warm, photographic, narrative style; an outdoor/natural topic might genuinely suit realistic photography. Do not default to painterly or decorative aesthetics unless the subject actually calls for it.
 

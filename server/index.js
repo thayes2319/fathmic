@@ -165,5 +165,5 @@ app.post("/api/popularity", async (req, res) => {
 
 const port = process.env.PORT || 8788;
 app.listen(port, () => {
-  console.log(`Rootpath server running on http://127.0.0.1:${port}`);
+  console.log(`FATHmic server running on http://127.0.0.1:${port}`);
 });

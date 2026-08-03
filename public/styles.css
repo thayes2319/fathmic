@@ -86,6 +86,16 @@ h1 { margin-bottom: 0.25rem; }
   animation: iconProcessPulse 1.3s ease-in-out infinite;
   animation-delay: var(--delay);
 }
+/* Same cascade, finite instead of looping — a quiet "hello" a few seconds
+   after page load rather than requiring a visitor to discover the hover
+   trigger. Ends on the animation's 0%/100% (small, dim) keyframe, close
+   enough to the true rest state (opacity 0) that removing this class
+   afterward finishes with a smooth fade via the base rule's own transition,
+   not a jarring snap. */
+.icon-intro .prompt-icon-node {
+  animation: iconProcessPulse 1.3s ease-in-out 4;
+  animation-delay: var(--delay);
+}
 @keyframes iconProcessPulse {
   0%, 100% { transform: translateY(7px) scale(0.35); opacity: 0.25; }
   50% { transform: translateY(0) scale(1); opacity: 1; }
