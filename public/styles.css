@@ -796,6 +796,18 @@ button:disabled { opacity: 0.5; cursor: default; }
 #genre-buttons button:hover { background: var(--accent); color: #fff; }
 #genre-buttons button.active { background: var(--accent); color: #fff; outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* Same cyan as the rest of the BLUEPRINT branding, outlined at rest (not
+   just on activation) so it stands out from the other six genres before
+   it's even picked, not just after. Scoped as #genre-buttons
+   #blueprint-genre-btn (two IDs), not just #blueprint-genre-btn alone --
+   a single ID loses to #genre-buttons button's own ID+element specificity
+   for the color property specifically (border-color has no such competing
+   rule, so that one alone would've worked; color needed the higher
+   specificity, confirmed by checking computed style, not assumed). */
+#genre-buttons #blueprint-genre-btn { border-color: var(--logo-dot); color: var(--logo-dot); }
+#genre-buttons #blueprint-genre-btn:hover { background: var(--logo-dot); color: #fff; }
+#genre-buttons #blueprint-genre-btn.active { background: var(--logo-dot); color: #fff; outline-color: var(--logo-dot); }
+
 #reference-cards {
   display: flex;
   gap: 0.75rem;
@@ -918,11 +930,16 @@ button:disabled { opacity: 0.5; cursor: default; }
   min-height: 0; /* let flex children shrink/size correctly instead of overflowing */
   gap: 0.3rem;
 }
+/* Caption sits below the bars, not above -- bars anchor to a shared
+   baseline (align-items:flex-end on .scope-mini-bars) so a short bar can
+   land far from a label sitting up top, while a caption at the baseline
+   stays equally close to every bar regardless of its height. */
 .scope-row-header {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   flex-shrink: 0;
+  order: 2;
 }
 .scope-icon {
   height: 0.9rem;
@@ -1066,7 +1083,11 @@ button:disabled { opacity: 0.5; cursor: default; }
   z-index: 1;
 }
 #output-section.blueprint-result #blueprint-result-badge { display: inline-block; }
-#output-section.blueprint-result #output-text { border-color: var(--logo-dot); }
+/* Badge sits at top:0.7rem, height ~21px -> bottom edge lands ~32px down
+   from #output-text's top edge, but the normal top padding is only 20px
+   (1.25rem) -- measured a real ~12px encroachment into the first line of
+   rendered content. 2.5rem clears the badge with a bit of breathing room. */
+#output-section.blueprint-result #output-text { border-color: var(--logo-dot); padding-top: 2.5rem; }
 #output-section.blueprint-result .ref-card[data-card="illustration"] { border-color: var(--logo-dot); }
 #output-text h4 {
   margin: 1.25rem 0 0.5rem;

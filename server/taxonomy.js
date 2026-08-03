@@ -74,7 +74,7 @@ Structure:
 
 Four rules for the content itself:
 
-1. Names carry the orienting facts. If a category or subcategory has a defining characteristic the reader needs to know just to make sense of it (a zone number, a scale, a boundary condition), fold it into its "label" itself — e.g. "North Georgia Mountains (Zone 6b–7b, cooler microclimate)" — rather than listing that fact as a separate element node.
+1. Names carry the orienting facts — this applies to elements too, not just categories/subcategories. If a category, subcategory, or element has a defining characteristic the reader needs to know just to make sense of it (a zone number, a scale, a boundary condition) OR uses genuine trade/technical jargon a layperson outside that field wouldn't know, fold a brief clarification into its "label" itself — e.g. "North Georgia Mountains (Zone 6b–7b, cooler microclimate)" or "Concrete footers (below-frost-line concrete bases the posts sit on)". Use this selectively: most names need nothing added. Only add a clarification when the term would genuinely be unclear to someone outside the trade — not for common words, and not just to pad every label with extra detail.
 
 2. Elements are only things you'd actually select. Every "element" node's label must be a concrete, choosable item — a specific named thing, technique, or option a person would pick between. Background facts, general characteristics, or context do NOT belong as elements — if the reader wouldn't check a box next to it as a decision, it doesn't go there. Fold it into a name instead, or leave it out.
 
