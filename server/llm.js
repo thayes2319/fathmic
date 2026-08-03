@@ -46,7 +46,7 @@ async function callStructured({ system, prompt, tool, maxTokens = 2048, label = 
 
 // Calls Claude for a plain prose response (used by synthesis, where the
 // deliverable IS the output, not structured data to route through the app).
-async function callText({ system, prompt, label = "unknown" }) {
+async function callText({ system, prompt, label = "unknown", maxTokens = 2048 }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not set. Copy .env.example to .env and fill it in.");
@@ -61,7 +61,7 @@ async function callText({ system, prompt, label = "unknown" }) {
     },
     body: JSON.stringify({
       model: process.env.LLM_MODEL || "claude-sonnet-5",
-      max_tokens: 2048,
+      max_tokens: maxTokens,
       system,
       messages: [{ role: "user", content: prompt }]
     })

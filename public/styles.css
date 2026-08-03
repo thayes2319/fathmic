@@ -1331,6 +1331,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--fg);
 }
 #output-text h4:first-child { margin-top: 0; }
+#output-text .heading-note { font-weight: normal; font-style: italic; color: var(--muted); font-size: 0.85em; }
+#output-text hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
 #output-text p { margin: 0 0 0.9rem; }
 #output-text ul, #output-text ol { margin: 0 0 0.9rem; padding-left: 1.4rem; }
 #output-text li { margin-bottom: 0.35rem; }

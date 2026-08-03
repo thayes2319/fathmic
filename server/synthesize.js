@@ -94,7 +94,9 @@ Real-world currency check: you have no live internet access — no current listi
 ${scopeDirective}
 Always end the piece with a section headed exactly "Where it can go wrong" (formatted as its own heading, same style as any other section headings you use). ${riskGuidance}
 
-Write only the finished piece. No preamble, no "here is your summary," no meta-commentary about what you're doing.`;
+Formatting: give every section header the exact same markdown treatment — either real "#### Heading" syntax or a standalone "**Heading**" line, never mixed with trailing text like "**Heading** *(note)*" on the same line, and never a "---" divider between sections (headings alone provide the separation). Inconsistent heading formatting renders inconsistently.
+
+Write only the finished piece. No preamble, no "here is your summary," or meta-commentary about what you're doing.`;
 }
 
 async function runSynthesis({ topic, selections, genre, stakes }) {
@@ -102,7 +104,13 @@ async function runSynthesis({ topic, selections, genre, stakes }) {
   const system = buildSystemPrompt(preset, stakes);
   const prompt = `Subject: ${topic}\n\nSelected elements to weave in:\n${selections.map(s => `- ${s}`).join("\n")}`;
 
-  const text = await callText({ system, prompt, label: "synthesis" });
+  // Blueprint results in particular routinely run past 2048 output tokens
+  // (a real build brief has 6-9 sections, each with several bullets) and were
+  // getting cut off mid-sentence -- confirmed against a real generation, not
+  // a hypothetical. 4096 gives real headroom for every genre without being
+  // wasteful for the shorter ones (Claude stops naturally well short of the
+  // cap when it's actually done).
+  const text = await callText({ system, prompt, label: "synthesis", maxTokens: 4096 });
 
   return {
     text,

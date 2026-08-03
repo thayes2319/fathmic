@@ -470,13 +470,33 @@ function renderMarkdown(text) {
 
     if (!line) { flushPara(); closeList(); return; }
 
+    // A standalone ---/***/___ line — markdown's horizontal-rule syntax,
+    // which the model reaches for as a section divider sometimes (mainly in
+    // BLUEPRINT results). Previously fell through to being printed as a
+    // literal "---" paragraph, which read as a rendering glitch.
+    const hr = line.match(/^(-{3,}|\*{3,}|_{3,})$/);
+    if (hr) { flushPara(); closeList(); html.push("<hr>"); return; }
+
     const heading = line.match(/^(#{1,6})\s+(.*)$/);
     if (heading) { flushPara(); closeList(); html.push(`<h4>${inline(heading[2])}</h4>`); return; }
 
     // A line that's entirely **bold**, nothing else — the model's default
     // way of writing a section header when it doesn't reach for real `#`.
-    const boldHeading = line.match(/^\*\*(.+)\*\*$/);
-    if (boldHeading) { flushPara(); closeList(); html.push(`<h4>${inline(boldHeading[1])}</h4>`); return; }
+    // Also accepts a trailing *(italic parenthetical)*, e.g.
+    // "**Storage** *(if applicable)*" — seen in real BLUEPRINT output, and
+    // without this it silently fell through to a plain paragraph, breaking
+    // the visual rhythm of every other section reading as a real heading.
+    // Deliberately NOT broadened further than that (a bold lead-in followed
+    // by real sentence text, e.g. "**Note:** this matters because...",
+    // should stay a normal paragraph, not become a heading).
+    const boldHeading = line.match(/^\*\*(.+?)\*\*(?:\s*\*\(([^)]*)\)\*)?$/);
+    if (boldHeading) {
+      flushPara();
+      closeList();
+      const note = boldHeading[2] ? ` <span class="heading-note">(${inline(boldHeading[2])})</span>` : "";
+      html.push(`<h4>${inline(boldHeading[1])}${note}</h4>`);
+      return;
+    }
 
     const bullet = line.match(/^[-*]\s+(.*)$/);
     if (bullet) {
@@ -1622,7 +1642,7 @@ function buildQuickChart() {
     }
   });
   if (!rows.length) return "";
-  return `<div id="quick-chart"><div class="quick-chart-label">Quick chart — your picks, while the full result comes together:</div><ul>${rows.join("")}</ul></div>`;
+  return `<div id="quick-chart"><div class="quick-chart-label status-pulsing">Quick chart of your picks — synthesizing the full version now...</div><ul>${rows.join("")}</ul></div>`;
 }
 
 async function runSynthesisForGenre(genre, genreLabel) {
