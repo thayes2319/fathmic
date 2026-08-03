@@ -896,6 +896,22 @@ button:disabled { opacity: 0.5; cursor: default; }
 .scope-mini-bar { width: 16%; border-radius: 3px; background: var(--border); }
 .scope-mini-bar.lit { background: var(--accent); }
 
+/* #reference-cards packs 3 aspect-ratio:1/1 cards into one row with no
+   wrap, so on a ~360-412px phone each card squeezes to roughly 100-127px
+   square. Tried trimming the fixed rem-based padding/title/header overhead
+   first, but measured it against real device sizes (see conversation) and
+   even at zero overhead the card itself is just too small to give
+   .scope-mini-bars meaningful height -- a Galaxy S22 landed at ~5px bars,
+   several rendering at 1-2px, not actually visible. The card's own size is
+   the real constraint, not what's eating space inside it. Stacking full-
+   width on narrow viewports instead: each card becomes ~320-390px square,
+   comfortably bigger than this same card renders at on desktop, so the
+   normal (non-mobile) padding/sizing above is already fine again here. */
+@media (max-width: 480px) {
+  #reference-cards { flex-direction: column; }
+  .ref-card { flex: 0 0 auto; width: 100%; }
+}
+
 /* A genuinely cloud-shaped callout. The box is a wide, short text banner
    (a paragraph, not an icon), so a single blob border-radius reads as an
    irregular pill, not a cloud -- an actual puffy edge needs a row of

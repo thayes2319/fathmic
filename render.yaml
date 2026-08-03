@@ -14,3 +14,5 @@ services:
         sync: false
       - key: BLUEPRINT_NOTIFY_EMAIL
         value: thomas@gohw.net
+      - key: UNSPLASH_ACCESS_KEY
+        sync: false
