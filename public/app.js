@@ -11,7 +11,8 @@ const state = {
   lastGenreLabel: null,
   resultSelectionsSnapshot: null,
   stakes: "medium",
-  lastStakesUsed: null
+  lastStakesUsed: null,
+  blueprintFit: false
 };
 
 const el = {
@@ -224,6 +225,7 @@ function resetDownstream() {
   state.resultSelectionsSnapshot = null;
   state.lastGenre = null;
   state.lastStakesUsed = null;
+  state.blueprintFit = false;
   interviewModeActive = false;
   interviewIndex = -1;
   exitActiveSession();
@@ -370,6 +372,7 @@ async function runDistill(input) {
     const gate = await postJSON("/api/gate", { input, persona: el.personaSelect.value || null });
 
     state.stakes = gate.stakes || "medium";
+    state.blueprintFit = gate.blueprintFit === true;
     renderStakesDial();
 
     if (gate.status === "block") {
@@ -1414,19 +1417,28 @@ loadTrending();
 // was misleading. Reset now shows the same in-progress text the real
 // generate function shows once it starts, so there's no visible flicker —
 // it just reads as continuously working from the moment the card appears.
+// BLUEPRINT results get "Developing..." instead of "Generating..." — a
+// nod to darkroom/cyanotype developing, on-theme for a mode literally named
+// after blueprints, and distinct enough from the generic label that it
+// quietly signals this card is doing something a little different.
+function illustrationPlaceholderLabel() {
+  return state.blueprintFit ? "Developing..." : "Generating...";
+}
+
 function resetIllustrationCard() {
   if (!el.illustrationCard) return;
-  el.illustrationCard.innerHTML = '<div class="ref-card-placeholder">Generating...</div>';
+  el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">${illustrationPlaceholderLabel()}</div>`;
 }
 
 async function generateIllustration() {
   if (!el.illustrationCard) return;
-  el.illustrationCard.innerHTML = '<div class="ref-card-placeholder">Generating...</div>';
+  el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">${illustrationPlaceholderLabel()}</div>`;
 
   try {
     const result = await postJSON("/api/illustrate", {
       topic: state.topic,
-      resultText: state.lastResultText
+      resultText: state.lastResultText,
+      isBlueprint: state.blueprintFit
     });
     el.illustrationCard.innerHTML = "";
     const img = document.createElement("img");

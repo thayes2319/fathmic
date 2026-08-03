@@ -19,20 +19,35 @@ Critical constraint: image models cannot render legible text, numbers, or labels
 
 Write ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly: specific subject matter, setting, mood, and a suggested visual style appropriate to the content. Output only the description, nothing else.`;
 
+// For BLUEPRINT subjects (see KNOWN_BLUEPRINT_SUBJECTS in gate.js) the point
+// isn't an editorial illustration of a topic, it's a preview of the actual
+// thing being specified — the tattoo, the furniture piece, the garden
+// layout. Still no embedded labels/dimensions for the same reliability
+// reason as PROMPT_SYSTEM below (arguably matters more here, since a real
+// technical blueprint would normally have callouts an image model can't
+// actually render) — this is a concept rendering, not an annotated drawing.
+const BLUEPRINT_PROMPT_SYSTEM = `You are composing a visual generation prompt for FATHmic's BLUEPRINT mode — a concept rendering of the actual physical thing being specified (a tattoo, a piece of furniture, a garden layout, an engagement ring, and similar), not an editorial illustration of an abstract topic.
+
+Render the SPECIFIC thing described by the distilled selections as concretely and literally as possible — materials, form, style, scale, setting — the way a concept designer's rendering or a professional reference photo would show it. This should read as a preview of the real, buildable object or space, not a metaphor for it.
+
+Critical constraint: image models cannot render legible text, numbers, or labels reliably — they produce garbled gibberish when asked to. NEVER include dimension labels, measurement callouts, material tags, or any readable text in the description, even though a literal technical blueprint would normally have them. Show the design itself; leave annotation out entirely.
+
+Write ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly. Output only the description, nothing else.`;
+
 const GENERAL_NEGATIVE_PROMPT =
   "no text, no writing, no letters, no captions, no watermarks, no logos, " +
   "no signatures, no UI elements, no borders, no frames, no collage, no screenshots";
 
-async function composeImagePrompt(topic, resultExcerpt) {
+async function composeImagePrompt(topic, resultExcerpt, isBlueprint) {
   return callText({
-    system: PROMPT_SYSTEM,
+    system: isBlueprint ? BLUEPRINT_PROMPT_SYSTEM : PROMPT_SYSTEM,
     prompt: `Topic: ${topic}\n\nDistilled content (excerpt):\n${resultExcerpt}`
   });
 }
 
-async function runIllustration({ topic, resultText }) {
+async function runIllustration({ topic, resultText, isBlueprint }) {
   const excerpt = (resultText || "").slice(0, 600);
-  const imagePrompt = await composeImagePrompt(topic, excerpt);
+  const imagePrompt = await composeImagePrompt(topic, excerpt, isBlueprint === true);
 
   const response = await fetch(MURALIZER_GENERATE_URL, {
     method: "POST",

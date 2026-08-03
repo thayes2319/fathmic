@@ -123,11 +123,11 @@ app.post("/api/synthesize", async (req, res) => {
 
 app.post("/api/illustrate", async (req, res) => {
   try {
-    const { topic, resultText } = req.body || {};
+    const { topic, resultText, isBlueprint } = req.body || {};
     if (!topic || !resultText) {
       return res.status(400).json({ error: "topic and resultText are required" });
     }
-    const result = await runIllustration({ topic, resultText });
+    const result = await runIllustration({ topic, resultText, isBlueprint: isBlueprint === true });
     res.json(result);
   } catch (err) {
     console.error("[illustrate]", err);
