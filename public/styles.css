@@ -138,7 +138,7 @@ h1 { margin-bottom: 0.25rem; }
   transform: translate(-50%, -50%);
   width: 850px;
   max-width: none;
-  filter: sepia(1) saturate(1.4) opacity(0.12);
+  filter: sepia(1) saturate(1.4) opacity(0.097);
   pointer-events: none;
   z-index: 0;
 }
