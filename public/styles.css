@@ -1092,24 +1092,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 /* SVG text scales with the whole diagram's viewBox, not the viewport — on a
    ~375px phone this diagram renders at roughly half scale, so 14px here
-   was rendering at ~7px, too small to read. A flat size increase fixed
-   mobile but overshot on desktop (where it was fine already) and pushed the
-   button left into the output-card icon next to it. A media query instead:
-   desktop keeps the original size/position, mobile gets both a size bump
-   and a shift right (x 372->402, text 424->454) to clear that icon, whose
-   rect ends at x=356 — plenty of margin either way. */
+   was rendering at ~7px, too small to read. First attempt overrode the
+   rect/text x/y/width/font-size directly per breakpoint; turned out CSS x
+   overrides on <text> compute correctly (getComputedStyle agreed) but don't
+   reliably apply to actual layout in this engine — the rect moved, the text
+   didn't, breaking their alignment. transform doesn't have that problem, and
+   scaling the whole button as one rigid group guarantees the rect and text
+   stay correctly aligned to each other regardless: growing 1.5x scales the
+   font size and corner radius right along with it, no separate overrides
+   needed, and translating +56 along the way shifts it clear of the output-
+   card icon (which ends at x=356) the same way the direct-override attempt
+   intended, just via a mechanism that actually renders correctly. */
+#schematic-dismiss-inner {
+  transform-box: fill-box;
+  transform-origin: center;
+}
 @media (max-width: 480px) {
-  #schematic-dismiss rect {
-    x: 402px;
-    y: 258px;
-    width: 156px;
-    height: 48px;
-    rx: 10px;
-  }
-  #schematic-dismiss text {
-    x: 480px;
-    y: 288px;
-    font-size: 20px;
+  #schematic-dismiss-inner {
+    transform: translate(56px, 0) scale(1.5);
   }
 }
 
