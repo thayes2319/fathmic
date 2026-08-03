@@ -162,7 +162,8 @@ async function runTaxonomy(input, firstBranch) {
       system: SYSTEM_PROMPT,
       prompt: `Subject: "${input}"${branchNote}`,
       tool: TAXONOMY_TOOL,
-      maxTokens: 6144
+      maxTokens: 6144,
+      label: "taxonomy"
     });
 
     const nodes = recoverArrayField(result.nodes);

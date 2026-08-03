@@ -102,7 +102,7 @@ async function runSynthesis({ topic, selections, genre, stakes }) {
   const system = buildSystemPrompt(preset, stakes);
   const prompt = `Subject: ${topic}\n\nSelected elements to weave in:\n${selections.map(s => `- ${s}`).join("\n")}`;
 
-  const text = await callText({ system, prompt });
+  const text = await callText({ system, prompt, label: "synthesis" });
 
   return {
     text,

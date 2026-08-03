@@ -121,7 +121,8 @@ async function runGate(input) {
   const result = await callStructured({
     system: SYSTEM_PROMPT,
     prompt: `Input: "${input}"`,
-    tool: GATE_TOOL
+    tool: GATE_TOOL,
+    label: "gate"
   });
 
   return {

@@ -1,9 +1,12 @@
+const { claudeCallCost } = require("./pricing");
+const { recordCost } = require("./costLog");
+
 const API_URL = "https://api.anthropic.com/v1/messages";
 
 // Calls Claude with a single forced tool call and returns the tool's input object.
 // This is the structured-output pattern for all three endpoints — the model has
 // no room to reply with prose, only with arguments matching the given schema.
-async function callStructured({ system, prompt, tool, maxTokens = 2048 }) {
+async function callStructured({ system, prompt, tool, maxTokens = 2048, label = "unknown" }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not set. Copy .env.example to .env and fill it in.");
@@ -32,7 +35,8 @@ async function callStructured({ system, prompt, tool, maxTokens = 2048 }) {
   }
 
   const data = await response.json();
-  console.log(`[llm] stop_reason=${data.stop_reason} usage=${JSON.stringify(data.usage)}`);
+  console.log(`[llm] label=${label} stop_reason=${data.stop_reason} usage=${JSON.stringify(data.usage)}`);
+  recordCost({ kind: label, usd: claudeCallCost(data.usage) });
   const toolUse = (data.content || []).find(block => block.type === "tool_use");
   if (!toolUse) {
     throw new Error("Model did not return a tool_use block.");
@@ -42,7 +46,7 @@ async function callStructured({ system, prompt, tool, maxTokens = 2048 }) {
 
 // Calls Claude for a plain prose response (used by synthesis, where the
 // deliverable IS the output, not structured data to route through the app).
-async function callText({ system, prompt }) {
+async function callText({ system, prompt, label = "unknown" }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not set. Copy .env.example to .env and fill it in.");
@@ -69,6 +73,8 @@ async function callText({ system, prompt }) {
   }
 
   const data = await response.json();
+  console.log(`[llm] label=${label} stop_reason=${data.stop_reason} usage=${JSON.stringify(data.usage)}`);
+  recordCost({ kind: label, usd: claudeCallCost(data.usage) });
   const textBlock = (data.content || []).find(block => block.type === "text");
   return textBlock ? textBlock.text : "";
 }

@@ -13,6 +13,7 @@ const { sendBlueprintCandidateEmail } = require("./notify");
 const { fetchExternalTrends } = require("./externalTrends");
 const { recordFeedback } = require("./feedbackLog");
 const { saveShare, getShare } = require("./shareLog");
+const { getCostSummary } = require("./costLog");
 
 const app = express();
 app.set("trust proxy", 1); // so req.ip is the real client IP behind a host's reverse proxy, not the proxy itself
@@ -204,6 +205,19 @@ app.get("/api/share/:id", (req, res) => {
   const entry = getShare(req.params.id);
   if (!entry) return res.status(404).json({ error: "Share link not found — it may be mistyped, or the link has expired." });
   res.json(entry);
+});
+
+// Real operating-cost data, computed from actual per-call token usage (see
+// server/pricing.js + costLog.js) -- not linked from the UI, and gated
+// behind a shared secret since this is spend data, not something to leave
+// open the way /api/trending is. 404 (not 401/403) on a bad/missing key so
+// an untargeted scanner can't even tell the route exists.
+const ADMIN_KEY = process.env.ADMIN_KEY;
+app.get("/api/costs", (req, res) => {
+  if (!ADMIN_KEY || req.query.key !== ADMIN_KEY) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  res.json(getCostSummary());
 });
 
 const port = process.env.PORT || 8788;

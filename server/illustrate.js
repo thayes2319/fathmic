@@ -1,4 +1,6 @@
 const { callText } = require("./llm");
+const { recordCost } = require("./costLog");
+const { STABILITY_LARGE_PRICE, STABILITY_TURBO_PRICE } = require("./pricing");
 
 // Same downstream-image-generation PATTERN Muralizer uses (composed prompt ->
 // image API), reusing Muralizer's actual backend/account rather than a fresh
@@ -52,7 +54,8 @@ const BLUEPRINT_NEGATIVE_PROMPT =
 async function composeImagePrompt(topic, resultExcerpt, isBlueprint) {
   return callText({
     system: isBlueprint ? BLUEPRINT_PROMPT_SYSTEM : PROMPT_SYSTEM,
-    prompt: `Topic: ${topic}\n\nDistilled content (excerpt):\n${resultExcerpt}`
+    prompt: `Topic: ${topic}\n\nDistilled content (excerpt):\n${resultExcerpt}`,
+    label: "illustration-prompt"
   });
 }
 
@@ -79,6 +82,9 @@ async function runStabilityIllustration(imagePrompt, negativePrompt, model) {
   if (!imageBase64) {
     throw new Error("Generate response did not include image data.");
   }
+  // Billed per-image, not per-token -- flat rate looked up by which model
+  // actually ran, not tied into llm.js's Claude-specific cost math at all.
+  recordCost({ kind: "illustration-image", usd: model === "sd3.5-large" ? STABILITY_LARGE_PRICE : STABILITY_TURBO_PRICE });
   return imageBase64;
 }
 

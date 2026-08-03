@@ -24,3 +24,5 @@ services:
         sync: false
       - key: DATA_DIR
         value: /data
+      - key: ADMIN_KEY
+        sync: false

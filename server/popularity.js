@@ -30,7 +30,8 @@ async function runPopularity(topic) {
     system: SYSTEM_PROMPT,
     prompt: `Topic: ${topic}`,
     tool: POPULARITY_TOOL,
-    maxTokens: 256
+    maxTokens: 256,
+    label: "popularity"
   });
 
   const clamp = v => (typeof v === "number" ? Math.max(0, Math.min(1, v)) : 0.3);

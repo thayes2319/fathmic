@@ -9,14 +9,15 @@ Write 2-4 words, nothing else. No punctuation. Strip location/proper-noun specif
 const BROADER_QUERY_SYSTEM = `A specific Unsplash search query just came up with zero results. Give a broader, more generic, more commonly-photographed term that still relates to the topic — sacrifice specificity for the sake of actually finding something. 1-2 words, nothing else, no punctuation. (e.g. if "3D printed gears" found nothing, try "gears" or "machine parts" or even "manufacturing".)`;
 
 async function composeSearchQuery(topic) {
-  const query = await callText({ system: QUERY_SYSTEM, prompt: `Topic: ${topic}` });
+  const query = await callText({ system: QUERY_SYSTEM, prompt: `Topic: ${topic}`, label: "photo-query" });
   return query.trim().replace(/["'.]/g, "");
 }
 
 async function composeBroaderQuery(topic, failedQuery) {
   const query = await callText({
     system: BROADER_QUERY_SYSTEM,
-    prompt: `Topic: ${topic}\nFailed query: "${failedQuery}"`
+    prompt: `Topic: ${topic}\nFailed query: "${failedQuery}"`,
+    label: "photo-query-broader"
   });
   return query.trim().replace(/["'.]/g, "");
 }
