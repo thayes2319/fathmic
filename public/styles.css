@@ -1339,6 +1339,31 @@ button:disabled { opacity: 0.5; cursor: default; }
 #output-text p:last-child,
 #output-text ul:last-child,
 #output-text ol:last-child { margin-bottom: 0; }
+
+/* Only the Brief genre asks the model for one of these, but the renderer
+   isn't genre-gated -- any output gets real table styling if it contains
+   one. Shared with .history-detail-text since both run through the same
+   renderMarkdown(). A horizontally-scrolling wrapper keeps a wide table from
+   blowing out the layout on mobile instead of squeezing columns unreadably. */
+#output-text table, .history-detail-text table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.9rem;
+  font-size: 0.92rem;
+  display: block;
+  overflow-x: auto;
+}
+#output-text th, #output-text td,
+.history-detail-text th, .history-detail-text td {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+#output-text th, .history-detail-text th {
+  background: rgba(127, 127, 127, 0.08);
+  font-weight: 700;
+}
 #output-text li:last-child { margin-bottom: 0; }
 #output-text strong { color: var(--fg); }
 

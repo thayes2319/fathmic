@@ -465,20 +465,54 @@ function renderMarkdown(text) {
     if (listType) { html.push(`</${listType}>`); listType = null; }
   }
 
-  escapeHtml(text).split("\n").forEach(rawLine => {
+  // Only used by the Brief genre so far, but not gated to it -- any genre's
+  // output gets a real <table> if it happens to contain one. Splits a
+  // "| a | b | c |" row into cells, tolerant of missing leading/trailing
+  // pipes (both are optional per GFM table syntax).
+  function splitTableRow(rawLine) {
+    let s = rawLine.trim();
+    if (s.startsWith("|")) s = s.slice(1);
+    if (s.endsWith("|")) s = s.slice(0, -1);
+    return s.split("|").map(cell => cell.trim());
+  }
+  const isTableSeparatorRow = rawLine => /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(rawLine.trim());
+
+  const lines = escapeHtml(text).split("\n");
+  let i = 0;
+  while (i < lines.length) {
+    const rawLine = lines[i];
     const line = rawLine.trim();
 
-    if (!line) { flushPara(); closeList(); return; }
+    if (!line) { flushPara(); closeList(); i++; continue; }
+
+    // A table: a "| a | b |" header row immediately followed by a
+    // "|---|---|" separator row. Both have to be present in that exact
+    // order to count -- a stray line that merely contains a pipe character
+    // isn't enough on its own, so ordinary prose can't false-positive here.
+    if (line.includes("|") && i + 1 < lines.length && isTableSeparatorRow(lines[i + 1])) {
+      flushPara();
+      closeList();
+      const headerCells = splitTableRow(line);
+      let tableHtml = `<table><thead><tr>${headerCells.map(c => `<th>${inline(c)}</th>`).join("")}</tr></thead><tbody>`;
+      i += 2; // past header row + separator row
+      while (i < lines.length && lines[i].trim().includes("|")) {
+        tableHtml += `<tr>${splitTableRow(lines[i]).map(c => `<td>${inline(c)}</td>`).join("")}</tr>`;
+        i++;
+      }
+      tableHtml += "</tbody></table>";
+      html.push(tableHtml);
+      continue;
+    }
 
     // A standalone ---/***/___ line — markdown's horizontal-rule syntax,
     // which the model reaches for as a section divider sometimes (mainly in
     // BLUEPRINT results). Previously fell through to being printed as a
     // literal "---" paragraph, which read as a rendering glitch.
     const hr = line.match(/^(-{3,}|\*{3,}|_{3,})$/);
-    if (hr) { flushPara(); closeList(); html.push("<hr>"); return; }
+    if (hr) { flushPara(); closeList(); html.push("<hr>"); i++; continue; }
 
     const heading = line.match(/^(#{1,6})\s+(.*)$/);
-    if (heading) { flushPara(); closeList(); html.push(`<h4>${inline(heading[2])}</h4>`); return; }
+    if (heading) { flushPara(); closeList(); html.push(`<h4>${inline(heading[2])}</h4>`); i++; continue; }
 
     // A line that's entirely **bold**, nothing else — the model's default
     // way of writing a section header when it doesn't reach for real `#`.
@@ -495,7 +529,8 @@ function renderMarkdown(text) {
       closeList();
       const note = boldHeading[2] ? ` <span class="heading-note">(${inline(boldHeading[2])})</span>` : "";
       html.push(`<h4>${inline(boldHeading[1])}${note}</h4>`);
-      return;
+      i++;
+      continue;
     }
 
     const bullet = line.match(/^[-*]\s+(.*)$/);
@@ -503,7 +538,8 @@ function renderMarkdown(text) {
       flushPara();
       if (listType !== "ul") { closeList(); html.push("<ul>"); listType = "ul"; }
       html.push(`<li>${inline(bullet[1])}</li>`);
-      return;
+      i++;
+      continue;
     }
 
     const numbered = line.match(/^\d+[.)]\s+(.*)$/);
@@ -511,12 +547,14 @@ function renderMarkdown(text) {
       flushPara();
       if (listType !== "ol") { closeList(); html.push("<ol>"); listType = "ol"; }
       html.push(`<li>${inline(numbered[1])}</li>`);
-      return;
+      i++;
+      continue;
     }
 
     closeList();
     para.push(inline(line));
-  });
+    i++;
+  }
 
   flushPara();
   closeList();

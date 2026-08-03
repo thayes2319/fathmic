@@ -35,6 +35,16 @@ const GENRE_PRESETS = {
     modeGuidance: "Organize by boundaries — what this is, what it isn't, how it relates to adjacent things.",
     voiceGuidance: "Declarative voice. Is-a statements. Precise, not evocative."
   },
+  // General-purpose, independent of BLUEPRINT (see below) -- available for
+  // any topic, not gated by blueprintFit. The point is a real briefing
+  // document: dense prose, not Summary's outline-by-category structure, plus
+  // exactly one table so the key facts are still scannable without reading
+  // every paragraph.
+  brief: {
+    mode: "brief",
+    modeGuidance: "Organize as 2-4 tight prose paragraphs — no bullet-point outline, no heading-per-category structure. Write it as a real briefing document a decision-maker reads once. Then, after the prose, include exactly one markdown table summarizing the key facts/options/tradeoffs from the selections in compact form (e.g. a Factor / Value or Option / Tradeoff table) — the table supports the prose, it doesn't repeat it verbatim, and there is exactly one, not one per section.",
+    voiceGuidance: "Direct, confident briefing-room voice — dense with substance, no throat-clearing, no hedging filler. Written for someone who has two minutes."
+  },
   // Only surfaced client-side for BLUEPRINT-classified inputs (see
   // state.blueprintFit in app.js) — the other six genres are all
   // reader-facing prose framings, none shaped like something you'd actually
@@ -82,6 +92,9 @@ function buildSystemPrompt(genre, stakes) {
   const scopeDirective = genre === "blueprint"
     ? `\n\nAlways open the piece with a section headed exactly "Scope" (formatted as its own heading, same style as other section headings), before any other section — one short section stating what's being made and its boundaries: size, extent, what's included and excluded.`
     : "";
+  const tableDirective = genre === "brief"
+    ? `\n\nThe one table must use real GitHub-flavored markdown table syntax: a header row, then a separator row of the form |---|---|---| (one segment per column, three or more hyphens each), then data rows — every row using the same number of columns as the header. No merged cells, no nested tables, no markdown formatting (bold/italic/links) inside cells.`
+    : "";
   return `You are the synthesis engine for FATHmic. You take a distilled set of selections about a subject and turn them into a finished piece of writing.
 
 Structural mode (${preset.mode}): ${preset.modeGuidance}
@@ -91,7 +104,7 @@ Voice: ${preset.voiceGuidance}
 Confidence level (body only): ${stakesGuidance}
 
 Real-world currency check: you have no live internet access — no current listings, prices, schedules, availability, or news. If a selection depends on a fact that changes over time and you can't verify it from general knowledge (e.g. what's currently playing/in stock/in season/on sale), do not describe it as if it were resolved or write around the gap. Say so plainly in the first sentence or two — name the specific thing you can't verify and what the reader should check instead — then continue with everything else that IS resolvable normally.
-${scopeDirective}
+${scopeDirective}${tableDirective}
 Always end the piece with a section headed exactly "Where it can go wrong" (formatted as its own heading, same style as any other section headings you use). ${riskGuidance}
 
 Formatting: give every section header the exact same markdown treatment — either real "#### Heading" syntax or a standalone "**Heading**" line, never mixed with trailing text like "**Heading** *(note)*" on the same line, and never a "---" divider between sections (headings alone provide the separation). Inconsistent heading formatting renders inconsistently.
