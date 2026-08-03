@@ -5,6 +5,10 @@
   --muted: #6b6b6b;
   --accent: #7a5c3e;
   --border: #ddd8cf;
+  /* Sampled directly from the dot of the "i" in images/fathmic.png — a fixed
+     brand color from the logo asset itself, not a themed value, so no
+     dark-mode variant below. */
+  --logo-dot: #34d1f8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -41,7 +45,7 @@ h1 { margin-bottom: 0.25rem; }
 .tagline { color: var(--muted); margin-top: 0; }
 
 #brand-lockup { position: relative; z-index: 1; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
-#brand-lockup h1 { margin-bottom: 0; }
+#brand-wordmark { height: 40px; width: auto; display: block; }
 
 #prompt-icon {
   flex: 0 0 auto;
@@ -56,8 +60,8 @@ h1 { margin-bottom: 0.25rem; }
   stroke-linecap: round;
 }
 .prompt-icon-node {
-  stroke: var(--accent);
-  fill: var(--accent);
+  stroke: var(--logo-dot);
+  fill: var(--logo-dot);
   stroke-width: 1.5;
   transform-box: fill-box;
   transform-origin: center;
@@ -88,10 +92,7 @@ h1 { margin-bottom: 0.25rem; }
 }
 /* Same cascade, finite instead of looping — a quiet "hello" a few seconds
    after page load rather than requiring a visitor to discover the hover
-   trigger. Ends on the animation's 0%/100% (small, dim) keyframe, close
-   enough to the true rest state (opacity 0) that removing this class
-   afterward finishes with a smooth fade via the base rule's own transition,
-   not a jarring snap. */
+   trigger. */
 .icon-intro .prompt-icon-node {
   animation: iconProcessPulse 1.3s ease-in-out 4;
   animation-delay: var(--delay);
@@ -100,15 +101,25 @@ h1 { margin-bottom: 0.25rem; }
   0%, 100% { transform: translateY(7px) scale(0.35); opacity: 0.25; }
   50% { transform: translateY(0) scale(1); opacity: 1; }
 }
+/* Once the intro cascade finishes, land on and stay in the risen "out"
+   position (same end state as the hover reveal) instead of fading back to
+   invisible — app.js swaps .icon-intro for this class right as the intro
+   ends. The existing transition on the base rule carries it smoothly from
+   wherever the animation left off into this state, same mechanism that
+   already made removing .icon-intro fade cleanly before this class existed. */
+.icon-revealed .prompt-icon-node {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
 
 #brand-mark {
   position: absolute;
-  top: 50%;
+  top: 156%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 850px;
   max-width: none;
-  filter: sepia(1) saturate(1.4) opacity(0.16);
+  filter: sepia(1) saturate(1.4) opacity(0.11);
   pointer-events: none;
   z-index: 0;
 }
@@ -126,6 +137,41 @@ textarea, input[type="text"] {
   color: var(--fg);
   font-family: inherit;
   font-size: 1rem;
+}
+
+/* A native placeholder attribute can't be animated (it's UA-rendered, not a
+   real element), so the two hint sentences cycle via this absolutely-
+   positioned overlay instead, sized/positioned to land exactly where a
+   placeholder would sit. app.js hides it the moment there's real focus or
+   input, same as a native placeholder disappearing once you start typing. */
+#input-wrap { position: relative; }
+#placeholder-cycle {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  right: 0.6rem;
+  pointer-events: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.placeholder-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+}
+.placeholder-line.entering { animation: placeholderFoldIn 0.5s ease-out forwards; }
+.placeholder-line.leaving { animation: placeholderFoldOut 0.4s ease-in forwards; }
+@keyframes placeholderFoldIn {
+  from { opacity: 0; transform: translateX(20px) scaleX(0.96); }
+  to   { opacity: 1; transform: translateX(0) scaleX(1); }
+}
+@keyframes placeholderFoldOut {
+  from { opacity: 1; transform: translateX(0) scaleX(1); }
+  to   { opacity: 0; transform: translateX(-20px) scaleX(0.96); }
 }
 
 button {
@@ -251,7 +297,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 #blueprint-section {
   margin-top: 1rem;
   padding: 0.8rem 1rem;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--logo-dot);
   border-radius: 8px;
   background: rgba(127, 127, 127, 0.08);
 }
@@ -967,8 +1013,13 @@ button:disabled { opacity: 0.5; cursor: default; }
   height: auto;
 }
 
+/* Blue reserved for the node motif specifically (matching the header icon
+   and the watermark pins) — everything else in this diagram (the gate ring,
+   the output icon, connecting lines, the dismiss button) stays the app's
+   regular accent, so this stays one contained, meaningful touch rather than
+   blue creeping into general UI chrome. */
 .sq-input, .sq-node {
-  fill: var(--accent);
+  fill: var(--logo-dot);
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
@@ -987,7 +1038,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   stroke-dashoffset: 1;
 }
 .sq-leaf { fill: var(--muted); }
-.sq-selected { fill: var(--accent); }
+.sq-selected { fill: var(--logo-dot); }
 .sq-output {
   fill: none;
   stroke: var(--accent);
@@ -1038,6 +1089,28 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-weight: 600;
   font-family: inherit;
   pointer-events: none;
+}
+/* SVG text scales with the whole diagram's viewBox, not the viewport — on a
+   ~375px phone this diagram renders at roughly half scale, so 14px here
+   was rendering at ~7px, too small to read. A flat size increase fixed
+   mobile but overshot on desktop (where it was fine already) and pushed the
+   button left into the output-card icon next to it. A media query instead:
+   desktop keeps the original size/position, mobile gets both a size bump
+   and a shift right (x 372->402, text 424->454) to clear that icon, whose
+   rect ends at x=356 — plenty of margin either way. */
+@media (max-width: 480px) {
+  #schematic-dismiss rect {
+    x: 402px;
+    y: 258px;
+    width: 156px;
+    height: 48px;
+    rx: 10px;
+  }
+  #schematic-dismiss text {
+    x: 480px;
+    y: 288px;
+    font-size: 20px;
+  }
 }
 
 #schematic-sequence.is-playing .sq-input {

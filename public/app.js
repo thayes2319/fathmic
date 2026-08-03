@@ -16,6 +16,7 @@ const state = {
 
 const el = {
   subjectInput: document.getElementById("subject-input"),
+  placeholderCycle: document.getElementById("placeholder-cycle"),
   distillBtn: document.getElementById("distill-btn"),
   otherToggleBtn: document.getElementById("other-toggle-btn"),
   gateStatus: document.getElementById("gate-status"),
@@ -68,6 +69,58 @@ const el = {
   stakesNeedle: document.querySelector(".stakes-knob-needle"),
   stakesPointer: document.querySelector(".stakes-pointer")
 };
+
+// Cycles the two hint sentences one at a time in the empty subject input,
+// fold/fading each in from the right and out to the left rather than
+// showing both lines at once. Stops the instant there's real focus or
+// input (same as a native placeholder disappearing once you start typing),
+// and resumes from the top if the field goes back to empty on blur.
+if (el.placeholderCycle) {
+  const lines = Array.from(el.placeholderCycle.querySelectorAll(".placeholder-line"));
+  const HOLD_MS = 3200;
+  const FOLD_OUT_MS = 400;
+  let cycleIndex = 0;
+  let cycleActive = false;
+  let cycleTimer = null;
+
+  function stopCycle() {
+    cycleActive = false;
+    clearTimeout(cycleTimer);
+    lines.forEach(line => line.classList.remove("entering", "leaving"));
+    el.placeholderCycle.hidden = true;
+  }
+
+  function stepCycle() {
+    if (!cycleActive || el.subjectInput.value) { stopCycle(); return; }
+    const current = lines[cycleIndex];
+    current.classList.add("entering");
+    cycleTimer = setTimeout(() => {
+      if (!cycleActive || el.subjectInput.value) { stopCycle(); return; }
+      current.classList.remove("entering");
+      current.classList.add("leaving");
+      cycleTimer = setTimeout(() => {
+        current.classList.remove("leaving");
+        cycleIndex = (cycleIndex + 1) % lines.length;
+        stepCycle();
+      }, FOLD_OUT_MS);
+    }, HOLD_MS);
+  }
+
+  function startCycle() {
+    if (cycleActive || el.subjectInput.value) return;
+    cycleActive = true;
+    el.placeholderCycle.hidden = false;
+    stepCycle();
+  }
+
+  el.subjectInput.addEventListener("input", stopCycle);
+  el.subjectInput.addEventListener("focus", stopCycle);
+  el.subjectInput.addEventListener("blur", () => {
+    if (!el.subjectInput.value) startCycle();
+  });
+
+  startCycle();
+}
 
 // The synthesis model writes in light markdown (bold pseudo-headers, `- `
 // bullets, the occasional real `#` heading) with no instruction either way —
@@ -1618,6 +1671,9 @@ if (el.schematicSequence && el.brandLockup) {
 if (el.promptIcon) {
   setTimeout(() => {
     el.promptIcon.classList.add("icon-intro");
-    setTimeout(() => el.promptIcon.classList.remove("icon-intro"), 1300 * 4);
+    setTimeout(() => {
+      el.promptIcon.classList.remove("icon-intro");
+      el.promptIcon.classList.add("icon-revealed");
+    }, 1300 * 4);
   }, 400);
 }

@@ -54,14 +54,19 @@
             </g>
           </svg>
         </div>
-        <h1>FATHmic</h1>
+        <img id="brand-wordmark" src="images/fathmic.png" alt="FATHmic" />
       </div>
       <p class="tagline">Discover the unknown unknowns</p>
     </header>
 
     <section id="input-section">
-      <textarea id="subject-input" rows="3" aria-label="What do you want to understand?" placeholder="Know it all now, not after an hour of typing and reading.
-What do you want to fathom?"></textarea>
+      <div id="input-wrap">
+        <textarea id="subject-input" rows="3" aria-label="What do you want to understand?"></textarea>
+        <div id="placeholder-cycle" aria-hidden="true">
+          <span class="placeholder-line">Know it all now, not after an hour of typing and reading.</span>
+          <span class="placeholder-line">What do you want to fathom?</span>
+        </div>
+      </div>
 
       <div id="schematic-sequence" hidden>
         <svg id="schematic-svg" viewBox="0 0 640 350" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
