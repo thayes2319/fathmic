@@ -34,6 +34,15 @@ const GENRE_PRESETS = {
     mode: "taxonomy",
     modeGuidance: "Organize by boundaries — what this is, what it isn't, how it relates to adjacent things.",
     voiceGuidance: "Declarative voice. Is-a statements. Precise, not evocative."
+  },
+  // Only surfaced client-side for BLUEPRINT-classified inputs (see
+  // state.blueprintFit in app.js) — the other six genres are all
+  // reader-facing prose framings, none shaped like something you'd actually
+  // hand to a person building the thing. This one is.
+  blueprint: {
+    mode: "spec",
+    modeGuidance: "Organize as a build brief, not prose, by the actual components/parts the selections break down into (e.g. body/neck/electronics for an instrument, not abstract information-type buckets), covering each part's materials and design choices together within its own section — the way a real build sheet organizes by part.",
+    voiceGuidance: "Precise, structured voice — the way a professional hands a brief to whoever is building this, not an essay. Short declarative lines grouped under headers, not narrative sentences."
   }
 };
 
@@ -63,6 +72,16 @@ function buildSystemPrompt(genre, stakes) {
   const preset = GENRE_PRESETS[genre] || GENRE_PRESETS.summary;
   const stakesGuidance = STAKES_GUIDANCE[stakes] || STAKES_GUIDANCE.medium;
   const riskGuidance = RISK_SECTION_GUIDANCE[stakes] || RISK_SECTION_GUIDANCE.medium;
+  // Folded into modeGuidance text first, but that reads as guidance the model
+  // weighs against everything else in the same paragraph rather than a hard
+  // requirement -- confirmed by testing, it got dropped twice. "Where it can
+  // go wrong" below has never been dropped in any test all session, because
+  // it's phrased as its own isolated "Always..." directive, not part of a
+  // longer explanation. Matching that exact pattern here instead of
+  // rewording modeGuidance a third time.
+  const scopeDirective = genre === "blueprint"
+    ? `\n\nAlways open the piece with a section headed exactly "Scope" (formatted as its own heading, same style as other section headings), before any other section — one short section stating what's being made and its boundaries: size, extent, what's included and excluded.`
+    : "";
   return `You are the synthesis engine for FATHmic. You take a distilled set of selections about a subject and turn them into a finished piece of writing.
 
 Structural mode (${preset.mode}): ${preset.modeGuidance}
@@ -72,7 +91,7 @@ Voice: ${preset.voiceGuidance}
 Confidence level (body only): ${stakesGuidance}
 
 Real-world currency check: you have no live internet access — no current listings, prices, schedules, availability, or news. If a selection depends on a fact that changes over time and you can't verify it from general knowledge (e.g. what's currently playing/in stock/in season/on sale), do not describe it as if it were resolved or write around the gap. Say so plainly in the first sentence or two — name the specific thing you can't verify and what the reader should check instead — then continue with everything else that IS resolvable normally.
-
+${scopeDirective}
 Always end the piece with a section headed exactly "Where it can go wrong" (formatted as its own heading, same style as any other section headings you use). ${riskGuidance}
 
 Write only the finished piece. No preamble, no "here is your summary," no meta-commentary about what you're doing.`;

@@ -35,6 +35,7 @@ const el = {
   taxonomyTree: document.getElementById("taxonomy-tree"),
   genreSection: document.getElementById("genre-section"),
   genreButtons: document.getElementById("genre-buttons"),
+  blueprintGenreBtn: document.getElementById("blueprint-genre-btn"),
   outputSection: document.getElementById("output-section"),
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
@@ -68,8 +69,59 @@ const el = {
   regenerateBtn: document.getElementById("regenerate-btn"),
   stakesPositions: document.querySelectorAll(".stakes-marker"),
   stakesNeedle: document.querySelector(".stakes-knob-needle"),
-  stakesPointer: document.querySelector(".stakes-pointer")
+  stakesPointer: document.querySelector(".stakes-pointer"),
+  referenceCards: document.getElementById("reference-cards"),
+  cardLightboxBackdrop: document.getElementById("card-lightbox-backdrop"),
+  cardLightboxContent: document.getElementById("card-lightbox-content"),
+  cardLightboxClose: document.getElementById("card-lightbox-close")
 };
+
+// Reference cards zoom into a lightbox on click — most useful on mobile,
+// where even the stacked full-width cards top out around 320-390px.
+// Guarded so clicking a card still showing its placeholder/error text
+// (nothing generated yet) does nothing rather than opening an empty
+// lightbox — checked by looking for the actual content (an <img>, or the
+// Topic Reach chart) rather than trusting the card's current state.
+function openCardLightbox(card) {
+  el.cardLightboxContent.innerHTML = "";
+  if (card.dataset.card === "popularity") {
+    const scopeFill = card.querySelector(".scope-rows-fill");
+    if (!scopeFill) return;
+    const wrap = document.createElement("div");
+    wrap.className = "lightbox-scope-wrap";
+    wrap.appendChild(scopeFill.cloneNode(true));
+    el.cardLightboxContent.appendChild(wrap);
+  } else {
+    const img = card.querySelector("img");
+    if (!img) return;
+    const bigImg = document.createElement("img");
+    bigImg.src = img.src;
+    bigImg.alt = img.alt;
+    el.cardLightboxContent.appendChild(bigImg);
+    const credit = card.querySelector(".photo-credit");
+    if (credit) el.cardLightboxContent.appendChild(credit.cloneNode(true));
+  }
+  el.cardLightboxBackdrop.hidden = false;
+}
+
+function closeCardLightbox() {
+  el.cardLightboxBackdrop.hidden = true;
+  el.cardLightboxContent.innerHTML = "";
+}
+
+if (el.referenceCards) {
+  el.referenceCards.addEventListener("click", event => {
+    const card = event.target.closest(".ref-card");
+    if (card) openCardLightbox(card);
+  });
+  el.cardLightboxClose.addEventListener("click", closeCardLightbox);
+  el.cardLightboxBackdrop.addEventListener("click", event => {
+    if (event.target === el.cardLightboxBackdrop) closeCardLightbox();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !el.cardLightboxBackdrop.hidden) closeCardLightbox();
+  });
+}
 
 // Cycles the two hint sentences one at a time in the empty subject input,
 // fold/fading each in from the right and out to the left rather than
@@ -1114,6 +1166,7 @@ function applyExclusions() {
   });
 
   el.genreSection.hidden = state.selected.size === 0;
+  if (el.blueprintGenreBtn) el.blueprintGenreBtn.hidden = !state.blueprintFit;
   checkStaleness();
 }
 
@@ -1177,6 +1230,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   if (matchingBtn) matchingBtn.classList.add("active");
 
   el.outputSection.hidden = false;
+  el.outputSection.classList.toggle("blueprint-result", state.blueprintFit);
   el.outputHeading.textContent = `Result — ${genreLabel}`;
   el.outputText.textContent = "Synthesizing...";
   el.staleBanner.hidden = true;

@@ -289,6 +289,7 @@
         <button data-genre="argument">Argument</button>
         <button data-genre="action_item">Action items</button>
         <button data-genre="definition">Definition</button>
+        <button id="blueprint-genre-btn" data-genre="blueprint" hidden>Blueprint</button>
       </div>
     </section>
 
@@ -334,11 +335,19 @@
       </div>
 
       <div id="output-text-wrap">
+        <span id="blueprint-result-badge">BLUEPRINT</span>
         <button id="copy-output-btn" title="Copy result to clipboard">Copy</button>
         <div id="output-text"></div>
       </div>
     </section>
   </main>
+
+  <div id="card-lightbox-backdrop" hidden>
+    <div id="card-lightbox">
+      <button id="card-lightbox-close" type="button" aria-label="Close">&times;</button>
+      <div id="card-lightbox-content"></div>
+    </div>
+  </div>
 
   <script src="demo-fixtures.js"></script>
   <script src="app.js"></script>
