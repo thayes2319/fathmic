@@ -1,24 +1,19 @@
+/* Locked to light only, deliberately -- dark mode used to follow
+   prefers-color-scheme (see git history if it's ever wanted back), but
+   maintaining two visual modes going forward wasn't worth it for a
+   single-maintainer project. color-scheme: light (not "light dark") also
+   keeps browser-native chrome -- scrollbars, form control defaults -- light
+   regardless of the phone/OS setting, not just these custom properties. */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --fg: #1a1a1a;
   --bg: #fafaf8;
   --muted: #6b6b6b;
   --accent: #7a5c3e;
   --border: #ddd8cf;
-  /* Sampled directly from the dot of the "i" in images/fathmic.png — a fixed
-     brand color from the logo asset itself, not a themed value, so no
-     dark-mode variant below. */
+  /* Sampled directly from the dot of the "i" in images/fathmic.png -- a
+     fixed brand color from the logo asset itself either way. */
   --logo-dot: #34d1f8;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fg: #eee;
-    --bg: #171613;
-    --muted: #999;
-    --accent: #c9a877;
-    --border: #3a382f;
-  }
 }
 
 * { box-sizing: border-box; }
