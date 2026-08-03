@@ -56,10 +56,20 @@
         </div>
         <img id="brand-wordmark" src="images/fathmic.png" alt="FATHmic" />
       </div>
-      <p class="tagline">Discover the unknown unknowns</p>
+      <div id="tagline-cycle" class="tagline">
+        <span class="tagline-line">Discover the unknown unknowns</span>
+        <span class="tagline-line">Turn any topic into a clear, custom-built answer</span>
+        <span class="tagline-line">FATHmic — pronounced <strong>FATH-mik</strong> (like &ldquo;fathom&rdquo; + mic)</span>
+        <span class="tagline-line"><strong>fathom</strong>: to get to the very bottom of something &nbsp;+&nbsp; <strong>-ic</strong>: the suffix that makes it an adjective &mdash; &ldquo;of or relating to&rdquo;</span>
+      </div>
+      <button id="history-btn" class="link-btn" type="button" hidden>My previous FATHmics</button>
     </header>
 
     <section id="input-section">
+      <p id="how-it-works-line">
+        Type any topic below — FATHmic maps out the real decision points hiding inside it, you pick the ones that fit, and it writes your answer.
+        <button id="replay-schematic-btn" class="link-btn" type="button">See how it works &#8635;</button>
+      </p>
       <div id="input-wrap">
         <textarea id="subject-input" rows="3" aria-label="What do you want to understand?"></textarea>
         <div id="placeholder-cycle" aria-hidden="true">
@@ -155,30 +165,34 @@
         </svg>
       </div>
 
-      <div id="persona-row">
-        <label for="persona-select">Searching as (optional):</label>
-        <select id="persona-select">
-          <option value="">Prefer not to say</option>
-          <option value="parent">Parent</option>
-          <option value="student">Student</option>
-          <option value="professional">Working Professional</option>
-          <option value="hobbyist">Hobbyist</option>
-          <option value="retiree">Retiree</option>
-          <option value="pet_owner">Pet Owner</option>
-          <option value="caregiver">Caregiver</option>
-          <option value="small_business_owner">Small Business Owner</option>
-          <option value="homeowner">Homeowner</option>
-          <option value="creative">Creative</option>
-          <option value="other">Other</option>
-        </select>
+      <div id="action-row">
+        <button id="distill-btn">Distill</button>
+        <div id="persona-row">
+          <label for="persona-select">Searching as (optional):</label>
+          <select id="persona-select">
+            <option value="">Prefer not to say</option>
+            <option value="parent">Parent</option>
+            <option value="student">Student</option>
+            <option value="professional">Working Professional</option>
+            <option value="hobbyist">Hobbyist</option>
+            <option value="retiree">Retiree</option>
+            <option value="pet_owner">Pet Owner</option>
+            <option value="caregiver">Caregiver</option>
+            <option value="small_business_owner">Small Business Owner</option>
+            <option value="homeowner">Homeowner</option>
+            <option value="creative">Creative</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
       </div>
-
-      <button id="distill-btn">Distill</button>
       <button id="other-toggle-btn" class="skip-btn" type="button" hidden>Other</button>
       <p id="gate-status" class="status"></p>
 
       <div id="blueprint-section">
-        <p id="blueprint-tagline">This site is tuned especially for <strong>blueprinting your build</strong></p>
+        <div id="blueprint-header">
+          <span id="blueprint-stamp">Blueprint &amp; Spec</span>
+          <span id="blueprint-caption">tuned especially for your build</span>
+        </div>
         <div class="hscroll-wrap">
           <button id="blueprint-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
           <div id="blueprint-chips" class="hscroll-track"></div>
@@ -216,7 +230,17 @@
     </section>
 
     <section id="taxonomy-section" hidden>
-      <h2 id="topic-heading"></h2>
+      <div id="topic-header-row">
+        <h2 id="topic-heading"></h2>
+        <button id="revise-topic-btn" class="link-btn" type="button">Revise</button>
+      </div>
+      <div id="revise-topic-panel" hidden>
+        <textarea id="revise-topic-input" rows="2" aria-label="Revise your topic"></textarea>
+        <div id="revise-topic-actions">
+          <button id="revise-topic-submit-btn" type="button">Update map</button>
+          <button id="revise-topic-cancel-btn" class="skip-btn" type="button">Cancel</button>
+        </div>
+      </div>
       <div id="expand-controls">
         <button id="interview-toggle-btn" class="icon-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>
@@ -336,6 +360,7 @@
 
       <div id="output-text-wrap">
         <span id="blueprint-result-badge">BLUEPRINT</span>
+        <button id="print-output-btn" title="Print this result">Print</button>
         <button id="copy-output-btn" title="Copy result to clipboard">Copy</button>
         <div id="output-text"></div>
       </div>
@@ -346,6 +371,15 @@
     <div id="card-lightbox">
       <button id="card-lightbox-close" type="button" aria-label="Close">&times;</button>
       <div id="card-lightbox-content"></div>
+    </div>
+  </div>
+
+  <div id="history-backdrop" hidden>
+    <div id="history-modal">
+      <button id="history-close" type="button" aria-label="Close">&times;</button>
+      <h3>My previous FATHmics</h3>
+      <div id="history-list-content"></div>
+      <div id="history-detail-content" hidden></div>
     </div>
   </div>
 

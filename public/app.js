@@ -18,6 +18,19 @@ const state = {
 const el = {
   subjectInput: document.getElementById("subject-input"),
   placeholderCycle: document.getElementById("placeholder-cycle"),
+  taglineCycle: document.getElementById("tagline-cycle"),
+  replaySchematicBtn: document.getElementById("replay-schematic-btn"),
+  historyBtn: document.getElementById("history-btn"),
+  historyBackdrop: document.getElementById("history-backdrop"),
+  historyClose: document.getElementById("history-close"),
+  historyListContent: document.getElementById("history-list-content"),
+  historyDetailContent: document.getElementById("history-detail-content"),
+  reviseTopicBtn: document.getElementById("revise-topic-btn"),
+  reviseTopicPanel: document.getElementById("revise-topic-panel"),
+  reviseTopicInput: document.getElementById("revise-topic-input"),
+  reviseTopicSubmitBtn: document.getElementById("revise-topic-submit-btn"),
+  reviseTopicCancelBtn: document.getElementById("revise-topic-cancel-btn"),
+  printOutputBtn: document.getElementById("print-output-btn"),
   distillBtn: document.getElementById("distill-btn"),
   otherToggleBtn: document.getElementById("other-toggle-btn"),
   gateStatus: document.getElementById("gate-status"),
@@ -123,6 +136,161 @@ if (el.referenceCards) {
   });
 }
 
+// "My previous FATHmics": a persistent, cross-visit record of completed
+// results, entirely client-side (localStorage) — no account system exists,
+// so this is scoped to "this browser" rather than "this person." Saved once
+// per successful synthesis (see runSynthesisForGenre), capped so it can't
+// grow unbounded. The entry point in the header stays hidden until there's
+// at least one saved result, rather than showing an always-empty link.
+const HISTORY_KEY = "fathmic_history";
+const HISTORY_MAX = 20;
+
+function loadHistory() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveToHistory(entry) {
+  try {
+    const history = loadHistory();
+    history.unshift(entry);
+    history.length = Math.min(history.length, HISTORY_MAX);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    refreshHistoryButtonVisibility();
+  } catch {
+    // Privacy mode or similar blocking localStorage — history just won't
+    // persist, same tolerant pattern as the schematic's "seen" flag.
+  }
+}
+
+function refreshHistoryButtonVisibility() {
+  if (!el.historyBtn) return;
+  el.historyBtn.hidden = loadHistory().length === 0;
+}
+
+function renderHistoryList() {
+  const history = loadHistory();
+  el.historyListContent.innerHTML = "";
+  if (!history.length) {
+    el.historyListContent.innerHTML = '<p class="history-empty">No previous FATHmics yet.</p>';
+    return;
+  }
+  history.forEach((entry, index) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "history-item";
+    const when = new Date(entry.timestamp).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    item.innerHTML = `<span class="history-item-topic">${escapeHtml(entry.topic)}</span><span class="history-item-meta">${escapeHtml(entry.genreLabel)} · ${when}</span>`;
+    item.addEventListener("click", () => showHistoryDetail(index));
+    el.historyListContent.appendChild(item);
+  });
+}
+
+function showHistoryDetail(index) {
+  const entry = loadHistory()[index];
+  if (!entry) return;
+  el.historyListContent.hidden = true;
+  el.historyDetailContent.hidden = false;
+  el.historyDetailContent.innerHTML = `
+    <button id="history-back-btn" class="link-btn" type="button">&larr; Back</button>
+    <h4>${escapeHtml(entry.topic)}</h4>
+    <p class="history-item-meta">${escapeHtml(entry.genreLabel)} · ${new Date(entry.timestamp).toLocaleString()}</p>
+    <div class="history-detail-text">${renderMarkdown(entry.resultText)}</div>
+    <button id="history-reopen-btn" class="pick-btn pick-btn-sm" type="button">Reopen this FATHmic</button>
+  `;
+  el.historyDetailContent.querySelector("#history-back-btn").addEventListener("click", () => {
+    el.historyDetailContent.hidden = true;
+    el.historyListContent.hidden = false;
+  });
+  el.historyDetailContent.querySelector("#history-reopen-btn").addEventListener("click", () => {
+    closeHistoryModal();
+    loadHistoryEntry(entry);
+  });
+}
+
+// Restores a full past session -- not just the topic text, but the same
+// taxonomy tree, the same selections, stakes, and Blueprint status the
+// result was actually generated from, plus the saved text itself (shown
+// immediately, no re-synthesis needed). What's NOT restored: the
+// illustration/photo/popularity reference cards -- their content (a base64
+// image, an Unsplash URL) was never persisted (would bloat localStorage for
+// little benefit), so those regenerate fresh, same as any normal run.
+function loadHistoryEntry(entry) {
+  resetDownstream();
+  state.input = entry.input || entry.topic;
+  el.subjectInput.value = state.input;
+  state.topic = entry.topic;
+  state.categories = entry.categories || [];
+  state.selected = new Set(entry.selections || []);
+  state.stakes = entry.stakes || "medium";
+  state.blueprintFit = entry.blueprintFit === true;
+  renderStakesDial();
+
+  // Land in the normal expanded view (not interview mode) with whatever had
+  // a selection already open -- same convention as landing from a revise.
+  state.expandedCategories = new Set(state.categories.filter(categoryHasSelection).map(c => c.name));
+  state.expandedSubcategories = new Set();
+  state.categories.forEach(cat => (cat.subcategories || []).forEach(sub => {
+    if (subcategoryHasSelection(sub)) state.expandedSubcategories.add(`${cat.name}::${sub.name}`);
+  }));
+  interviewModeActive = false;
+  interviewIndex = -1;
+  el.taxonomySection.hidden = false;
+  renderTaxonomy();
+  applyExclusions();
+  enterActiveSession();
+
+  Array.from(el.genreButtons.children).forEach(btn => btn.classList.remove("active"));
+  const matchingBtn = Array.from(el.genreButtons.children).find(btn => btn.dataset.genre === entry.genre);
+  if (matchingBtn) matchingBtn.classList.add("active");
+
+  el.outputSection.hidden = false;
+  el.outputSection.classList.toggle("blueprint-result", state.blueprintFit);
+  el.outputHeading.textContent = `Result — ${entry.genreLabel}`;
+  el.outputText.innerHTML = renderMarkdown(entry.resultText);
+  state.lastResultText = entry.resultText;
+  state.lastGenre = entry.genre;
+  state.lastGenreLabel = entry.genreLabel;
+  state.resultSelectionsSnapshot = new Set(state.selected);
+  state.lastStakesUsed = state.stakes;
+
+  resetIllustrationCard();
+  resetPhotoCard();
+  resetPopularityCard();
+  generateIllustration(); // fire-and-forget -- not persisted, so regenerated fresh
+  generatePhoto();
+  generatePopularity();
+
+  requestAnimationFrame(() => el.taxonomySection.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+
+function openHistoryModal() {
+  el.historyDetailContent.hidden = true;
+  el.historyListContent.hidden = false;
+  renderHistoryList();
+  el.historyBackdrop.hidden = false;
+}
+
+function closeHistoryModal() {
+  el.historyBackdrop.hidden = true;
+}
+
+if (el.historyBtn) {
+  refreshHistoryButtonVisibility();
+  el.historyBtn.addEventListener("click", openHistoryModal);
+  el.historyClose.addEventListener("click", closeHistoryModal);
+  el.historyBackdrop.addEventListener("click", event => {
+    if (event.target === el.historyBackdrop) closeHistoryModal();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !el.historyBackdrop.hidden) closeHistoryModal();
+  });
+}
+
 // Cycles the two hint sentences one at a time in the empty subject input,
 // fold/fading each in from the right and out to the left rather than
 // showing both lines at once. Stops the instant there's real focus or
@@ -186,6 +354,57 @@ if (el.placeholderCycle) {
   stopPlaceholderCycle = stopCycle;
 
   startCycle();
+}
+
+// Rotates the header tagline through a few framings using the same fold
+// in/out mechanic as the placeholder cycle above -- personality, plain
+// function, and pronunciation/etymology each got requested separately, and
+// no single line does all of them well. Runs continuously at rest; unlike
+// the placeholder cycle there's no "real content" state to defer to.
+if (el.taglineCycle) {
+  const taglineLines = Array.from(el.taglineCycle.querySelectorAll(".tagline-line"));
+  const TAGLINE_HOLD_MS = 4200;
+  const TAGLINE_FOLD_OUT_MS = 400;
+  let taglineIndex = 0;
+
+  // The lines are absolutely positioned (so they can overlap during the fold
+  // transition) which means none of them contribute to #tagline-cycle's own
+  // height. Left alone, the container collapses to ~1 line tall while a
+  // longer wrapped line (the etymology one runs 2-3 lines on a narrow phone)
+  // still visually overflows past its bottom edge — and since the line
+  // element is still there in layout even at opacity:0, that overflow area
+  // was actually intercepting clicks meant for whatever sits below it in the
+  // header (the History button). Measuring each line's real height (same
+  // approach as sizeSchematicLabels below) and sizing the container to the
+  // tallest one fixes this for any line length at any viewport width.
+  function sizeTaglineCycle() {
+    let maxHeight = 0;
+    taglineLines.forEach(line => {
+      const prevPosition = line.style.position;
+      line.style.position = "static";
+      maxHeight = Math.max(maxHeight, line.getBoundingClientRect().height);
+      line.style.position = prevPosition;
+    });
+    el.taglineCycle.style.minHeight = `${maxHeight}px`;
+  }
+  sizeTaglineCycle();
+  window.addEventListener("resize", sizeTaglineCycle);
+
+  function stepTagline() {
+    const current = taglineLines[taglineIndex];
+    current.classList.add("entering");
+    setTimeout(() => {
+      current.classList.remove("entering");
+      current.classList.add("leaving");
+      setTimeout(() => {
+        current.classList.remove("leaving");
+        taglineIndex = (taglineIndex + 1) % taglineLines.length;
+        stepTagline();
+      }, TAGLINE_FOLD_OUT_MS);
+    }, TAGLINE_HOLD_MS);
+  }
+
+  if (taglineLines.length) stepTagline();
 }
 
 // The synthesis model writes in light markdown (bold pseudo-headers, `- `
@@ -267,6 +486,8 @@ async function postJSON(path, body) {
 }
 
 function resetDownstream() {
+  clearTimeout(blueprintAutoRunTimer);
+  blueprintAutoRunTimer = null;
   el.clarifySection.hidden = true;
   el.taxonomySection.hidden = true;
   el.genreSection.hidden = true;
@@ -451,6 +672,28 @@ async function runDistill(input) {
 
 el.distillBtn.addEventListener("click", () => runDistill(el.subjectInput.value.trim()));
 
+// "Distill" reads as intimidating/clinical to some visitors. Cycling the
+// button's own label through a short list of calmer synonyms softens that
+// without touching what the button actually does — the click handler above
+// always calls runDistill() regardless of which word is currently showing.
+// Kept short and deliberately non-destructive-sounding (no "extract",
+// "press", "squeeze", "decompose", etc., even though those are common
+// synonyms too) per explicit feedback that a long, aggressive-sounding
+// rotation would undercut the point rather than help it.
+const DISTILL_LABELS = ["Distill", "Refine", "Purify", "Clarify", "Concentrate"];
+if (el.distillBtn) {
+  let distillLabelIndex = 0;
+  setInterval(() => {
+    if (el.distillBtn.disabled) return; // mid-request — leave whatever it currently reads alone
+    distillLabelIndex = (distillLabelIndex + 1) % DISTILL_LABELS.length;
+    el.distillBtn.classList.add("label-fading");
+    setTimeout(() => {
+      el.distillBtn.textContent = DISTILL_LABELS[distillLabelIndex];
+      el.distillBtn.classList.remove("label-fading");
+    }, 200);
+  }, 4500);
+}
+
 el.clarifySubmitBtn.addEventListener("click", async () => {
   const answer = el.clarifyAnswer.value.trim();
   if (!answer) return;
@@ -519,6 +762,12 @@ const TAXONOMY_WAIT_MESSAGES = [
 ];
 
 async function runTaxonomy() {
+  // Empty for a fresh Distill or clarify-answer call (resetDownstream()
+  // already cleared state.selected before either path reaches here) —
+  // populated only when reviseTopic() calls this to regenerate an existing
+  // map. That's the signal used below to carry over whatever still applies
+  // instead of wiping selections and making someone start over.
+  const previousSelected = new Set(state.selected);
   let msgIndex = 0;
   el.gateStatus.textContent = TAXONOMY_WAIT_MESSAGES[0];
   el.gateStatus.classList.add("status-pulsing");
@@ -545,9 +794,46 @@ async function runTaxonomy() {
 
     state.topic = taxonomy.topic;
     state.categories = taxonomy.categories || [];
-    startInterview(); // renders internally; auto-starts interview mode on this fresh taxonomy
-    enterActiveSession();
-    el.gateStatus.textContent = "";
+
+    if (previousSelected.size) {
+      // Revise path: keep whichever previously-selected labels still exist
+      // anywhere in the regenerated tree, drop the rest (the structure
+      // underneath them may no longer exist), and land in the normal
+      // expanded view rather than interview mode — interview mode would
+      // relitigate categories they'd already resolved before revising.
+      const survivingLabels = new Set();
+      state.categories.forEach(cat => {
+        survivingLabels.add(cat.name);
+        (cat.subcategories || []).forEach(sub => {
+          survivingLabels.add(sub.name);
+          (sub.elements || []).forEach(e => survivingLabels.add(typeof e === "string" ? e : e.text));
+        });
+      });
+      state.selected = new Set(Array.from(previousSelected).filter(label => survivingLabels.has(label)));
+
+      state.expandedCategories = new Set(state.categories.filter(categoryHasSelection).map(c => c.name));
+      state.expandedSubcategories = new Set();
+      state.categories.forEach(cat => (cat.subcategories || []).forEach(sub => {
+        if (subcategoryHasSelection(sub)) state.expandedSubcategories.add(`${cat.name}::${sub.name}`);
+      }));
+      interviewModeActive = false;
+      interviewIndex = -1;
+      renderTaxonomy();
+      applyExclusions();
+
+      el.outputSection.hidden = true;
+      state.resultSelectionsSnapshot = null;
+      state.lastGenre = null;
+
+      const kept = state.selected.size;
+      el.gateStatus.textContent = kept
+        ? `Map updated — kept ${kept} of your ${previousSelected.size} previous selection${previousSelected.size === 1 ? "" : "s"}.`
+        : "Map updated — none of your previous selections carried over.";
+    } else {
+      startInterview(); // renders internally; auto-starts interview mode on this fresh taxonomy
+      enterActiveSession();
+      el.gateStatus.textContent = "";
+    }
 
     // Real response landed — stop any not-yet-fired scripted reveals so
     // they can't later flip an already-done step back to "active", mark
@@ -562,6 +848,44 @@ async function runTaxonomy() {
     el.gateStatus.classList.remove("status-pulsing");
     clearProcessTimers();
   }
+}
+
+// Revise mode: feedback was that editing the topic after a taxonomy already
+// existed threw away every selection and made someone start over. This
+// regenerates the taxonomy from an edited/expanded version of the original
+// input — same runTaxonomy() path used everywhere else — but leaves
+// state.selected populated going in, which runTaxonomy() takes as the signal
+// to carry over whatever still applies instead of clearing it.
+async function reviseTopic(newInputText) {
+  const trimmed = (newInputText || "").trim();
+  if (!trimmed) return;
+
+  state.input = trimmed;
+  el.subjectInput.value = trimmed;
+  el.reviseTopicPanel.hidden = true;
+
+  el.promptIcon.classList.add("icon-processing");
+  openProcessModal();
+  setStepState("gate", "done"); // revising skips the gate -- already passed once for this topic
+
+  try {
+    await runTaxonomy();
+  } catch (err) {
+    closeProcessModal();
+    el.gateStatus.textContent = `Error: ${err.message}`;
+  } finally {
+    el.promptIcon.classList.remove("icon-processing");
+  }
+}
+
+if (el.reviseTopicBtn) {
+  el.reviseTopicBtn.addEventListener("click", () => {
+    el.reviseTopicInput.value = state.input;
+    el.reviseTopicPanel.hidden = false;
+    el.reviseTopicInput.focus();
+  });
+  el.reviseTopicCancelBtn.addEventListener("click", () => { el.reviseTopicPanel.hidden = true; });
+  el.reviseTopicSubmitBtn.addEventListener("click", () => reviseTopic(el.reviseTopicInput.value));
 }
 
 let elementRegistry = [];
@@ -1167,7 +1491,29 @@ function applyExclusions() {
 
   el.genreSection.hidden = state.selected.size === 0;
   if (el.blueprintGenreBtn) el.blueprintGenreBtn.hidden = !state.blueprintFit;
+  if (state.blueprintFit && state.selected.size > 0 && state.lastGenre === null) scheduleBlueprintAutoRun();
   checkStaleness();
+}
+
+// BLUEPRINT-fit topics default straight to the Blueprint output type instead
+// of making someone hunt for it among six other genre buttons — but only
+// once, for the FIRST result on a fresh taxonomy (guarded by lastGenre being
+// null): after that a real result exists and the normal stale-banner +
+// manual Regenerate convention takes over, same as every other genre, rather
+// than silently re-synthesizing behind their back every time a checkbox
+// changes. Debounced so it fires ~1.5s after the last selection change, not
+// on the very first checkbox ticked (which would run on a near-empty pick).
+let blueprintAutoRunTimer = null;
+const BLUEPRINT_AUTO_RUN_DELAY_MS = 1500;
+
+function scheduleBlueprintAutoRun() {
+  clearTimeout(blueprintAutoRunTimer);
+  blueprintAutoRunTimer = setTimeout(() => {
+    blueprintAutoRunTimer = null;
+    if (state.blueprintFit && state.selected.size > 0 && state.lastGenre === null && el.blueprintGenreBtn && !el.blueprintGenreBtn.hidden) {
+      runSynthesisForGenre("blueprint", el.blueprintGenreBtn.textContent);
+    }
+  }, BLUEPRINT_AUTO_RUN_DELAY_MS);
 }
 
 // Compares current selections against a snapshot taken at the last successful
@@ -1224,6 +1570,32 @@ el.stakesPositions.forEach(btn => {
   });
 });
 
+// The full synthesis call can take a real while, and "Synthesizing..." on
+// its own is dead time. Everything needed for a quick recap of the actual
+// picks already exists client-side (state.categories + state.selected) —
+// no extra API call — so show that instead of a bare status string while
+// the real prose comes together. Purely a snapshot of selections, grouped by
+// category; not a generated summary.
+function buildQuickChart() {
+  const rows = [];
+  state.categories.forEach(cat => {
+    const picks = [];
+    if (state.selected.has(cat.name)) picks.push(cat.name);
+    (cat.subcategories || []).forEach(sub => {
+      if (state.selected.has(sub.name)) picks.push(sub.name);
+      (sub.elements || []).forEach(e => {
+        const text = typeof e === "string" ? e : e.text;
+        if (state.selected.has(text)) picks.push(text);
+      });
+    });
+    if (picks.length) {
+      rows.push(`<li><strong>${escapeHtml(cat.name)}:</strong> ${picks.map(escapeHtml).join(", ")}</li>`);
+    }
+  });
+  if (!rows.length) return "";
+  return `<div id="quick-chart"><div class="quick-chart-label">Quick chart — your picks, while the full result comes together:</div><ul>${rows.join("")}</ul></div>`;
+}
+
 async function runSynthesisForGenre(genre, genreLabel) {
   Array.from(el.genreButtons.children).forEach(btn => btn.classList.remove("active"));
   const matchingBtn = Array.from(el.genreButtons.children).find(btn => btn.dataset.genre === genre);
@@ -1232,7 +1604,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   el.outputSection.hidden = false;
   el.outputSection.classList.toggle("blueprint-result", state.blueprintFit);
   el.outputHeading.textContent = `Result — ${genreLabel}`;
-  el.outputText.textContent = "Synthesizing...";
+  el.outputText.innerHTML = buildQuickChart() || "Synthesizing...";
   el.staleBanner.hidden = true;
   resetIllustrationCard();
   resetPhotoCard();
@@ -1251,6 +1623,18 @@ async function runSynthesisForGenre(genre, genreLabel) {
     state.lastGenreLabel = genreLabel;
     state.resultSelectionsSnapshot = new Set(state.selected);
     state.lastStakesUsed = state.stakes;
+    saveToHistory({
+      input: state.input,
+      topic: state.topic,
+      categories: state.categories,
+      selections: Array.from(state.selected),
+      stakes: state.stakes,
+      blueprintFit: state.blueprintFit,
+      genre,
+      genreLabel,
+      resultText: result.text,
+      timestamp: Date.now()
+    });
     generateIllustration(); // fire-and-forget: don't block the text result on image generation
     generatePhoto(); // fire-and-forget: same
     generatePopularity(); // fire-and-forget: same
@@ -1287,6 +1671,10 @@ el.copyOutputBtn.addEventListener("click", async () => {
     el.copyOutputBtn.classList.remove("copied");
   }, 1500);
 });
+
+if (el.printOutputBtn) {
+  el.printOutputBtn.addEventListener("click", () => window.print());
+}
 
 el.expandAllBtn.addEventListener("click", () => {
   // Top-level only — subcategories stay however they were. Cascading into
@@ -1338,7 +1726,15 @@ const BLUEPRINT_SUBJECTS = [
   { label: "Home theater builds", seed: "Planning a home theater build" },
   { label: "Instrument builds", seed: "Designing a custom guitar build" },
   { label: "Gaming PC builds", seed: "Designing a custom gaming PC build" },
-  { label: "Window replacement", seed: "Planning a home window replacement" }
+  { label: "Window replacement", seed: "Planning a home window replacement" },
+  { label: "Custom sneaker design", seed: "Designing a custom sneaker" },
+  { label: "Wedding theme & decor", seed: "Planning a wedding theme and decor" },
+  { label: "Kitchen remodel", seed: "Planning a custom kitchen remodel" },
+  { label: "Backyard deck & patio", seed: "Designing a backyard deck and patio" },
+  { label: "Custom car build", seed: "Designing a custom car build" },
+  { label: "Cosplay costume design", seed: "Designing a custom cosplay costume" },
+  { label: "Tiny house build", seed: "Designing a custom tiny house build" },
+  { label: "Custom bicycle build", seed: "Designing a custom bicycle build" }
 ];
 if (el.blueprintChips) {
   BLUEPRINT_SUBJECTS.forEach(subject => {
@@ -1743,6 +2139,14 @@ if (el.schematicSequence && el.brandLockup) {
     // once-per-visitor autoplay rather than error out; replay-on-hover
     // still works regardless.
   }
+}
+
+// Hovering the logo to replay the explainer isn't a discoverable
+// interaction — feedback was that first-time visitors didn't know what the
+// site does or what to do first. A plain, visible "See how it works" link
+// right above the input does the same replay on an actual click.
+if (el.replaySchematicBtn) {
+  el.replaySchematicBtn.addEventListener("click", () => playSchematic());
 }
 
 // Small logo icon plays its cascade a few times on every load, unprompted —

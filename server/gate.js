@@ -33,7 +33,15 @@ const KNOWN_BLUEPRINT_SUBJECTS = [
   "Home theater builds",
   "Instrument builds",
   "Gaming PC builds",
-  "Window replacement"
+  "Window replacement",
+  "Custom sneaker design",
+  "Wedding theme & decor",
+  "Kitchen remodel",
+  "Backyard deck & patio",
+  "Custom car build",
+  "Cosplay costume design",
+  "Tiny house build",
+  "Custom bicycle build"
 ];
 
 const GATE_TOOL = {
