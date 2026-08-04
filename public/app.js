@@ -169,16 +169,37 @@ function loadHistory() {
 }
 
 function saveToHistory(entry) {
+  const history = loadHistory();
+  history.unshift(entry);
+  history.length = Math.min(history.length, HISTORY_MAX);
+
+  // BLUEPRINT entries can carry a base64 illustration image (see
+  // state.blueprintFit callers) so reopening shows the exact design someone
+  // actually looked at, not a freshly-regenerated (differently-seeded, so
+  // genuinely different) image. That's a real amount of data against
+  // localStorage's small (~5-10MB) quota, though, so this degrades in two
+  // steps rather than silently losing the whole save: first drop just this
+  // new entry's image, then drop every entry's image, before giving up.
+  const tryWrite = data => { localStorage.setItem(HISTORY_KEY, JSON.stringify(data)); };
+  const withoutImage = e => { const { image, ...rest } = e; return rest; };
+
   try {
-    const history = loadHistory();
-    history.unshift(entry);
-    history.length = Math.min(history.length, HISTORY_MAX);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    refreshHistoryButtonVisibility();
+    tryWrite(history);
   } catch {
-    // Privacy mode or similar blocking localStorage — history just won't
-    // persist, same tolerant pattern as the schematic's "seen" flag.
+    try {
+      tryWrite([withoutImage(history[0]), ...history.slice(1)]);
+    } catch {
+      try {
+        tryWrite(history.map(withoutImage));
+      } catch {
+        // Privacy mode or similar blocking localStorage entirely — history
+        // just won't persist, same tolerant pattern as the schematic's
+        // "seen" flag.
+        return;
+      }
+    }
   }
+  refreshHistoryButtonVisibility();
 }
 
 function refreshHistoryButtonVisibility() {
@@ -279,11 +300,25 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   state.resultSelectionsSnapshot = new Set(state.selected);
   state.lastStakesUsed = state.stakes;
 
-  resetIllustrationCard();
   resetPhotoCard();
   resetPopularityCard();
   resetResultFeedback();
-  generateIllustration(); // fire-and-forget -- not persisted, so regenerated fresh
+  // A persisted BLUEPRINT image (see attachImageToLatestHistoryEntry /
+  // the Share handler) means this is the exact design someone actually
+  // looked at -- show it directly rather than calling generateIllustration()
+  // and getting a different, freshly-(randomly-)seeded one. Only BLUEPRINT
+  // entries ever carry this field; anything else falls through to the
+  // normal regenerate-fresh behavior, unchanged.
+  if (entry.image) {
+    el.illustrationCard.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = entry.image;
+    img.alt = state.topic;
+    el.illustrationCard.appendChild(img);
+  } else {
+    resetIllustrationCard();
+    generateIllustration(); // fire-and-forget -- not persisted, so regenerated fresh
+  }
   generatePhoto();
   generatePopularity();
 
@@ -1071,7 +1106,27 @@ document.addEventListener("click", event => {
   }
 });
 
+// Reentrancy guard -- renderTaxonomy() already calls applyExclusions() at
+// its own end (below), and applyExclusions() now also calls renderTaxonomy()
+// when in interview mode (to advance the progressive subcategory reveal).
+// Without this, that's direct infinite recursion: render -> applyExclusions
+// -> render -> applyExclusions -> ... (confirmed for real: "Maximum call
+// stack size exceeded"). With it, the nested call from inside an
+// already-in-progress render becomes a no-op, so exactly one extra render
+// happens per selection change, not an unbounded chain.
+let renderingTaxonomy = false;
+
 function renderTaxonomy() {
+  if (renderingTaxonomy) return;
+  renderingTaxonomy = true;
+  try {
+    renderTaxonomyImpl();
+  } finally {
+    renderingTaxonomy = false;
+  }
+}
+
+function renderTaxonomyImpl() {
   el.topicHeading.textContent = state.topic;
   el.taxonomyTree.innerHTML = "";
   elementRegistry = [];
@@ -1140,7 +1195,13 @@ function renderTaxonomy() {
     });
 
     const catTitle = document.createElement("summary");
-    catTitle.textContent = category.name;
+    // Phrased as a question only in interview mode's own floated focus card
+    // -- reads naturally there (one thing being asked at a time), but would
+    // feel oddly conversational sitting as a section header among several
+    // in the normal flat/expanded view. Plain client-side template, not
+    // AI-authored: instant, free, and fully reversible if it doesn't test
+    // well, versus regenerating the taxonomy prompt itself.
+    catTitle.textContent = isInterviewFocus ? `Tell me about ${category.name}` : category.name;
 
     // Fixedness badge: a quick signal of whether this category is mostly a
     // given condition (little real choice) or a genuine space worth exploring —
@@ -1271,18 +1332,39 @@ function renderTaxonomy() {
       applyExclusions();
     });
     catGeneralLabel.appendChild(catGeneralCheckbox);
-    catGeneralLabel.append(" General — this whole category is noise to me right now");
+    catGeneralLabel.append(" General — include this category without picking specifics");
     catEl.appendChild(catGeneralLabel);
 
     if (catGeneralCheckbox.checked) {
       categorySubsWrapper.classList.add("collapsed-by-general");
     }
 
-    (category.subcategories || []).forEach(sub => {
+    // Interview focus, one level deeper: within the floated category, reveal
+    // subcategories progressively -- the first unanswered one plus everything
+    // already answered above it, not the whole flat list at once. Purely
+    // derived from state.selected at render time (no separate tracked index),
+    // so it advances "for free" the moment applyExclusions() re-renders after
+    // a selection changes (see the interview-mode hook there). Earlier
+    // answered subcategories stay visible and editable rather than being
+    // hidden once passed -- that's how "go back" works here, not a separate
+    // back button: the answer is still right there to change.
+    let interviewSubRevealCount = Infinity;
+    if (isInterviewFocus) {
+      interviewSubRevealCount = 0;
+      for (const sub of (category.subcategories || [])) {
+        interviewSubRevealCount++;
+        if (!subcategoryHasSelection(sub)) break;
+      }
+    }
+
+    (category.subcategories || []).forEach((sub, subIndex) => {
+      if (isInterviewFocus && subIndex >= interviewSubRevealCount) return; // not revealed yet
+
       const subKey = `${category.name}::${sub.name}`;
       const subEl = document.createElement("details");
-      subEl.className = "subcategory";
-      subEl.open = state.expandedSubcategories.has(subKey);
+      const isSubInFocus = isInterviewFocus && subIndex === interviewSubRevealCount - 1 && !subcategoryHasSelection(sub);
+      subEl.className = isSubInFocus ? "subcategory subcategory-in-focus" : "subcategory";
+      subEl.open = isSubInFocus || state.expandedSubcategories.has(subKey);
       subEl.addEventListener("toggle", () => {
         if (subEl.open) state.expandedSubcategories.add(subKey);
         else state.expandedSubcategories.delete(subKey);
@@ -1597,6 +1679,15 @@ function applyExclusions() {
   if (el.blueprintGenreBtn) el.blueprintGenreBtn.hidden = !state.blueprintFit;
   if (state.blueprintFit && state.selected.size > 0 && state.lastGenre === null) scheduleBlueprintAutoRun();
   checkStaleness();
+
+  // applyExclusions() normally only patches existing DOM (checked/disabled
+  // state, exclusion classes) without a full rebuild -- cheap, and fine for
+  // free-browse mode. Interview mode's progressive subcategory reveal (see
+  // the interviewSubRevealCount block in renderTaxonomy) is derived from
+  // state.selected at render time, so it needs an actual re-render to
+  // advance the moment a selection changes, or the next subcategory would
+  // never visibly "come to focus" on its own.
+  if (interviewModeActive) renderTaxonomy();
 }
 
 // BLUEPRINT-fit topics default straight to the Blueprint output type instead
@@ -1787,6 +1878,10 @@ if (el.shareOutputBtn) {
     const original = el.shareOutputBtn.textContent;
     el.shareOutputBtn.textContent = "Sharing...";
     try {
+      // BLUEPRINT only -- see attachImageToLatestHistoryEntry's comment for
+      // why a randomly-seeded regeneration on the receiving end wouldn't be
+      // the same design the sharer actually looked at.
+      const image = state.blueprintFit ? getCurrentIllustrationDataUrl() : null;
       const { id } = await postJSON("/api/share", {
         input: state.input,
         topic: state.topic,
@@ -1796,7 +1891,8 @@ if (el.shareOutputBtn) {
         blueprintFit: state.blueprintFit,
         genre: state.lastGenre,
         genreLabel: state.lastGenreLabel,
-        resultText: state.lastResultText
+        resultText: state.lastResultText,
+        image
       });
       const url = `${location.origin}${location.pathname}?share=${id}`;
       await navigator.clipboard.writeText(url);
@@ -1879,7 +1975,7 @@ function sanitizeForPdfFont(s) {
 // works straight from the raw markdown text, not the already-rendered
 // output -- so it doesn't inherit any rendering quirks or need the result
 // to currently be on screen.
-function buildResultPdf(topic, genreLabel, markdownText) {
+function buildResultPdf(topic, genreLabel, markdownText, imageDataUrl) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -1917,6 +2013,17 @@ function buildResultPdf(topic, genreLabel, markdownText) {
   doc.text(sanitizeForPdfFont(`${genreLabel} - ${new Date().toLocaleDateString()} - fathmic.ai`), marginX, y);
   doc.setTextColor(0);
   y += 24;
+
+  // BLUEPRINT only (see the click handler) -- the actual generated design,
+  // not a placeholder, which is the whole point of a spec/handoff document.
+  // Stability generates these at aspect_ratio "1:1" (see illustrate.js), so
+  // sizing as a square is a safe assumption rather than a guess.
+  if (imageDataUrl) {
+    const imageSize = Math.min(contentWidth, 260);
+    ensureRoom(imageSize + 16);
+    doc.addImage(imageDataUrl, "PNG", marginX, y, imageSize, imageSize);
+    y += imageSize + 16;
+  }
 
   const isTableSeparatorRow = rawLine => /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(rawLine.trim());
   function splitTableRow(rawLine) {
@@ -1987,7 +2094,8 @@ if (el.exportPdfBtn) {
     if (!state.lastResultText) return;
     const original = el.exportPdfBtn.textContent;
     try {
-      buildResultPdf(state.topic, state.lastGenreLabel || "Result", state.lastResultText);
+      const image = state.blueprintFit ? getCurrentIllustrationDataUrl() : null;
+      buildResultPdf(state.topic, state.lastGenreLabel || "Result", state.lastResultText, image);
     } catch (err) {
       console.error("[pdf export]", err);
       el.exportPdfBtn.textContent = "Export failed";
@@ -2224,6 +2332,15 @@ if (el.sharedViewDismissBtn) {
 // nod to darkroom/cyanotype developing, on-theme for a mode literally named
 // after blueprints, and distinct enough from the generic label that it
 // quietly signals this card is doing something a little different.
+// Used by Share and PDF export -- both are on-demand actions that only
+// happen well after generation would have finished, unlike history's save
+// (see attachImageToLatestHistoryEntry above), so there's no timing race
+// here: if a BLUEPRINT image exists on screen, this returns it.
+function getCurrentIllustrationDataUrl() {
+  const img = el.illustrationCard && el.illustrationCard.querySelector("img");
+  return img ? img.src : null;
+}
+
 function illustrationPlaceholderLabel() {
   return state.blueprintFit ? "Developing..." : "Generating...";
 }
@@ -2231,6 +2348,30 @@ function illustrationPlaceholderLabel() {
 function resetIllustrationCard() {
   if (!el.illustrationCard) return;
   el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">${illustrationPlaceholderLabel()}</div>`;
+}
+
+// Text saves to history the instant it arrives (see runSynthesisForGenre),
+// well before this fire-and-forget illustration call finishes -- rather
+// than delay that save (and the visible text result) on image generation,
+// this patches the just-saved entry once the image actually shows up.
+// BLUEPRINT only: Stability's generation is randomly seeded, so a freshly
+// regenerated image on reopen is a genuinely different design than the one
+// someone actually looked at and decided on -- worth the storage for a
+// design spec, not worth it for a decorative illustration on a general
+// topic. Matched by being history[0] (the entry this same run just
+// created), not by any id, since nothing else writes to history in between.
+function attachImageToLatestHistoryEntry(dataUrl) {
+  const history = loadHistory();
+  if (!history.length) return;
+  history[0].image = dataUrl;
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    // Quota or privacy-mode issue -- the text entry itself already saved
+    // fine; just this attachment didn't stick. Not worth the three-tier
+    // fallback saveToHistory has, since this is a best-effort enhancement
+    // to an already-successful save, not the save itself.
+  }
 }
 
 async function generateIllustration() {
@@ -2248,6 +2389,7 @@ async function generateIllustration() {
     img.src = `data:image/png;base64,${result.image}`;
     img.alt = state.topic;
     el.illustrationCard.appendChild(img);
+    if (state.blueprintFit) attachImageToLatestHistoryEntry(img.src);
   } catch (err) {
     el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
   }

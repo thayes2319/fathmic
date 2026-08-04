@@ -575,6 +575,14 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-size: 0.95rem;
   padding: 0.4rem 0;
 }
+/* The one subcategory interview mode just revealed and is waiting on an
+   answer for -- a lighter, narrower echo of the category-level floating
+   card's own highlight treatment, not competing with it. */
+.subcategory-in-focus {
+  border-left-color: var(--accent);
+  background: rgba(122, 92, 62, 0.06);
+  border-radius: 0 6px 6px 0;
+}
 .subcategory > summary::-webkit-details-marker { display: none; }
 .subcategory > summary::before { content: "\25B8  "; color: var(--muted); }
 .subcategory[open] > summary::before { content: "\25BE  "; }
