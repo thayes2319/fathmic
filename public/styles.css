@@ -602,24 +602,32 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 /* The one subcategory interview mode just revealed and is waiting on an
    answer for -- a lighter, narrower echo of the category-level floating
-   card's own highlight treatment, not competing with it. Flashes twice on
-   arrival (a ring pulse, on-off-on-off) to cue "this is the new question,"
-   then settles into the steady tinted state. Re-triggers automatically for
-   the 2nd/3rd/... subcategory too, since each is a freshly-created element
-   when it becomes the focus (progressive reveal rebuilds the tree), not a
-   class toggled on an existing one -- no JS timing needed to replay it. */
+   card's own highlight treatment, not competing with it. The heading itself
+   gets the same grow/stall/return treatment as the category question (see
+   interviewQuestionEnter) -- same motion language across both levels of the
+   interview, just scaled down (1.3x vs 1.5x peak) since a subcategory lives
+   in a narrower, indented, bordered box and doesn't have as much room to
+   grow into before looking like it's poking outside its own container.
+   Re-triggers automatically for the 2nd/3rd/... subcategory too, since each
+   is a freshly-created element when it becomes the focus (progressive
+   reveal rebuilds the tree), not a class toggled on an existing one -- no
+   JS timing needed to replay it. */
 .subcategory-in-focus {
   border-left-color: var(--accent);
   background: rgba(122, 92, 62, 0.06);
   border-radius: 0 6px 6px 0;
-  animation: subcategoryFocusFlash 1.2s ease-out;
 }
-@keyframes subcategoryFocusFlash {
-  0%   { box-shadow: 0 0 0 3px var(--accent); }
-  15%  { box-shadow: 0 0 0 3px transparent; }
-  30%  { box-shadow: 0 0 0 3px var(--accent); }
-  45%  { box-shadow: 0 0 0 3px transparent; }
-  100% { box-shadow: 0 0 0 3px transparent; }
+.subcategory-in-focus > summary {
+  position: relative;
+  z-index: 5;
+  transform-origin: left center;
+  animation: subcategoryQuestionEnter 1.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes subcategoryQuestionEnter {
+  0%   { transform: scale(0.75) translateY(4px); opacity: 0; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  20%  { transform: scale(1.3) translateY(-10px); opacity: 1; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.18)); }
+  50%  { transform: scale(1.3) translateY(-10px); opacity: 1; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.18)); } /* ~0.5s stall */
+  100% { transform: scale(1) translateY(0); opacity: 1; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
 .subcategory > summary::-webkit-details-marker { display: none; }
 .subcategory > summary::before { content: "\25B8  "; color: var(--muted); }
