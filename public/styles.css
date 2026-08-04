@@ -371,7 +371,25 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .blueprint-chip:hover { opacity: 0.85; }
 
-#demo-cases { margin-top: 1rem; }
+#demos-trending-details { margin-top: 1rem; }
+#demos-trending-details summary {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+#demos-trending-details summary::-webkit-details-marker { display: none; }
+#demos-trending-details summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.4rem;
+  transition: transform 0.15s ease;
+}
+#demos-trending-details[open] summary::before { transform: rotate(90deg); }
+#demos-trending-details summary:hover { color: var(--fg); }
+#demo-cases { margin-top: 0.75rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
 
 /* Shared by all three horizontal pill lists (Fathmics to Explore, Most
