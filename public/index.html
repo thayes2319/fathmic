@@ -306,35 +306,6 @@
         <h2 id="topic-heading"></h2>
         <button id="revise-topic-btn" class="link-btn" type="button">Revise</button>
       </div>
-      <div id="revise-topic-panel" hidden>
-        <textarea id="revise-topic-input" rows="2" aria-label="Revise your topic"></textarea>
-        <div id="revise-topic-actions">
-          <button id="revise-topic-submit-btn" type="button">Update map</button>
-          <button id="revise-topic-cancel-btn" class="skip-btn" type="button">Cancel</button>
-        </div>
-      </div>
-      <div id="expand-controls">
-        <button id="interview-toggle-btn" class="icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>
-          <span class="interview-toggle-label">Interview me</span>
-        </button>
-        <button id="expand-all-btn" class="icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          Expand all
-        </button>
-        <button id="collapse-all-btn" class="icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-          Collapse all
-        </button>
-        <button id="pick-all-btn" class="pick-btn" title="Accepts Given categories generally, picks one specific option per subcategory worth exploring, across everything. Won't touch anything you've already chosen.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
-          Pick for me
-        </button>
-      </div>
-      <div id="taxonomy-tree"></div>
-    </section>
-
-    <section id="genre-section" hidden>
       <div id="stakes-control">
         <div class="stakes-knob">
           <div class="stakes-dial">
@@ -376,7 +347,35 @@
           </span>
         </span>
       </div>
+      <div id="revise-topic-panel" hidden>
+        <textarea id="revise-topic-input" rows="2" aria-label="Revise your topic"></textarea>
+        <div id="revise-topic-actions">
+          <button id="revise-topic-submit-btn" type="button">Update map</button>
+          <button id="revise-topic-cancel-btn" class="skip-btn" type="button">Cancel</button>
+        </div>
+      </div>
+      <div id="expand-controls">
+        <button id="interview-toggle-btn" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>
+          <span class="interview-toggle-label">Interview me</span>
+        </button>
+        <button id="expand-all-btn" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          Expand all
+        </button>
+        <button id="collapse-all-btn" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+          Collapse all
+        </button>
+        <button id="pick-all-btn" class="pick-btn" title="Accepts Given categories generally, picks one specific option per subcategory worth exploring, across everything. Won't touch anything you've already chosen.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+          Pick for me
+        </button>
+      </div>
+      <div id="taxonomy-tree"></div>
+    </section>
 
+    <section id="genre-section" hidden>
       <h2>How should this come together?</h2>
       <div id="genre-buttons">
         <button data-genre="summary">Summary</button>
