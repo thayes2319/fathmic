@@ -253,6 +253,31 @@
             <option value="other">Other</option>
           </select>
         </div>
+
+        <details id="demos-trending-details">
+          <summary>Demos &amp; Trending</summary>
+
+          <div id="demo-cases">
+            <span class="demo-label">Preloaded Fathmic Demos</span>
+            <div class="hscroll-wrap">
+              <button id="demo-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+              <div id="demo-buttons" class="hscroll-track"></div>
+              <button id="demo-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+            </div>
+          </div>
+
+          <div id="trending-section" hidden>
+            <div id="trending-header">
+              <span class="demo-label">Most Searched:</span>
+              <select id="trending-filter"></select>
+            </div>
+            <div class="hscroll-wrap">
+              <button id="trending-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+              <div id="trending-groups" class="hscroll-track"></div>
+              <button id="trending-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+            </div>
+          </div>
+        </details>
       </div>
       <p id="gate-status" class="status"></p>
 
@@ -267,31 +292,6 @@
           <button id="blueprint-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
         </div>
       </div>
-
-      <details id="demos-trending-details">
-        <summary>Demos &amp; Trending</summary>
-
-        <div id="demo-cases">
-          <span class="demo-label">Preloaded Fathmic Demos</span>
-          <div class="hscroll-wrap">
-            <button id="demo-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
-            <div id="demo-buttons" class="hscroll-track"></div>
-            <button id="demo-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
-          </div>
-        </div>
-
-        <div id="trending-section" hidden>
-          <div id="trending-header">
-            <span class="demo-label">Most Searched:</span>
-            <select id="trending-filter"></select>
-          </div>
-          <div class="hscroll-wrap">
-            <button id="trending-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
-            <div id="trending-groups" class="hscroll-track"></div>
-            <button id="trending-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
-          </div>
-        </div>
-      </details>
     </section>
 
     <section id="clarify-section" hidden>

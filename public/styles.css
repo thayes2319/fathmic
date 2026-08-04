@@ -371,15 +371,21 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .blueprint-chip:hover { opacity: 0.85; }
 
-#demos-trending-details { margin-top: 1rem; }
+/* Opposite side of the row from Distill, same row -- margin-left:auto
+   pushes it to the far right while Distill/persona-row stay grouped left.
+   Once opened, flex-basis:100% claims the whole row width so the expanded
+   demo/trending panel drops to its own line below (action-row already has
+   flex-wrap:wrap) instead of squeezing in beside the other controls. */
+#demos-trending-details { margin-left: auto; }
+#demos-trending-details[open] { flex-basis: 100%; margin-left: 0; margin-top: 1rem; }
 #demos-trending-details summary {
   display: inline-flex;
   align-items: center;
-  margin-top: 0.6rem;
+  margin-top: 0;
   padding: 0.55rem 1.1rem;
-  border: 1px solid var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, white);
   border-radius: 6px;
-  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 70%, white);
   color: #fff;
   font-size: 0.85rem;
   font-weight: 600;
