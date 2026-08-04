@@ -40,7 +40,6 @@ const el = {
   feedbackDownBtn: document.getElementById("feedback-down-btn"),
   resultFeedbackThanks: document.getElementById("result-feedback-thanks"),
   distillBtn: document.getElementById("distill-btn"),
-  otherToggleBtn: document.getElementById("other-toggle-btn"),
   gateStatus: document.getElementById("gate-status"),
   processModalBackdrop: document.getElementById("process-modal-backdrop"),
   processModalVerb: document.getElementById("process-modal-verb"),
@@ -61,6 +60,7 @@ const el = {
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
   copyOutputBtn: document.getElementById("copy-output-btn"),
+  demosTrendingDetails: document.getElementById("demos-trending-details"),
   demoCases: document.getElementById("demo-cases"),
   demoButtons: document.getElementById("demo-buttons"),
   blueprintSection: document.getElementById("blueprint-section"),
@@ -638,38 +638,31 @@ function resetDownstream() {
   exitActiveSession();
 }
 
-// Fathmics-to-Explore / Most-Searched are worth full visibility for a new
-// visitor deciding what to try, but once an actual taxonomy is on screen —
-// live or from a loaded demo case — they're just competing for attention
-// with the task at hand. Collapse them behind "Other" at that point, back
-// to full visibility the moment a new attempt starts (resetDownstream).
-let trendingHasData = false;
-let browseCollapsed = false;
-
+// Spec & Blueprint suggestions are worth full visibility for a new visitor
+// deciding what to try, but once an actual taxonomy is on screen — live or
+// from a loaded demo case — they're just competing for attention with the
+// task at hand. Hide them at that point, back the moment a new attempt
+// starts (resetDownstream). Demos & Trending lives in its own collapsible
+// <details> now (always reachable, collapsed by default) instead of being
+// tied to session state — just make sure it's actually collapsed whenever
+// a session starts or ends, in case the user had it open while browsing.
 function setBrowseVisibility(visible) {
   el.blueprintSection.hidden = !visible;
-  el.demoCases.hidden = !visible;
-  el.trendingSection.hidden = visible ? !trendingHasData : true;
+}
+
+function collapseDemosTrending() {
+  if (el.demosTrendingDetails) el.demosTrendingDetails.open = false;
 }
 
 function enterActiveSession() {
-  browseCollapsed = true;
   setBrowseVisibility(false);
-  el.otherToggleBtn.hidden = false;
-  el.otherToggleBtn.textContent = "Other";
+  collapseDemosTrending();
 }
 
 function exitActiveSession() {
-  browseCollapsed = false;
   setBrowseVisibility(true);
-  el.otherToggleBtn.hidden = true;
+  collapseDemosTrending();
 }
-
-el.otherToggleBtn.addEventListener("click", () => {
-  browseCollapsed = !browseCollapsed;
-  setBrowseVisibility(!browseCollapsed);
-  el.otherToggleBtn.textContent = browseCollapsed ? "Other" : "Hide";
-});
 
 // Process modal: one real, trackable step ("gate") plus a timed-release
 // simulation of taxonomy generation's internal work, since that's a single
@@ -2388,7 +2381,6 @@ async function loadTrending() {
     });
 
     renderTrendingItems(trendingCategories[0].items);
-    trendingHasData = true;
     el.trendingSection.hidden = false;
   } catch {
     // Non-critical — trending is a nice-to-have browsing aid, not core flow.
