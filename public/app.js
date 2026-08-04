@@ -94,7 +94,10 @@ const el = {
   referenceCards: document.getElementById("reference-cards"),
   cardLightboxBackdrop: document.getElementById("card-lightbox-backdrop"),
   cardLightboxContent: document.getElementById("card-lightbox-content"),
-  cardLightboxClose: document.getElementById("card-lightbox-close")
+  cardLightboxClose: document.getElementById("card-lightbox-close"),
+  questionSpotlight: document.getElementById("question-spotlight"),
+  questionSpotlightCategory: document.getElementById("question-spotlight-category"),
+  questionSpotlightSubcategory: document.getElementById("question-spotlight-subcategory")
 };
 
 // A ?share=<id> URL loads someone else's shared result instead of the normal
@@ -624,6 +627,9 @@ function resetDownstream() {
   state.blueprintFit = false;
   interviewModeActive = false;
   interviewIndex = -1;
+  lastSpotlightKey = null;
+  clearTimeout(questionSpotlightHideTimer);
+  if (el.questionSpotlight) el.questionSpotlight.hidden = true;
   exitActiveSession();
 }
 
@@ -1025,6 +1031,28 @@ let subcategoryRegistry = [];
 let interviewModeActive = false;
 let interviewIndex = -1;
 
+// Tracks the last (category, subcategory) pair the question-spotlight fired
+// for, so it only replays on a genuine change, not every re-render (see the
+// spotlightKey check in renderTaxonomyImpl). Reset in resetDownstream() so
+// a brand new topic doesn't skip its own first spotlight just because the
+// key happens to collide with whatever the previous session ended on.
+let lastSpotlightKey = null;
+let questionSpotlightHideTimer = null;
+
+function showQuestionSpotlight(categoryText, subcategoryText) {
+  if (!el.questionSpotlight) return;
+  // Force the element through display:none and back even if it's already
+  // visible from a moment ago (rapid subcategory advances), so the CSS
+  // animation always restarts from its own 0% rather than being skipped.
+  el.questionSpotlight.hidden = true;
+  void el.questionSpotlight.offsetWidth; // force reflow
+  el.questionSpotlightCategory.textContent = categoryText;
+  el.questionSpotlightSubcategory.textContent = subcategoryText || "";
+  el.questionSpotlight.hidden = false;
+  clearTimeout(questionSpotlightHideTimer);
+  questionSpotlightHideTimer = setTimeout(() => { el.questionSpotlight.hidden = true; }, 3000);
+}
+
 function categoryHasSelection(category) {
   if (state.selected.has(category.name)) return true; // category-level "General" pick
   return (category.subcategories || []).some(subcategoryHasSelection);
@@ -1222,7 +1250,6 @@ function renderTaxonomyImpl() {
     // taxonomies (demo fixtures, anything saved before this field existed)
     // that never had it generated.
     catTitle.textContent = isInterviewFocus ? `Tell me about ${category.questionPhrase || category.name}` : category.name;
-    if (isInterviewFocus) catTitle.classList.add("interview-question-enter");
 
     // The visible Given/Mixed/Explore badge was removed (real repeat
     // observation: with everything showing "Explore" for a given topic, it
@@ -1361,6 +1388,30 @@ function renderTaxonomyImpl() {
       for (const sub of (category.subcategories || [])) {
         interviewSubRevealCount++;
         if (!subcategoryHasSelection(sub)) break;
+      }
+    }
+
+    // The question-spotlight moment: category question as the header line,
+    // whichever subcategory just came into focus beneath it. Fires once per
+    // genuinely NEW (category, subcategory) pair -- lastSpotlightKey guards
+    // against re-firing on every incidental re-render (this whole function
+    // runs on every selection change, not just ones that actually advance
+    // the focus). Also covers a category with zero subcategories (a fully
+    // "Given" one) or one where every subcategory is already answered --
+    // both just show the category line alone, no subcategory beneath it.
+    if (isInterviewFocus) {
+      const subs = category.subcategories || [];
+      const candidate = interviewSubRevealCount > 0 && interviewSubRevealCount <= subs.length
+        ? subs[interviewSubRevealCount - 1]
+        : null;
+      const focusedSub = candidate && !subcategoryHasSelection(candidate) ? candidate : null;
+      const spotlightKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
+      if (spotlightKey !== lastSpotlightKey) {
+        lastSpotlightKey = spotlightKey;
+        showQuestionSpotlight(
+          `Tell me about ${category.questionPhrase || category.name}`,
+          focusedSub ? focusedSub.name : ""
+        );
       }
     }
 

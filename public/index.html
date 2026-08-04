@@ -453,6 +453,21 @@
     <a href="mailto:thomas@gohw.net">Contact</a>
   </footer>
 
+  <!-- Interview mode's question moment: a category or subcategory heading
+       briefly takes over screen center, on its own background panel, before
+       fading back to reveal the real (already-rendered, unanimated)
+       heading sitting normally in the modal underneath. JS-driven (see
+       showQuestionSpotlight in app.js) rather than a CSS transform on the
+       real heading itself, since the real heading has to stay in its
+       normal in-flow position the whole time -- this is a temporary,
+       decorative overlay, not the thing people actually interact with. -->
+  <div id="question-spotlight" hidden aria-hidden="true">
+    <div id="question-spotlight-text">
+      <div id="question-spotlight-category"></div>
+      <div id="question-spotlight-subcategory"></div>
+    </div>
+  </div>
+
   <div id="card-lightbox-backdrop" hidden>
     <div id="card-lightbox">
       <button id="card-lightbox-close" type="button" aria-label="Close">&times;</button>
