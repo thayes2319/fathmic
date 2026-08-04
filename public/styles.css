@@ -61,7 +61,12 @@ h1 { margin-bottom: 0.25rem; }
   color: var(--muted);
   line-height: 1.5;
 }
-#how-it-works-line #replay-schematic-btn { margin-left: 0.4rem; white-space: nowrap; }
+#how-it-works-line #replay-schematic-btn {
+  margin-left: 0.4rem;
+  white-space: nowrap;
+  color: #0F186B; /* logo wordmark navy, not the default .link-btn brown */
+  font-size: 0.85rem;
+}
 
 #brand-lockup { position: relative; z-index: 1; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
 #brand-wordmark { height: 40px; width: auto; display: block; }
