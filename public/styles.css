@@ -373,22 +373,29 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 #demos-trending-details { margin-top: 1rem; }
 #demos-trending-details summary {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.6rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--muted);
   cursor: pointer;
   user-select: none;
   list-style: none;
 }
 #demos-trending-details summary::-webkit-details-marker { display: none; }
-#demos-trending-details summary::before {
+#demos-trending-details summary:hover { opacity: 0.88; }
+#demos-trending-details summary::after {
   content: "▸";
   display: inline-block;
-  margin-right: 0.4rem;
+  margin-left: 0.5rem;
   transition: transform 0.15s ease;
 }
-#demos-trending-details[open] summary::before { transform: rotate(90deg); }
-#demos-trending-details summary:hover { color: var(--fg); }
+#demos-trending-details[open] summary::after { transform: rotate(90deg); }
 #demo-cases { margin-top: 0.75rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
 
