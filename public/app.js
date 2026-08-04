@@ -4,6 +4,12 @@ const state = {
   topic: "",
   categories: [],
   selected: new Set(),
+  // Free-text "Other" answers, keyed by subcategory name -- same flat-name
+  // convention state.selected already relies on (categoryHasSelection etc.
+  // match by bare label, not a compound category::sub key). A plain object
+  // rather than a Map so it serializes directly into history/share JSON.
+  otherText: {},
+  otherTextSnapshot: null,
   expandedCategories: new Set(),
   expandedSubcategories: new Set(),
   lastResultText: "",
@@ -272,6 +278,7 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   state.topic = entry.topic;
   state.categories = entry.categories || [];
   state.selected = new Set(entry.selections || []);
+  state.otherText = entry.otherText || {};
   state.stakes = entry.stakes || "medium";
   state.blueprintFit = entry.blueprintFit === true;
   renderStakesDial();
@@ -302,6 +309,7 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   state.lastGenre = entry.genre;
   state.lastGenreLabel = entry.genreLabel;
   state.resultSelectionsSnapshot = new Set(state.selected);
+  state.otherTextSnapshot = otherTextSnapshotString();
   state.lastStakesUsed = state.stakes;
 
   resetPhotoCard();
@@ -620,6 +628,8 @@ function resetDownstream() {
   el.genreSection.hidden = true;
   el.outputSection.hidden = true;
   state.selected.clear();
+  state.otherText = {};
+  state.otherTextSnapshot = null;
   state.expandedCategories.clear();
   state.expandedSubcategories.clear();
   state.resultSelectionsSnapshot = null;
@@ -895,6 +905,7 @@ async function runTaxonomy() {
   // map. That's the signal used below to carry over whatever still applies
   // instead of wiping selections and making someone start over.
   const previousSelected = new Set(state.selected);
+  const previousOtherText = { ...state.otherText };
   let msgIndex = 0;
   el.gateStatus.textContent = TAXONOMY_WAIT_MESSAGES[0];
   el.gateStatus.classList.add("status-pulsing");
@@ -938,6 +949,12 @@ async function runTaxonomy() {
       });
       state.selected = new Set(Array.from(previousSelected).filter(label => survivingLabels.has(label)));
 
+      const keptOtherText = {};
+      Object.entries(previousOtherText).forEach(([subName, text]) => {
+        if (survivingLabels.has(subName) && text && text.trim()) keptOtherText[subName] = text;
+      });
+      state.otherText = keptOtherText;
+
       state.expandedCategories = new Set(state.categories.filter(categoryHasSelection).map(c => c.name));
       state.expandedSubcategories = new Set();
       state.categories.forEach(cat => (cat.subcategories || []).forEach(sub => {
@@ -950,6 +967,7 @@ async function runTaxonomy() {
 
       el.outputSection.hidden = true;
       state.resultSelectionsSnapshot = null;
+      state.otherTextSnapshot = null;
       state.lastGenre = null;
 
       const kept = state.selected.size;
@@ -1090,7 +1108,35 @@ function categoryHasSelection(category) {
 
 function subcategoryHasSelection(sub) {
   return state.selected.has(sub.name) ||
-    (sub.elements || []).some(e => state.selected.has(typeof e === "string" ? e : e.text));
+    (sub.elements || []).some(e => state.selected.has(typeof e === "string" ? e : e.text)) ||
+    !!(state.otherText[sub.name] && state.otherText[sub.name].trim());
+}
+
+function hasAnyOtherText() {
+  return Object.values(state.otherText).some(t => t && t.trim());
+}
+
+// Stable-order snapshot for staleness comparison -- see checkStaleness().
+function otherTextSnapshotString() {
+  return JSON.stringify(
+    Object.entries(state.otherText).filter(([, t]) => t && t.trim()).sort()
+  );
+}
+
+// Every non-empty "Other" answer, formatted so the synthesis model can tell
+// it's a custom answer to a specific subcategory rather than a stray line.
+function otherTextSelectionEntries() {
+  return Object.entries(state.otherText)
+    .filter(([, t]) => t && t.trim())
+    .map(([subName, t]) => `${subName} — other: ${t.trim()}`);
+}
+
+// What actually gets sent to synthesis/saved to history/share: every ticked
+// checkbox plus every custom Other answer, in one flat list -- the server
+// only ever consumes this as an unordered bag of strings (see
+// server/synthesize.js), so there's no structural difference to preserve.
+function buildSelectionsPayload() {
+  return [...Array.from(state.selected), ...otherTextSelectionEntries()];
 }
 
 function findNextUnansweredIndex(fromIndex) {
@@ -1204,6 +1250,8 @@ function renderTaxonomy() {
     renderingTaxonomy = false;
   }
 }
+
+const OTHER_TEXT_WORD_LIMIT = 12;
 
 function renderTaxonomyImpl() {
   el.topicHeading.textContent = state.topic;
@@ -1581,6 +1629,41 @@ function renderTaxonomyImpl() {
       }
       list.appendChild(specificsList);
 
+      // A free-text escape hatch alongside General/specifics — for when none
+      // of the generated options actually fit. Deliberately NOT axis-tagged
+      // or exclusion-aware (there's nothing structured to conflict against);
+      // it's folded into the synthesis prompt as its own line instead (see
+      // otherTextSelectionEntries). Re-rendering on every keystroke would
+      // rebuild this exact input out from under the user's cursor, so this
+      // only updates state.otherText live (for the word cap + stale-check)
+      // and defers the interview-mode reveal advance to blur/change.
+      const otherWrap = document.createElement("label");
+      otherWrap.className = "other-answer";
+      otherWrap.append("Other: ");
+      const otherInput = document.createElement("input");
+      otherInput.type = "text";
+      otherInput.placeholder = `Type your own (up to ${OTHER_TEXT_WORD_LIMIT} words)`;
+      otherInput.value = state.otherText[sub.name] || "";
+      otherInput.addEventListener("input", () => {
+        const words = otherInput.value.split(/\s+/).filter(Boolean);
+        if (words.length > OTHER_TEXT_WORD_LIMIT) {
+          otherInput.value = words.slice(0, OTHER_TEXT_WORD_LIMIT).join(" ");
+        }
+        const trimmed = otherInput.value.trim();
+        if (trimmed) {
+          state.otherText[sub.name] = trimmed;
+        } else {
+          delete state.otherText[sub.name];
+        }
+        checkStaleness();
+      });
+      otherInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") otherInput.blur();
+      });
+      otherInput.addEventListener("change", () => applyExclusions());
+      otherWrap.appendChild(otherInput);
+      list.appendChild(otherWrap);
+
       // Cascade registration: if the subcategory itself is tagged, an exclusion
       // hides the WHOLE block (summary + General + every element under it),
       // regardless of whether the model also tagged the individual elements.
@@ -1701,13 +1784,9 @@ function computeActiveDirections() {
 // specific choice actually pays off. Never overrides anything already
 // selected, in this category or picked earlier in the same run.
 function pickForCategory(category) {
-  const subHasSelection = sub =>
-    state.selected.has(sub.name) ||
-    (sub.elements || []).some(e => state.selected.has(typeof e === "string" ? e : e.text));
-
   if (typeof category.fixedness === "number" && category.fixedness < 0.35) {
     const categoryUntouched = !state.selected.has(category.name) &&
-      !(category.subcategories || []).some(subHasSelection);
+      !(category.subcategories || []).some(subcategoryHasSelection);
     if (categoryUntouched) state.selected.add(category.name);
     return;
   }
@@ -1715,7 +1794,7 @@ function pickForCategory(category) {
   const activeDirections = computeActiveDirections();
 
   (category.subcategories || []).forEach(sub => {
-    if (subHasSelection(sub)) return; // don't touch an existing choice
+    if (subcategoryHasSelection(sub)) return; // don't touch an existing choice, including a custom Other answer
     if (sub.axis && activeDirections.has(sub.axis) && !activeDirections.get(sub.axis).has(sub.direction)) return;
 
     for (const elementObj of sub.elements || []) {
@@ -1781,9 +1860,10 @@ function applyExclusions() {
     }
   });
 
-  el.genreSection.hidden = state.selected.size === 0;
+  const hasAnySelection = state.selected.size > 0 || hasAnyOtherText();
+  el.genreSection.hidden = !hasAnySelection;
   if (el.blueprintGenreBtn) el.blueprintGenreBtn.hidden = !state.blueprintFit;
-  if (state.blueprintFit && state.selected.size > 0 && state.lastGenre === null) scheduleBlueprintAutoRun();
+  if (state.blueprintFit && hasAnySelection && state.lastGenre === null) scheduleBlueprintAutoRun();
   checkStaleness();
 
   // applyExclusions() normally only patches existing DOM (checked/disabled
@@ -1811,7 +1891,7 @@ function scheduleBlueprintAutoRun() {
   clearTimeout(blueprintAutoRunTimer);
   blueprintAutoRunTimer = setTimeout(() => {
     blueprintAutoRunTimer = null;
-    if (state.blueprintFit && state.selected.size > 0 && state.lastGenre === null && el.blueprintGenreBtn && !el.blueprintGenreBtn.hidden) {
+    if (state.blueprintFit && (state.selected.size > 0 || hasAnyOtherText()) && state.lastGenre === null && el.blueprintGenreBtn && !el.blueprintGenreBtn.hidden) {
       runSynthesisForGenre("blueprint", el.blueprintGenreBtn.textContent);
     }
   }, BLUEPRINT_AUTO_RUN_DELAY_MS);
@@ -1830,8 +1910,9 @@ function checkStaleness() {
   const current = state.selected;
   const snapshot = state.resultSelectionsSnapshot;
   const selectionsChanged = current.size !== snapshot.size || Array.from(current).some(v => !snapshot.has(v));
+  const otherTextChanged = otherTextSnapshotString() !== state.otherTextSnapshot;
   const stakesChanged = state.stakes !== state.lastStakesUsed;
-  el.staleBanner.hidden = !(selectionsChanged || stakesChanged);
+  el.staleBanner.hidden = !(selectionsChanged || otherTextChanged || stakesChanged);
 }
 
 // Visual-only — tracks the selected position, doesn't itself receive clicks
@@ -1888,6 +1969,8 @@ function buildQuickChart() {
         const text = typeof e === "string" ? e : e.text;
         if (state.selected.has(text)) picks.push(text);
       });
+      const other = state.otherText[sub.name];
+      if (other && other.trim()) picks.push(`${sub.name} (other): ${other.trim()}`);
     });
     if (picks.length) {
       rows.push(`<li><strong>${escapeHtml(cat.name)}:</strong> ${picks.map(escapeHtml).join(", ")}</li>`);
@@ -1915,7 +1998,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   try {
     const result = await postJSON("/api/synthesize", {
       topic: state.topic,
-      selections: Array.from(state.selected),
+      selections: buildSelectionsPayload(),
       genre,
       stakes: state.stakes
     });
@@ -1924,12 +2007,14 @@ async function runSynthesisForGenre(genre, genreLabel) {
     state.lastGenre = genre;
     state.lastGenreLabel = genreLabel;
     state.resultSelectionsSnapshot = new Set(state.selected);
+    state.otherTextSnapshot = otherTextSnapshotString();
     state.lastStakesUsed = state.stakes;
     saveToHistory({
       input: state.input,
       topic: state.topic,
       categories: state.categories,
       selections: Array.from(state.selected),
+      otherText: { ...state.otherText },
       stakes: state.stakes,
       blueprintFit: state.blueprintFit,
       genre,
@@ -1993,6 +2078,7 @@ if (el.shareOutputBtn) {
         topic: state.topic,
         categories: state.categories,
         selections: Array.from(state.selected),
+        otherText: { ...state.otherText },
         stakes: state.stakes,
         blueprintFit: state.blueprintFit,
         genre: state.lastGenre,

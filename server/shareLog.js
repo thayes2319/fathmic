@@ -17,7 +17,7 @@ const LOG_PATH = path.join(DATA_DIR, "share-log.jsonl");
 // document. This does mean BLUEPRINT shares are meaningfully larger on
 // disk than general ones; still small in absolute terms per the earlier
 // disk-sizing math, and it's an explicit per-share opt-in, not automatic.
-const SHAREABLE_FIELDS = ["input", "topic", "categories", "selections", "stakes", "blueprintFit", "genre", "genreLabel", "resultText", "image"];
+const SHAREABLE_FIELDS = ["input", "topic", "categories", "selections", "otherText", "stakes", "blueprintFit", "genre", "genreLabel", "resultText", "image"];
 
 // In-memory index for O(1) lookup by id, loaded once at startup and appended
 // to as shares are created -- same durability pattern as searchLog.
