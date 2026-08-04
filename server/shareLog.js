@@ -5,12 +5,19 @@ const { DATA_DIR } = require("./dataDir");
 
 const LOG_PATH = path.join(DATA_DIR, "share-log.jsonl");
 
-// Deliberately NOT storing the generated illustration image here -- it's a
-// base64 blob that would be the overwhelming majority of this file's size
-// for no real benefit (see the disk-sizing conversation: this stays small
-// specifically because it's text-only). A shared link's reference cards
-// regenerate fresh when viewed, same as any normal run.
-const SHAREABLE_FIELDS = ["input", "topic", "categories", "selections", "stakes", "blueprintFit", "genre", "genreLabel", "resultText"];
+// The illustration image is deliberately excluded for general topics -- a
+// base64 blob would be the overwhelming majority of this file's size for
+// little benefit when the picture is just decorative, so those reference
+// cards regenerate fresh when a shared link is opened, same as any normal
+// run. BLUEPRINT results are the exception: the client only ever sends
+// `image` when state.blueprintFit is true (see the Share button handler in
+// app.js), because Stability's generation is randomly seeded and a fresh
+// regeneration would be a genuinely different design than the one actually
+// shared -- not acceptable for something meant to be a spec/handoff
+// document. This does mean BLUEPRINT shares are meaningfully larger on
+// disk than general ones; still small in absolute terms per the earlier
+// disk-sizing math, and it's an explicit per-share opt-in, not automatic.
+const SHAREABLE_FIELDS = ["input", "topic", "categories", "selections", "stakes", "blueprintFit", "genre", "genreLabel", "resultText", "image"];
 
 // In-memory index for O(1) lookup by id, loaded once at startup and appended
 // to as shares are created -- same durability pattern as searchLog.

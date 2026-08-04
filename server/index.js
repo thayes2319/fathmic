@@ -17,7 +17,12 @@ const { getCostSummary } = require("./costLog");
 
 const app = express();
 app.set("trust proxy", 1); // so req.ip is the real client IP behind a host's reverse proxy, not the proxy itself
-app.use(express.json());
+// Default json body limit is 100kb -- fine for every route except
+// /api/share, which can now carry a base64-encoded BLUEPRINT illustration
+// (confirmed for real: a live image came in over 2MB as a base64 string,
+// well past the default, so the Share request was silently failing with a
+// 413 before this). 10mb gives real headroom without being unbounded.
+app.use(express.json({ limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Every /api/ route hits a paid backend (Anthropic, Muralizer's image
