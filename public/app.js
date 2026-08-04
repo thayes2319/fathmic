@@ -2218,13 +2218,14 @@ if (el.exportPdfBtn) {
 }
 
 el.expandAllBtn.addEventListener("click", () => {
-  // Top-level only — subcategories stay however they were. Cascading into
-  // every subcategory here would just dump the whole tree open at once,
-  // defeating the point of collapsed-by-default; that's what the per-category
-  // "Expand subcategories" button is for.
   interviewModeActive = false; // "expand everything" is its own opt-out of the guided one-at-a-time flow
   interviewIndex = -1;
-  state.categories.forEach(cat => state.expandedCategories.add(cat.name));
+  state.categories.forEach(cat => {
+    state.expandedCategories.add(cat.name);
+    (cat.subcategories || []).forEach(sub => {
+      state.expandedSubcategories.add(`${cat.name}::${sub.name}`);
+    });
+  });
   renderTaxonomy();
 });
 
