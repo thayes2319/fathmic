@@ -1441,21 +1441,32 @@ function renderTaxonomyImpl() {
     // against re-firing on every incidental re-render (this whole function
     // runs on every selection change, not just ones that actually advance
     // the focus). Also covers a category with zero subcategories (a fully
-    // "Given" one) or one where every subcategory is already answered --
-    // both just show the category line alone, no subcategory beneath it.
+    // "Given" one) -- fires once, category line alone.
+    //
+    // Deliberately does NOT fire again once every subcategory is answered.
+    // Real bug caught live: interviewSubRevealCount still points at the
+    // last subcategory after it's answered (the reveal-count math doesn't
+    // change), so focusedSub correctly resolves to null there too -- but
+    // that produces a DIFFERENT key ("Category::lastSub" -> "Category::")
+    // than the one already shown, which read as "genuinely new" and fired
+    // a redundant spotlight announcing the same category again with nothing
+    // to show. The subs.length===0 check below is what still allows the
+    // legitimate zero-subcategory case through while excluding this one.
     if (isInterviewFocus) {
       const subs = category.subcategories || [];
       const candidate = interviewSubRevealCount > 0 && interviewSubRevealCount <= subs.length
         ? subs[interviewSubRevealCount - 1]
         : null;
       const focusedSub = candidate && !subcategoryHasSelection(candidate) ? candidate : null;
-      const spotlightKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
-      if (spotlightKey !== lastSpotlightKey) {
-        lastSpotlightKey = spotlightKey;
-        showQuestionSpotlight(
-          `Tell me about ${category.questionPhrase || category.name}`,
-          focusedSub ? focusedSub.name : ""
-        );
+      if (focusedSub || subs.length === 0) {
+        const spotlightKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
+        if (spotlightKey !== lastSpotlightKey) {
+          lastSpotlightKey = spotlightKey;
+          showQuestionSpotlight(
+            `Tell me about ${category.questionPhrase || category.name}`,
+            focusedSub ? focusedSub.name : ""
+          );
+        }
       }
     }
 
