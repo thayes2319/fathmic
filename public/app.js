@@ -97,7 +97,8 @@ const el = {
   cardLightboxClose: document.getElementById("card-lightbox-close"),
   questionSpotlight: document.getElementById("question-spotlight"),
   questionSpotlightCategory: document.getElementById("question-spotlight-category"),
-  questionSpotlightSubcategory: document.getElementById("question-spotlight-subcategory")
+  questionSpotlightSubcategory: document.getElementById("question-spotlight-subcategory"),
+  questionSpotlightContinue: document.getElementById("question-spotlight-continue")
 };
 
 // A ?share=<id> URL loads someone else's shared result instead of the normal
@@ -628,8 +629,12 @@ function resetDownstream() {
   interviewModeActive = false;
   interviewIndex = -1;
   lastSpotlightKey = null;
-  clearTimeout(questionSpotlightHideTimer);
-  if (el.questionSpotlight) el.questionSpotlight.hidden = true;
+  clearTimeout(questionSpotlightShowTimer);
+  clearTimeout(questionSpotlightSafetyTimer);
+  if (el.questionSpotlight) {
+    el.questionSpotlight.hidden = true;
+    el.questionSpotlight.classList.remove("spotlight-leaving");
+  }
   exitActiveSession();
 }
 
@@ -1037,20 +1042,52 @@ let interviewIndex = -1;
 // a brand new topic doesn't skip its own first spotlight just because the
 // key happens to collide with whatever the previous session ended on.
 let lastSpotlightKey = null;
-let questionSpotlightHideTimer = null;
+let questionSpotlightShowTimer = null; // the ~0.5s delay before it appears
+let questionSpotlightSafetyTimer = null; // auto-dismiss if nobody interacts at all
+const QUESTION_SPOTLIGHT_DELAY_MS = 500;
+const QUESTION_SPOTLIGHT_SAFETY_MS = 20000;
+const QUESTION_SPOTLIGHT_EXIT_MS = 250; // must match the CSS exit animation duration
+
+function hideQuestionSpotlight() {
+  if (!el.questionSpotlight || el.questionSpotlight.hidden) return;
+  clearTimeout(questionSpotlightSafetyTimer);
+  el.questionSpotlight.classList.add("spotlight-leaving");
+  setTimeout(() => {
+    el.questionSpotlight.hidden = true;
+    el.questionSpotlight.classList.remove("spotlight-leaving");
+  }, QUESTION_SPOTLIGHT_EXIT_MS);
+}
 
 function showQuestionSpotlight(categoryText, subcategoryText) {
   if (!el.questionSpotlight) return;
-  // Force the element through display:none and back even if it's already
-  // visible from a moment ago (rapid subcategory advances), so the CSS
-  // animation always restarts from its own 0% rather than being skipped.
+  // Cancel anything already pending/showing -- a fast answer can trigger a
+  // new spotlight request before the previous one even appeared.
+  clearTimeout(questionSpotlightShowTimer);
+  clearTimeout(questionSpotlightSafetyTimer);
   el.questionSpotlight.hidden = true;
-  void el.questionSpotlight.offsetWidth; // force reflow
-  el.questionSpotlightCategory.textContent = categoryText;
-  el.questionSpotlightSubcategory.textContent = subcategoryText || "";
-  el.questionSpotlight.hidden = false;
-  clearTimeout(questionSpotlightHideTimer);
-  questionSpotlightHideTimer = setTimeout(() => { el.questionSpotlight.hidden = true; }, 3000);
+  el.questionSpotlight.classList.remove("spotlight-leaving");
+
+  // Deliberately delayed, not simultaneous with the base interview-float
+  // modal appearing -- reads as arriving ON TOP of something already
+  // there, which a same-frame appearance didn't convey.
+  questionSpotlightShowTimer = setTimeout(() => {
+    el.questionSpotlightCategory.textContent = categoryText;
+    el.questionSpotlightSubcategory.textContent = subcategoryText || "";
+    el.questionSpotlight.hidden = false;
+    // No fixed auto-hide -- stays up until dismissed (click anywhere, or
+    // Continue; see the listener below), since reading time genuinely
+    // varies by content length and person. This safety timer is only a
+    // distant fallback for an abandoned tab, same pattern as the
+    // onboarding schematic's own SCHEMATIC_HOLD_MS.
+    questionSpotlightSafetyTimer = setTimeout(hideQuestionSpotlight, QUESTION_SPOTLIGHT_SAFETY_MS);
+  }, QUESTION_SPOTLIGHT_DELAY_MS);
+}
+
+if (el.questionSpotlight) {
+  // Any click inside -- backdrop, card, or the Continue button -- dismisses
+  // it; nothing else to interact with in here, so there's no reason to
+  // distinguish "clicked the button" from "clicked anywhere else."
+  el.questionSpotlight.addEventListener("click", hideQuestionSpotlight);
 }
 
 function categoryHasSelection(category) {
@@ -1142,6 +1179,13 @@ el.interviewToggleBtn.addEventListener("click", () => {
 // afterward.
 document.addEventListener("click", event => {
   if (!interviewModeActive) return;
+  // The question-spotlight overlay (see showQuestionSpotlight) is part of
+  // the interview experience but lives in a completely separate part of
+  // the DOM, not nested inside .interview-float -- without this check,
+  // dismissing it (click anywhere on it, or Continue) looked exactly like
+  // clicking outside the card and exited interview mode entirely instead
+  // of just closing the overlay (confirmed for real).
+  if (el.questionSpotlight && el.questionSpotlight.contains(event.target)) return;
   const floatingCard = document.querySelector(".category-row.interview-float");
   if (floatingCard && !floatingCard.contains(event.target)) {
     exitInterview();
