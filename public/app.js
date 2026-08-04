@@ -1224,28 +1224,14 @@ function renderTaxonomyImpl() {
     catTitle.textContent = isInterviewFocus ? `Tell me about ${category.questionPhrase || category.name}` : category.name;
     if (isInterviewFocus) catTitle.classList.add("interview-question-enter");
 
-    // Fixedness badge: a quick signal of whether this category is mostly a
-    // given condition (little real choice) or a genuine space worth exploring —
-    // so attention goes to the categories where exploring actually pays off.
-    if (typeof category.fixedness === "number") {
-      const badge = document.createElement("span");
-      const f = category.fixedness;
-      const disclaimer = "AI estimate, not a verified fact — how much of a real choice this category represents.";
-      if (f < 0.35) {
-        badge.className = "fixedness-badge fixedness-given";
-        badge.textContent = "Given";
-        badge.title = `Given: ${disclaimer}`;
-      } else if (f > 0.65) {
-        badge.className = "fixedness-badge fixedness-explore";
-        badge.textContent = "Explore";
-        badge.title = `Explore: ${disclaimer}`;
-      } else {
-        badge.className = "fixedness-badge fixedness-mixed";
-        badge.textContent = "Mixed";
-        badge.title = `Mixed: ${disclaimer}`;
-      }
-      catTitle.appendChild(badge);
-    }
+    // The visible Given/Mixed/Explore badge was removed (real repeat
+    // observation: with everything showing "Explore" for a given topic, it
+    // wasn't actually differentiating anything, just adding a repeated label
+    // next to every category -- clutter without payoff now that categories
+    // read as self-explanatory questions and interview mode already walks
+    // through them one at a time). category.fixedness itself is untouched
+    // and still very much in use -- see pickForCategory()'s isGivenCategory
+    // check below, which is real behavior, not just display.
 
     catEl.appendChild(catTitle);
 
