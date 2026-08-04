@@ -1098,13 +1098,27 @@ el.interviewToggleBtn.addEventListener("click", () => {
 // expect a modal-like overlay to behave. Deliberately passive: it doesn't
 // prevent the click's own effect, so clicking, say, the History button
 // exits interview mode AND opens history, rather than swallowing the click.
+// Capture phase, deliberately -- not bubble phase. A click on something
+// inside the floating card that ALSO re-renders (Next/Previous category,
+// Pick for me, any selection) replaces the card's entire DOM subtree as
+// part of its own handler, which runs before this listener would fire if
+// registered normally (bubble phase runs after the target's own handlers).
+// By the time a bubble-phase check ran, event.target would be a detached,
+// orphaned node from the just-replaced tree -- .contains() can never match
+// a detached node, so it looked identical to "clicked outside," and
+// exitInterview() fired right after a perfectly normal category advance
+// (confirmed for real: clicking "Next category" was silently kicking out
+// of interview mode). Capture phase runs BEFORE any handler mutates
+// anything, so the containment check happens against accurate, unmutated
+// DOM state -- correct regardless of what the click's own handler does
+// afterward.
 document.addEventListener("click", event => {
   if (!interviewModeActive) return;
   const floatingCard = document.querySelector(".category-row.interview-float");
   if (floatingCard && !floatingCard.contains(event.target)) {
     exitInterview();
   }
-});
+}, true);
 
 // Reentrancy guard -- renderTaxonomy() already calls applyExclusions() at
 // its own end (below), and applyExclusions() now also calls renderTaxonomy()
@@ -1202,6 +1216,7 @@ function renderTaxonomyImpl() {
     // AI-authored: instant, free, and fully reversible if it doesn't test
     // well, versus regenerating the taxonomy prompt itself.
     catTitle.textContent = isInterviewFocus ? `Tell me about ${category.name}` : category.name;
+    if (isInterviewFocus) catTitle.classList.add("interview-question-enter");
 
     // Fixedness badge: a quick signal of whether this category is mostly a
     // given condition (little real choice) or a genuine space worth exploring —
