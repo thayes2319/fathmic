@@ -97,6 +97,7 @@ const el = {
   expandAllBtn: document.getElementById("expand-all-btn"),
   collapseAllBtn: document.getElementById("collapse-all-btn"),
   pickAllBtn: document.getElementById("pick-all-btn"),
+  resetSelectionsBtn: document.getElementById("reset-selections-btn"),
   staleBanner: document.getElementById("stale-banner"),
   staleBannerText: document.getElementById("stale-banner-text"),
   regenerateBtn: document.getElementById("regenerate-btn"),
@@ -2378,6 +2379,26 @@ el.pickAllBtn.addEventListener("click", () => {
   });
   renderTaxonomy();
 });
+
+if (el.resetSelectionsBtn) {
+  el.resetSelectionsBtn.addEventListener("click", () => {
+    if (!state.selected.size && !hasAnyOtherText()) return; // nothing to reset
+    const ok = window.confirm("Clear every pick and Other answer across the whole map? The map itself stays -- this can't be undone.");
+    if (!ok) return;
+    interviewModeActive = false;
+    interviewIndex = -1;
+    state.selected.clear();
+    state.otherText = {};
+    // Whatever result was written no longer corresponds to anything selected
+    // -- same output-hiding + snapshot reset the revise-topic path uses,
+    // just without regenerating the categories themselves.
+    el.outputSection.hidden = true;
+    state.resultSelectionsSnapshot = null;
+    state.otherTextSnapshot = null;
+    state.lastGenre = null;
+    renderTaxonomy();
+  });
+}
 
 // BLUEPRINT subjects: the taxonomy-to-full-spec pattern's native use case
 // (see Muralizer) — a curated, high-attention shortcut distinct from the
