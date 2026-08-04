@@ -1686,6 +1686,7 @@ function renderTaxonomyImpl() {
       if (sub.axis && sub.direction) {
         subcategoryRegistry.push({
           subEl,
+          subName: sub.name,
           axis: sub.axis,
           direction: sub.direction,
           checkboxes: [{ checkbox: generalCheckbox, text: sub.name }, ...specificCheckboxes]
@@ -1869,6 +1870,15 @@ function applyExclusions() {
           state.selected.delete(text);
         }
       });
+      // Same hard-reset treatment as the checkboxes above -- a hidden
+      // subcategory's Other answer would otherwise keep counting as
+      // "answered" and keep flowing into synthesis with no way for the user
+      // to see or remove it.
+      if (state.otherText[entry.subName]) {
+        delete state.otherText[entry.subName];
+        const otherInput = entry.subEl.querySelector('.other-answer input[type="text"]');
+        if (otherInput) otherInput.value = "";
+      }
       entry.subEl.classList.add("excluded-subcategory");
     } else {
       entry.subEl.classList.remove("excluded-subcategory");
