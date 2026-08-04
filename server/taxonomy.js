@@ -52,6 +52,10 @@ const TAXONOMY_TOOL = {
             fixedness: {
               type: "number",
               description: "Only set on 'category' nodes. A 0-1 score: 0 means this category is essentially a given condition the user already has (little real choice — e.g. 'what climate zone you live in'), 1 means it's a genuine open discovery/options space with many valid paths to explore (e.g. 'which crops to grow'). Omit for subcategory/element nodes."
+            },
+            questionPhrase: {
+              type: "string",
+              description: `Only set on 'category' nodes. This category's label rephrased as the natural continuation of the sentence "Tell me about ___" — a UI feature shows categories one at a time as a spoken-style question, and needs this to read grammatically. Include whatever article/possessive/preposition a fluent English speaker would actually use so the full sentence sounds natural (e.g. label "Tattoo Style" -> "the tattoo style", label "Budget Range" -> "your budget range", label "Weight & Construction" -> "weight and construction"). Lowercase unless a proper noun. Omit for subcategory/element nodes.`
             }
           },
           required: ["id", "type", "label"]
@@ -83,6 +87,8 @@ Four rules for the content itself:
 4. Tag subcategories too when the whole subcategory is one side of a conflict. If a subcategory itself represents one branch of a real either/or (e.g. "Piedmont" vs. "Coastal Plain" as regions), tag the subcategory node with axis/direction too, not just its elements. This lets a user accept the subcategory as a whole without picking through individual elements, while still correctly excluding whatever conflicts with it elsewhere.
 
 5. Score every category's fixedness. Set "fixedness" (0-1) on every category node: near 0 means the category is mostly a given condition or constraint the user already has and isn't really choosing (e.g. their climate zone, their existing assignment rubric) — near 1 means it's a genuine space of options worth exploring, where the user benefits from seeing what's possible (e.g. crop varieties, narrative approaches). Most subjects have a mix — be honest about where each category actually falls rather than defaulting to the middle.
+
+6. Set "questionPhrase" on every category node — see its schema description. This is read aloud as "Tell me about {questionPhrase}", so it must actually sound like natural spoken English with that prefix, not just the label with words removed.
 
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 
@@ -137,6 +143,7 @@ function buildTreeFromNodes(nodes) {
   return categories.map(cat => ({
     name: cat.label,
     fixedness: typeof cat.fixedness === "number" ? cat.fixedness : null,
+    questionPhrase: cat.questionPhrase || null,
     subcategories: (cat.children || [])
       .filter(c => c.type === "subcategory")
       .map(sub => ({

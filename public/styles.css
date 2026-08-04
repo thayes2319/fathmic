@@ -562,17 +562,23 @@ button:disabled { opacity: 0.5; cursor: default; }
 .category > summary::before { content: "\25B8  "; color: var(--accent); }
 .category[open] > summary::before { content: "\25BE  "; }
 
-/* Interview mode's question heading grows in on appearance rather than
-   just popping into place -- a small entrance moment for the thing that's
-   effectively "being asked" right now. Whole line scales up together
-   (not per-letter -- simpler, still reads as a deliberate arrival). */
+/* Interview mode's question heading: lifts off the card, grows large and
+   holds there for a beat (the actual "being asked" moment), then settles
+   back down to its normal resting size and position. Whole line moves
+   together, not per-letter. z-index'd above its own card and given a
+   drop-shadow while enlarged so it actually reads as coming off the
+   surface, not just growing in place. */
 .interview-question-enter {
+  position: relative;
+  z-index: 5;
   transform-origin: left center;
-  animation: interviewQuestionEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: interviewQuestionEnter 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes interviewQuestionEnter {
-  from { transform: scale(0.85); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  0%   { transform: scale(0.7) translateY(6px); opacity: 0; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  25%  { transform: scale(1.4) translateY(-14px); opacity: 1; filter: drop-shadow(0 10px 14px rgba(0,0,0,0.18)); }
+  56%  { transform: scale(1.4) translateY(-14px); opacity: 1; filter: drop-shadow(0 10px 14px rgba(0,0,0,0.18)); } /* ~0.5s hold */
+  100% { transform: scale(1) translateY(0); opacity: 1; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
 .category[open] { padding-bottom: 0.75rem; }
 
@@ -590,11 +596,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 /* The one subcategory interview mode just revealed and is waiting on an
    answer for -- a lighter, narrower echo of the category-level floating
-   card's own highlight treatment, not competing with it. */
+   card's own highlight treatment, not competing with it. Flashes twice on
+   arrival (a ring pulse, on-off-on-off) to cue "this is the new question,"
+   then settles into the steady tinted state. Re-triggers automatically for
+   the 2nd/3rd/... subcategory too, since each is a freshly-created element
+   when it becomes the focus (progressive reveal rebuilds the tree), not a
+   class toggled on an existing one -- no JS timing needed to replay it. */
 .subcategory-in-focus {
   border-left-color: var(--accent);
   background: rgba(122, 92, 62, 0.06);
   border-radius: 0 6px 6px 0;
+  animation: subcategoryFocusFlash 1.2s ease-out;
+}
+@keyframes subcategoryFocusFlash {
+  0%   { box-shadow: 0 0 0 3px var(--accent); }
+  15%  { box-shadow: 0 0 0 3px transparent; }
+  30%  { box-shadow: 0 0 0 3px var(--accent); }
+  45%  { box-shadow: 0 0 0 3px transparent; }
+  100% { box-shadow: 0 0 0 3px transparent; }
 }
 .subcategory > summary::-webkit-details-marker { display: none; }
 .subcategory > summary::before { content: "\25B8  "; color: var(--muted); }

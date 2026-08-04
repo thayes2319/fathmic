@@ -1215,7 +1215,13 @@ function renderTaxonomyImpl() {
     // in the normal flat/expanded view. Plain client-side template, not
     // AI-authored: instant, free, and fully reversible if it doesn't test
     // well, versus regenerating the taxonomy prompt itself.
-    catTitle.textContent = isInterviewFocus ? `Tell me about ${category.name}` : category.name;
+    // questionPhrase is written by the taxonomy-generation model itself (see
+    // server/taxonomy.js) specifically so this reads with correct grammar --
+    // "the tattoo style," "your budget range," not just the bare label stuck
+    // after a fixed prefix. Falls back to the raw label for older cached
+    // taxonomies (demo fixtures, anything saved before this field existed)
+    // that never had it generated.
+    catTitle.textContent = isInterviewFocus ? `Tell me about ${category.questionPhrase || category.name}` : category.name;
     if (isInterviewFocus) catTitle.classList.add("interview-question-enter");
 
     // Fixedness badge: a quick signal of whether this category is mostly a
