@@ -831,7 +831,7 @@ el.distillBtn.addEventListener("click", () => runDistill(el.subjectInput.value.t
 // "press", "squeeze", "decompose", etc., even though those are common
 // synonyms too) per explicit feedback that a long, aggressive-sounding
 // rotation would undercut the point rather than help it.
-const DISTILL_LABELS = ["Distill", "Refine", "Purify", "Clarify", "Concentrate"];
+const DISTILL_LABELS = ["Distill", "Refine", "Distill", "Purify", "Distill", "Clarify", "Distill", "Concentrate"];
 if (el.distillBtn) {
   let distillLabelIndex = 0;
   setInterval(() => {
@@ -2857,8 +2857,6 @@ async function playSchematic() {
     if (!cancelled) await new Promise(r => setTimeout(r, 500));
   }
   if (cancelled) return;
-  if (cancelled) return;
-  el.subjectInput.value = "";
 
   el.schematicSequence.hidden = false;
   if (!schematicLabelsSized) {
