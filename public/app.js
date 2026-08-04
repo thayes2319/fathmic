@@ -2036,6 +2036,15 @@ if (sharedResultId) {
       if (!res.ok) throw new Error(data.error || "Share link not found.");
       loadHistoryEntry(data, { scrollToTaxonomy: false });
       if (el.sharedViewBanner) el.sharedViewBanner.hidden = false;
+      // Strip ?share=... from the visible URL now that its data has been
+      // loaded into live, editable state -- otherwise it lingers in the
+      // address bar indefinitely (dismissing the banner only hid the banner,
+      // never touched the URL), and reloading the page while it's still
+      // there silently re-triggers this entire restore again, which reads
+      // as being stuck in shared mode with no way out except manually
+      // editing the URL. replaceState swaps the URL without a navigation/
+      // reload, so nothing else on the page is disturbed.
+      history.replaceState(null, "", location.pathname);
     } catch (err) {
       el.gateStatus.textContent = `Error: ${err.message}`;
     }
