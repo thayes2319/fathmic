@@ -18,6 +18,11 @@ const state = {
   resultSelectionsSnapshot: null,
   stakes: "medium",
   lastStakesUsed: null,
+  // The stakes value actually sent to the last /api/taxonomy call -- distinct
+  // from lastStakesUsed (which tracks synthesis). Lets checkStaleness tell
+  // "the written text is stale" apart from "the categories themselves were
+  // mapped for a different stakes level."
+  stakesUsedForTaxonomy: null,
   blueprintFit: false
 };
 
@@ -93,7 +98,9 @@ const el = {
   collapseAllBtn: document.getElementById("collapse-all-btn"),
   pickAllBtn: document.getElementById("pick-all-btn"),
   staleBanner: document.getElementById("stale-banner"),
+  staleBannerText: document.getElementById("stale-banner-text"),
   regenerateBtn: document.getElementById("regenerate-btn"),
+  updateCategoriesBtn: document.getElementById("update-categories-btn"),
   stakesPositions: document.querySelectorAll(".stakes-marker"),
   stakesNeedle: document.querySelector(".stakes-knob-needle"),
   stakesPointer: document.querySelector(".stakes-pointer"),
@@ -280,6 +287,11 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   state.selected = new Set(entry.selections || []);
   state.otherText = entry.otherText || {};
   state.stakes = entry.stakes || "medium";
+  // A reopened entry's categories were whatever they were when saved --
+  // treat them as in sync with the stakes stored alongside them (there's no
+  // per-run history of what stakes taxonomy generation actually used before
+  // this field existed, so this is the best available assumption).
+  state.stakesUsedForTaxonomy = state.stakes;
   state.blueprintFit = entry.blueprintFit === true;
   renderStakesDial();
 
@@ -635,6 +647,7 @@ function resetDownstream() {
   state.resultSelectionsSnapshot = null;
   state.lastGenre = null;
   state.lastStakesUsed = null;
+  state.stakesUsedForTaxonomy = null;
   state.blueprintFit = false;
   interviewModeActive = false;
   interviewIndex = -1;
@@ -927,11 +940,13 @@ async function runTaxonomy() {
   try {
     const taxonomy = await postJSON("/api/taxonomy", {
       input: state.input,
-      firstBranch: state.firstBranch
+      firstBranch: state.firstBranch,
+      stakes: state.stakes
     });
 
     state.topic = taxonomy.topic;
     state.categories = taxonomy.categories || [];
+    state.stakesUsedForTaxonomy = state.stakes;
 
     if (previousSelected.size) {
       // Revise path: keep whichever previously-selected labels still exist
@@ -1911,8 +1926,21 @@ function checkStaleness() {
   const snapshot = state.resultSelectionsSnapshot;
   const selectionsChanged = current.size !== snapshot.size || Array.from(current).some(v => !snapshot.has(v));
   const otherTextChanged = otherTextSnapshotString() !== state.otherTextSnapshot;
-  const stakesChanged = state.stakes !== state.lastStakesUsed;
-  el.staleBanner.hidden = !(selectionsChanged || otherTextChanged || stakesChanged);
+  const stakesChangedSinceSynthesis = state.stakes !== state.lastStakesUsed;
+  // Distinct from the synthesis check above -- taxonomy generation reads
+  // stakes too now (see server/taxonomy.js), and re-synthesizing with a new
+  // stakes value doesn't retroactively regenerate the categories, so these
+  // two can go stale independently of each other.
+  const stakesChangedSinceTaxonomy = state.stakesUsedForTaxonomy !== null &&
+    state.stakes !== state.stakesUsedForTaxonomy;
+
+  el.staleBanner.hidden = !(selectionsChanged || otherTextChanged || stakesChangedSinceSynthesis || stakesChangedSinceTaxonomy);
+  if (!el.staleBanner.hidden && el.staleBannerText) {
+    el.staleBannerText.textContent = stakesChangedSinceTaxonomy
+      ? "Stakes changed since the categories were mapped — Regenerate updates the writeup, but the categories themselves still reflect the original stakes level."
+      : "Selections changed since this was generated.";
+  }
+  if (el.updateCategoriesBtn) el.updateCategoriesBtn.hidden = !stakesChangedSinceTaxonomy;
 }
 
 // Visual-only — tracks the selected position, doesn't itself receive clicks
@@ -2110,6 +2138,13 @@ el.regenerateBtn.addEventListener("click", () => {
   if (!state.lastGenre) return;
   runSynthesisForGenre(state.lastGenre, state.lastGenreLabel);
 });
+
+if (el.updateCategoriesBtn) {
+  // Reuses "Revise topic" with the current (unchanged) topic text -- it
+  // already skips the gate and regenerates with whatever state.stakes is
+  // right now, which is exactly what's needed here, no retyping required.
+  el.updateCategoriesBtn.addEventListener("click", () => reviseTopic(state.input));
+}
 
 el.copyOutputBtn.addEventListener("click", async () => {
   const text = state.lastResultText || el.outputText.textContent;
@@ -2390,6 +2425,7 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
       state.categories = demo.categories || [];
       state.selected = new Set(demo.selections || []);
       state.stakes = "medium"; // demo fixtures skip the gate, so no inferred stakes exists
+      state.stakesUsedForTaxonomy = "medium"; // fixtures predate stakes-aware generation -- treat as in sync
       renderStakesDial();
 
       startInterview(); // demos arrive pre-selected, so this naturally resolves straight to the flat view

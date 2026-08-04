@@ -94,6 +94,18 @@ If a first branch is suggested below (from the specificity gate), make it the fi
 
 An empty or thin node list is a failed response — do the actual work of thinking through the subject before calling the tool.`;
 
+// Stakes is inferred by the gate before this ever runs (see server/index.js
+// and state.stakes in app.js), so it's available here for free -- no extra
+// call. Worded as a nudge toward precision/restraint, not a directive to add
+// categories, since a heavy-handed instruction here would risk padding every
+// high-stakes subject with a generic "risks" category that doesn't actually
+// fit it.
+const STAKES_TAXONOMY_GUIDANCE = {
+  low: "Stakes are low (casual curiosity or a hobby) -- keep categories and elements light and exploratory. Don't manufacture caution-, safety-, or compliance-flavored categories that wouldn't naturally belong to this subject.",
+  medium: "Stakes are moderate -- generate normally, no special emphasis needed.",
+  high: "Stakes are high (real consequences -- medical, legal, financial, safety -- if this goes wrong). Wherever the subject genuinely has precise distinctions that determine correctness or safety (exact thresholds, boundary conditions, named failure modes, contraindications), make sure those are the ones surfaced as categories/subcategories/elements, worded with that precision, rather than staying generic. Only where the subject actually has such factors -- don't invent a generic 'risks' category that doesn't fit."
+};
+
 const MIN_ACCEPTABLE_CATEGORIES = 4;
 // A subcategory with 0-1 elements leaves the user nothing real to choose
 // between -- just "General" or nothing. The system prompt already asks for
@@ -177,10 +189,11 @@ function findThinSubcategory(categories) {
   return null;
 }
 
-async function runTaxonomy(input, firstBranch) {
+async function runTaxonomy(input, firstBranch, stakes) {
   const branchNote = firstBranch
     ? `\n\nSuggested first branch (make this the first category): ${firstBranch}`
     : "";
+  const stakesNote = `\n\n${STAKES_TAXONOMY_GUIDANCE[stakes] || STAKES_TAXONOMY_GUIDANCE.medium}`;
 
   let lastCategoryCount = 0;
   let lastThinSubcategory = null;
@@ -188,7 +201,7 @@ async function runTaxonomy(input, firstBranch) {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const result = await callStructured({
       system: SYSTEM_PROMPT,
-      prompt: `Subject: "${input}"${branchNote}`,
+      prompt: `Subject: "${input}"${branchNote}${stakesNote}`,
       tool: TAXONOMY_TOOL,
       maxTokens: 6144,
       label: "taxonomy"

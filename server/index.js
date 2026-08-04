@@ -103,11 +103,11 @@ app.get("/api/trending-external", async (req, res) => {
 
 app.post("/api/taxonomy", async (req, res) => {
   try {
-    const { input, firstBranch } = req.body || {};
+    const { input, firstBranch, stakes } = req.body || {};
     if (!input || !String(input).trim()) {
       return res.status(400).json({ error: "input is required" });
     }
-    const result = await runTaxonomy(String(input).trim(), firstBranch || null);
+    const result = await runTaxonomy(String(input).trim(), firstBranch || null, stakes || null);
     res.json(result);
   } catch (err) {
     console.error("[taxonomy]", err);
