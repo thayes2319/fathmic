@@ -95,6 +95,11 @@ If a first branch is suggested below (from the specificity gate), make it the fi
 An empty or thin node list is a failed response — do the actual work of thinking through the subject before calling the tool.`;
 
 const MIN_ACCEPTABLE_CATEGORIES = 4;
+// A subcategory with 0-1 elements leaves the user nothing real to choose
+// between -- just "General" or nothing. The system prompt already asks for
+// 3-8 per subcategory; this is a much lower floor that only catches a
+// genuinely starved subcategory, not a legitimately narrow one.
+const MIN_ELEMENTS_PER_SUBCATEGORY = 2;
 const MAX_ATTEMPTS = 3;
 
 // Occasionally the model leaks XML-style tool-parameter framing
@@ -157,12 +162,28 @@ function buildTreeFromNodes(nodes) {
   }));
 }
 
+// Retry budget is shared with the category-count check below rather than
+// attempting to patch just the thin subcategory in isolation -- a full
+// regeneration is simpler and the call is cheap enough that it's not worth
+// the complexity of a targeted top-up call.
+function findThinSubcategory(categories) {
+  for (const cat of categories) {
+    for (const sub of cat.subcategories || []) {
+      if ((sub.elements || []).length < MIN_ELEMENTS_PER_SUBCATEGORY) {
+        return `${cat.name} > ${sub.name}`;
+      }
+    }
+  }
+  return null;
+}
+
 async function runTaxonomy(input, firstBranch) {
   const branchNote = firstBranch
     ? `\n\nSuggested first branch (make this the first category): ${firstBranch}`
     : "";
 
   let lastCategoryCount = 0;
+  let lastThinSubcategory = null;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const result = await callStructured({
@@ -175,8 +196,9 @@ async function runTaxonomy(input, firstBranch) {
 
     const nodes = recoverArrayField(result.nodes);
     const categories = nodes ? buildTreeFromNodes(nodes) : [];
+    const thinSubcategory = categories.length ? findThinSubcategory(categories) : null;
 
-    if (categories.length >= MIN_ACCEPTABLE_CATEGORIES) {
+    if (categories.length >= MIN_ACCEPTABLE_CATEGORIES && !thinSubcategory) {
       if (!Array.isArray(result.nodes)) {
         console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS}: recovered node list from a malformed string field`);
       }
@@ -187,14 +209,21 @@ async function runTaxonomy(input, firstBranch) {
     }
 
     lastCategoryCount = categories.length;
-    console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS} reconstructed only ${categories.length} categories — retrying`);
-    console.warn(`[taxonomy] failure shape: keys=${JSON.stringify(Object.keys(result || {}))}`);
-    console.warn(`[taxonomy] failure dump: ${JSON.stringify(result).slice(0, 3000)}`);
+    lastThinSubcategory = thinSubcategory;
+    if (thinSubcategory) {
+      console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS}: subcategory "${thinSubcategory}" has fewer than ${MIN_ELEMENTS_PER_SUBCATEGORY} elements — retrying`);
+    } else {
+      console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS} reconstructed only ${categories.length} categories — retrying`);
+      console.warn(`[taxonomy] failure shape: keys=${JSON.stringify(Object.keys(result || {}))}`);
+      console.warn(`[taxonomy] failure dump: ${JSON.stringify(result).slice(0, 3000)}`);
+    }
   }
 
   throw new Error(
     `Taxonomy generation returned too little content after ${MAX_ATTEMPTS} attempts ` +
-    `(last attempt reconstructed ${lastCategoryCount} categories). Try again.`
+    `(last attempt reconstructed ${lastCategoryCount} categories` +
+    (lastThinSubcategory ? `, thin subcategory: "${lastThinSubcategory}"` : "") +
+    `). Try again.`
   );
 }
 
