@@ -1,1683 +1,1824 @@
-﻿const DEMO_CASES = [
-    {
-        "label":  "Food Garden (Georgia)",
-        "input":  "I want to plant a food garden in Georgia",
-        "topic":  "Planning a Food Garden in Georgia",
-        "categories":  [
-                           {
-                               "name":  "Region of Georgia",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "North Georgia Mountains (Zone 6b–7b, cooler microclimate, shorter season)",
-                                                         "axis":  "region",
-                                                         "direction":  "mountains",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Plan around last frost mid-to-late April"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Use raised beds to improve drainage on slopes"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Favor cold-hardy apple and berry varieties"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Piedmont (Zone 7b–8a, red clay soil, hot humid summers)",
-                                                         "axis":  "region",
-                                                         "direction":  "piedmont",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Amend heavy clay with compost/gypsum before planting"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Choose Atlanta-area extension planting calendar"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Grow heat-tolerant tomato varieties (e.g. \u0027Heatmaster\u0027)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Coastal Plain (Zone 8a–9a, sandy soil, long humid season)",
-                                                         "axis":  "region",
-                                                         "direction":  "coastal",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Plant early spring crops in February"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Select sandy-soil-adapted root crops (sweet potato, peanut)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Add frequent irrigation for fast-draining sandy soil"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Season \u0026 Crop Timing",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Cool-Season Crops (spring/fall)",
-                                                         "axis":  "season",
-                                                         "direction":  "cool",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Collards"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Sugar snap peas"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Broccoli \u0027Waltham 29\u0027"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Lettuce (loose-leaf varieties)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Warm-Season Crops (summer)",
-                                                         "axis":  "season",
-                                                         "direction":  "warm",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Okra \u0027Clemson Spineless\u0027"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Southern peas (cowpeas)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Tomato \u0027Cherokee Purple\u0027"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Muscadine grapes"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Succession \u0026 Fall Planting Windows",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Second planting of bush beans in late July"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Fall broccoli transplants in August"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Garlic planted in November for summer harvest"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Soil \u0026 Bed Preparation",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Bed Style",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "In-ground row beds",
-                                                                              "axis":  "bed_style",
-                                                                              "direction":  "in_ground"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Raised wooden beds",
-                                                                              "axis":  "bed_style",
-                                                                              "direction":  "raised"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Straw bale gardening",
-                                                                              "axis":  "bed_style",
-                                                                              "direction":  "raised"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Mulching Strategy",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Pine straw mulch"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Wheat straw mulch"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Shredded leaf mulch"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Pests, Disease \u0026 Wildlife Pressure",
-                               "subcategories":  [
-
-                                                 ]
-                           },
-                           {
-                               "name":  "Garden Layout \u0026 Method",
-                               "subcategories":  [
-
-                                                 ]
-                           }
-                       ],
-        "selections":  [
-                           "Plan around last frost mid-to-late April",
-                           "Collards",
-                           "In-ground row beds"
-                       ],
-        "genre":  "action_item"
-    },
-    {
-        "label":  "7th Grade Story",
-        "input":  "I need to write a fictional story for my 7th grade English class",
-        "topic":  "Choosing and writing a fictional story for 7th grade English class",
-        "categories":  [
-                           {
-                               "name":  "Genre \u0026 Story Type (pick one lane first)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Realistic Fiction (grounded in real-world rules)",
-                                                         "axis":  "genre",
-                                                         "direction":  "realistic",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Coming-of-age school story"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Friendship/betrayal drama"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Family conflict story"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Sports competition story"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Speculative Fiction (bends real-world rules)",
-                                                         "axis":  "genre",
-                                                         "direction":  "speculative",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Fantasy quest with magic system"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Sci-fi/dystopian future world"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Ghost/horror mystery"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Fairy-tale retelling with a twist"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Plot Structure \u0026 Conflict",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Conflict Type (the engine of the plot)",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Character vs. character"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Character vs. self (internal struggle)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Character vs. nature/environment"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Character vs. society/rules"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Plot Shape (how events are ordered)",
-                                                         "axis":  "timeline",
-                                                         "direction":  "structure",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Classic linear five-part arc (setup, rising action, climax, falling action, resolution)",
-                                                                              "axis":  "timeline",
-                                                                              "direction":  "linear"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Flashback-framed structure (start near the end, then rewind)",
-                                                                              "axis":  "timeline",
-                                                                              "direction":  "nonlinear"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Twist-ending structure (hidden reveal changes everything)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Point of View \u0026 Narrator",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Narrative Voice (who tells it)",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "First-person narrator (I/me, inside one head)",
-                                                                              "axis":  "pov",
-                                                                              "direction":  "first"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Third-person limited (follows one character closely)",
-                                                                              "axis":  "pov",
-                                                                              "direction":  "third-limited"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Third-person omniscient (knows everything, all characters)",
-                                                                              "axis":  "pov",
-                                                                              "direction":  "third-omniscient"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Narrator Reliability",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Reliable, trustworthy narrator"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Unreliable narrator (hides or misunderstands truth)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Characters",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Protagonist Design",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Clear external goal (wins the game, finds the item)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Hidden internal flaw to overcome"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Specific personality quirk or habit"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Supporting Cast Roles",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Best friend/sidekick"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Antagonist with understandable motive"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Mentor or authority figure"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Foil character (contrasts protagonist\u0027s traits)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Setting \u0026 World",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Time Period",
-                                                         "axis":  "era",
-                                                         "direction":  "time",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Present-day setting",
-                                                                              "axis":  "era",
-                                                                              "direction":  "present"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Historical setting (specific decade/event)",
-                                                                              "axis":  "era",
-                                                                              "direction":  "past"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Futuristic setting",
-                                                                              "axis":  "era",
-                                                                              "direction":  "future"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Location Type",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Familiar everyday place (school, neighborhood)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Invented fantasy world with its own rules"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Isolated/confined setting (island, spaceship, cabin)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Craft \u0026 Technique",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Opening Hook Strategy",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Start mid-action (in medias res)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Start with vivid sensory description"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Start with intriguing dialogue line"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Dialogue \u0026 Description Balance",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Dialogue-heavy scenes to reveal character"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Descriptive narration to build mood/setting"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Theme \u0026 Message",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Theme about friendship/loyalty"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Theme about courage/facing fear"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Theme about honesty/consequences"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Assignment Fit \u0026 Revision",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Meeting Class Requirements",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Check required word/page count"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Confirm required story elements are present (rubric checklist)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Pick title that reflects theme"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Revision Pass Types",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Read-aloud pass for flow/dialogue realism"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Peer feedback pass"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Grammar/spelling proofread pass"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           }
-                       ],
-        "selections":  [
-                           "Coming-of-age school story",
-                           "Character vs. character",
-                           "First-person narrator (I/me, inside one head)",
-                           "Clear external goal (wins the game, finds the item)"
-                       ],
-        "genre":  "story"
-    },
-    {
-        "label":  "3D Print Gear Set",
-        "input":  "I want to 3D print a custom gear set",
-        "topic":  "3D Printing a Custom Gear Set for a Desktop Robotics Arm (low-load, demonstration purposes)",
-        "categories":  [
-                           {
-                               "name":  "Gear Type \u0026 Transmission Layout",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Gear Tooth Profile",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Spur gears (parallel shafts, simplest to print)",
-                                                                              "axis":  "gear_form",
-                                                                              "direction":  "spur"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Helical gears (quieter, smoother, needs supports/orientation care)",
-                                                                              "axis":  "gear_form",
-                                                                              "direction":  "helical"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Bevel gears (right-angle shaft intersection)",
-                                                                              "axis":  "gear_form",
-                                                                              "direction":  "bevel"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Worm \u0026 worm gear (high reduction, self-locking)",
-                                                                              "axis":  "gear_form",
-                                                                              "direction":  "worm"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Planetary gear set (compact, coaxial reduction)",
-                                                                              "axis":  "gear_form",
-                                                                              "direction":  "planetary"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Reduction Strategy",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Single-stage reduction (one gear pair)",
-                                                                              "axis":  "stages",
-                                                                              "direction":  "single"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Multi-stage gear train (2+ pairs for higher ratio)",
-                                                                              "axis":  "stages",
-                                                                              "direction":  "multi"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Rack-and-pinion (linear motion output)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Gear Sizing \u0026 Meshing Parameters",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Tooth Geometry Standard",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Metric module system (e.g., M0.5–M1.5 for small desktop gears)",
-                                                                              "axis":  "tooth_standard",
-                                                                              "direction":  "module"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Imperial diametral pitch system",
-                                                                              "axis":  "tooth_standard",
-                                                                              "direction":  "diametral_pitch"
-                                                                          },
-                                                                          {
-                                                                              "text":  "20° pressure angle (standard, strong tooth base)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "14.5° pressure angle (legacy, smoother but weaker)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Clearance \u0026 Fit Tuning",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Backlash allowance (0.05–0.15mm added per tooth flank for FDM tolerance)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Center-distance offset compensation for oversized printed teeth"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Bore/shaft clearance fit (press-fit vs. clearance-fit hole)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Keyway or D-shaft flat for anti-rotation on shaft"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Material Selection",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Standard FDM Filaments (low-load appropriate)",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "PLA (easiest print, brittle, fine for demo torque)",
-                                                                              "axis":  "material",
-                                                                              "direction":  "pla"
-                                                                          },
-                                                                          {
-                                                                              "text":  "PETG (tougher, slight flex, low warp)",
-                                                                              "axis":  "material",
-                                                                              "direction":  "petg"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Engineering Filaments (overkill for this use case but selectable)",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Nylon (wear-resistant, needs dry storage)",
-                                                                              "axis":  "material",
-                                                                              "direction":  "nylon"
-                                                                          },
-                                                                          {
-                                                                              "text":  "ABS (higher temp resistance, warps more)",
-                                                                              "axis":  "material",
-                                                                              "direction":  "abs"
-                                                                          },
-                                                                          {
-                                                                              "text":  "POM/Delrin filament (low friction, hard to print)",
-                                                                              "axis":  "material",
-                                                                              "direction":  "pom"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Print Orientation \u0026 Process Settings",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Print Orientation Choice",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Flat/face-down orientation (teeth in-plane, strong for spur gears, no supports)",
-                                                                              "axis":  "orientation",
-                                                                              "direction":  "flat"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Vertical/axis-up orientation (needed for bevel/helical angled teeth)",
-                                                                              "axis":  "orientation",
-                                                                              "direction":  "vertical"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Layer \u0026 Infill Settings",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "0.1–0.12mm fine layer height for tooth surface accuracy"
-                                                                          },
-                                                                          {
-                                                                              "text":  "3+ perimeter walls to encase tooth root stress area"
-                                                                          },
-                                                                          {
-                                                                              "text":  "20–40% infill (sufficient for demo/low load)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "100% infill for small/thin-tooth gears prone to layer splitting"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Design \u0026 Modeling Approach",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "CAD/Generation Method",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Parametric gear generator plugin (e.g., Fusion 360 spur gear add-in)",
-                                                                              "axis":  "design_method",
-                                                                              "direction":  "generator"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Open-source gear library (e.g., FreeCAD Gear workbench, OpenSCAD gears.scad)",
-                                                                              "axis":  "design_method",
-                                                                              "direction":  "library"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Hand-modeled involute profile from scratch",
-                                                                              "axis":  "design_method",
-                                                                              "direction":  "manual"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Hub \u0026 Mounting Features",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Set-screw hub with embedded nut/heat-set insert"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Integrated D-shaft bore matched to servo horn/motor shaft"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Snap-fit or friction-fit hub (no fasteners)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Idler bushing/bearing pocket for free-spinning gears"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Post-Processing \u0026 Fit Validation",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Finishing Techniques",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Deburring tooth edges with hobby knife/file"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Light sanding of bore/mating faces for smooth rotation"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Dry-fit lubrication (PTFE/silicone spray for printed-plastic mesh)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Test \u0026 Iteration Plan",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Print single test-mesh pair before full gear train"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Manual backlash check by hand-rotating meshed pair"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Iterate module/clearance values based on first-print fit"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           }
-                       ],
-        "selections":  [
-                           "Spur gears (parallel shafts, simplest to print)",
-                           "Metric module system (e.g., M0.5–M1.5 for small desktop gears)",
-                           "PLA (easiest print, brittle, fine for demo torque)",
-                           "Flat/face-down orientation (teeth in-plane, strong for spur gears, no supports)"
-                       ],
-        "genre":  "essay"
-    },
-    {
-        "label":  "Retirement City",
-        "input":  "I\u0027m selecting a retirement city in the U.S.",
-        "topic":  "Selecting a Retirement City in the U.S.",
-        "categories":  [
-                           {
-                               "name":  "Region/Climate Preference",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Sunbelt (hot summers, mild winters)",
-                                                         "axis":  "climate_region",
-                                                         "direction":  "sunbelt",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Phoenix, AZ (desert heat, dry)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "sunbelt"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Sarasota, FL (Gulf coast humidity)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "sunbelt"
-                                                                          },
-                                                                          {
-                                                                              "text":  "San Antonio, TX (inland heat)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "sunbelt"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Mountain West (Zone 5b–7a, four seasons, altitude)",
-                                                         "axis":  "climate_region",
-                                                         "direction":  "mountain",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Boise, ID",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "mountain"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Prescott, AZ (high desert, cooler than Phoenix)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "mountain"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Asheville, NC (Blue Ridge foothills)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "mountain"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Coastal (moderate, humid, hurricane exposure)",
-                                                         "axis":  "climate_region",
-                                                         "direction":  "coastal",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Charleston, SC",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "coastal"
-                                                                          },
-                                                                          {
-                                                                              "text":  "San Diego, CA (mild, low humidity)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "coastal"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Portland, ME (cold winters, coastal charm)",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "coastal"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Midwest/Four-Season (Zone 4–6, snow winters)",
-                                                         "axis":  "climate_region",
-                                                         "direction":  "midwest",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Madison, WI",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "midwest"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Columbus, OH",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "midwest"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Traverse City, MI",
-                                                                              "axis":  "climate_region",
-                                                                              "direction":  "midwest"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Cost of Living \u0026 Tax Structure",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "State Tax Treatment of Retirement Income",
-                                                         "axis":  "tax_treatment",
-                                                         "direction":  "tax_free",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "No state income tax (e.g., Florida, Texas, Nevada)",
-                                                                              "axis":  "tax_treatment",
-                                                                              "direction":  "tax_free"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Full Social Security \u0026 pension exemption states (e.g., Pennsylvania)",
-                                                                              "axis":  "tax_treatment",
-                                                                              "direction":  "tax_free"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "States Taxing Retirement Income",
-                                                         "axis":  "tax_treatment",
-                                                         "direction":  "taxed",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Full taxation of pensions/401k (e.g., California)",
-                                                                              "axis":  "tax_treatment",
-                                                                              "direction":  "taxed"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Partial exemption up to a threshold (e.g., Colorado)",
-                                                                              "axis":  "tax_treatment",
-                                                                              "direction":  "taxed"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Housing Cost Tier",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Low-cost metro (median home \u003c$250k, e.g., Huntsville, AL)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Mid-cost metro (median $250k–$450k, e.g., Greenville, SC)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "High-cost metro (median \u003e$600k, e.g., San Diego, CA)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Property Tax Burden",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Low property tax with homestead exemption (e.g., South Carolina)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "High property tax states (e.g., New Jersey, Illinois)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Healthcare Access \u0026 Quality",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Hospital/Specialist Density",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Major academic medical center city (e.g., Rochester, MN - Mayo Clinic)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Regional hub with multiple systems (e.g., Nashville, TN)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Rural/underserved area reliant on distant referral center"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Continuing Care Retirement Communities (CCRC) Availability",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Life-plan community with full continuum of care on-site"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Age-restricted 55+ community without on-site medical tiers"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Lifestyle \u0026 Social Fit",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Urban Density Preference",
-                                                         "axis":  "density",
-                                                         "direction":  "urban",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Walkable downtown core (e.g., Chicago, IL)",
-                                                                              "axis":  "density",
-                                                                              "direction":  "urban"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Mid-size college town (e.g., Chapel Hill, NC)",
-                                                                              "axis":  "density",
-                                                                              "direction":  "urban"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Rural/Small-Town Preference",
-                                                         "axis":  "density",
-                                                         "direction":  "rural",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Lake or mountain small town (e.g., Hendersonville, NC)",
-                                                                              "axis":  "density",
-                                                                              "direction":  "rural"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Master-planned rural retirement community (e.g., The Villages, FL)",
-                                                                              "axis":  "density",
-                                                                              "direction":  "rural"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Recreation \u0026 Amenity Focus",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Golf-centric community"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Arts/culture-centric city (e.g., Santa Fe, NM)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Outdoor recreation hub (e.g., Bend, OR)"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Family \u0026 Social Connectivity",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Proximity to Family",
-                                                         "axis":  "proximity",
-                                                         "direction":  "near_family",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Same metro area as adult children",
-                                                                              "axis":  "proximity",
-                                                                              "direction":  "near_family"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Within a day\u0027s drive (under 6 hours)",
-                                                                              "axis":  "proximity",
-                                                                              "direction":  "near_family"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Airport Access for Distant Family",
-                                                         "axis":  "proximity",
-                                                         "direction":  "fly_in",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Major hub airport with nonstop flights (e.g., Denver, CO)",
-                                                                              "axis":  "proximity",
-                                                                              "direction":  "fly_in"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Small regional airport requiring connections",
-                                                                              "axis":  "proximity",
-                                                                              "direction":  "fly_in"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Safety, Climate Risk \u0026 Resilience",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Natural Disaster Exposure",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Hurricane-prone Gulf/Atlantic coast"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Wildfire-prone Western foothills"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Tornado Alley Midwest/Plains"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Low-disaster-risk interior (e.g., Pittsburgh, PA)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Crime \u0026 Personal Safety",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Low violent-crime suburb/small city"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Higher-crime urban core with lower cost"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           }
-                       ],
-        "selections":  [
-                           "Phoenix, AZ (desert heat, dry)",
-                           "No state income tax (e.g., Florida, Texas, Nevada)",
-                           "Major academic medical center city (e.g., Rochester, MN - Mayo Clinic)",
-                           "Walkable downtown core (e.g., Chicago, IL)"
-                       ],
-        "genre":  "argument"
-    },
-    {
-        "label":  "First Marathon",
-        "input":  "I want to train for my first marathon",
-        "topic":  "Training for Your First Marathon",
-        "categories":  [
-                           {
-                               "name":  "Training Timeline / Experience Level",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Novice Runner (little/no running base, needs 20+ weeks)",
-                                                         "axis":  "experience_level",
-                                                         "direction":  "novice",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "6-8 week base-building phase before official plan starts"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Run-walk intervals (e.g., Galloway method)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "20-week beginner plan (Hal Higdon Novice 1 style)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Intermediate Runner (regular runner, 16-18 week plan)",
-                                                         "axis":  "experience_level",
-                                                         "direction":  "intermediate",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "16-week intermediate plan with tempo runs"
-                                                                          },
-                                                                          {
-                                                                              "text":  "18-week plan incorporating speedwork"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Skip base-building, start plan immediately"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Time-Crunched / Compressed Timeline (under 12 weeks)",
-                                                         "axis":  "experience_level",
-                                                         "direction":  "compressed",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "12-week condensed plan with reduced peak mileage"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Cross-training substitution for missed long runs"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Weekly Training Structure",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Long Run Progression",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Weekly long run increasing by ~1 mile"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Cutback week every 3rd-4th week (reduce mileage 20-25%)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "20-mile peak long run 3 weeks before race"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Run-walk long runs for injury-prone athletes"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Quality Workouts",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Tempo runs at goal marathon pace + buffer"
-                                                                          },
-                                                                          {
-                                                                              "text":  "800m/1600m interval repeats for VO2max"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Progression runs (start easy, finish at pace)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Recovery \u0026 Easy Days",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Easy conversational-pace runs (80% of weekly volume)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Full rest days (1-2 per week)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Active recovery via walking or yoga"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Cross-Training \u0026 Strength Support",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Aerobic Cross-Training",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Cycling as low-impact aerobic supplement"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Swimming for active recovery"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Elliptical for injury-safe volume"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Strength \u0026 Injury Prevention",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "2x/week lower-body strength sessions (squats, lunges)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Core/hip stability routine (planks, clamshells)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Foam rolling and mobility work"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Race-Day Pacing Strategy",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Pacing Approach",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Even/steady pacing throughout race",
-                                                                              "axis":  "pacing_strategy",
-                                                                              "direction":  "even"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Negative split (slower first half, faster second)",
-                                                                              "axis":  "pacing_strategy",
-                                                                              "direction":  "negative_split"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Run-walk ratio strategy (e.g., 4:1 run:walk)",
-                                                                              "axis":  "pacing_strategy",
-                                                                              "direction":  "run_walk"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Goal Setting",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Time-based goal using McMillan/VDOT calculator"
-                                                                          },
-                                                                          {
-                                                                              "text":  "\u0027Just finish\u0027 goal with no time target"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Nutrition \u0026 Hydration",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Daily Fueling",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Carbohydrate-forward diet during peak training weeks"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Post-long-run protein/carb recovery meal"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Race Fueling \u0026 Practice",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "In-run carb gels every 30-45 minutes"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Sports drink for electrolyte replacement"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Practicing race-day fueling during long runs"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Carb-loading protocol 2-3 days pre-race"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Gear \u0026 Injury Management",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Footwear \u0026 Gear",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Properly fitted running shoes (gait-analyzed)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Rotating two shoe pairs to reduce repetitive stress"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Moisture-wicking apparel to prevent chafing"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Injury Prevention \u0026 Taper",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "3-week taper reducing volume 20-40%"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Addressing common injuries (IT band, shin splints, runner\u0027s knee)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Rest/cross-train substitution when pain flares"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           }
-                       ],
-        "selections":  [
-                           "6-8 week base-building phase before official plan starts",
-                           "Weekly long run increasing by ~1 mile",
-                           "Cycling as low-impact aerobic supplement",
-                           "Even/steady pacing throughout race"
-                       ],
-        "genre":  "summary"
-    },
-    {
-        "label":  "Wedding Toast",
-        "input":  "I need to give a toast at my best friend\u0027s wedding",
-        "topic":  "Best Man Toast for a 15-Year Best Friend (Warm, Slightly Funny, ~2 Minutes)",
-        "categories":  [
-                           {
-                               "name":  "Structural Approach (pick one overall shape)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Chronological Story Arc",
-                                                         "axis":  "structure",
-                                                         "direction":  "chronological",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Open with how you met, close with today",
-                                                                              "axis":  "structure",
-                                                                              "direction":  "chronological"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Single origin anecdote stretched into full arc (meet → test → today)",
-                                                                              "axis":  "structure",
-                                                                              "direction":  "chronological"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Theme-First Structure (one metaphor threaded throughout)",
-                                                         "axis":  "structure",
-                                                         "direction":  "thematic",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Running joke/metaphor (e.g. \u0027he\u0027s always been bad at directions, but he found the right one\u0027)",
-                                                                              "axis":  "structure",
-                                                                              "direction":  "thematic"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Three-word throughline repeated at start, middle, end",
-                                                                              "axis":  "structure",
-                                                                              "direction":  "thematic"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Toast-to-Bride Pivot Structure",
-                                                         "axis":  "structure",
-                                                         "direction":  "pivot",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Groom-focused story that pivots to \u0027then he met her\u0027",
-                                                                              "axis":  "structure",
-                                                                              "direction":  "pivot"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Opening Line (first 10 seconds)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Humor-Forward Openers",
-                                                         "axis":  "opener",
-                                                         "direction":  "funny",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Self-deprecating joke about your own toast-giving nerves",
-                                                                              "axis":  "opener",
-                                                                              "direction":  "funny"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Mock-serious \u0027I was told to keep this short\u0027 bit",
-                                                                              "axis":  "opener",
-                                                                              "direction":  "funny"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Playful roast line about the groom\u0027s reaction to being asked to marry",
-                                                                              "axis":  "opener",
-                                                                              "direction":  "funny"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Sincere Openers",
-                                                         "axis":  "opener",
-                                                         "direction":  "warm",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Direct statement: \u0027I\u0027ve known this man for 15 years\u0027",
-                                                                              "axis":  "opener",
-                                                                              "direction":  "warm"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Address the couple by name and thank them for including you",
-                                                                              "axis":  "opener",
-                                                                              "direction":  "warm"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Core Anecdote Bank (choose one signature story)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Origin-of-Friendship Stories",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "How-we-met story with an embarrassing detail"
-                                                                          },
-                                                                          {
-                                                                              "text":  "A shared dumb hobby/inside joke from early years"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Character-Revealing Stories",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "A time he showed up for you (loyalty proof point)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "A funny flaw story that humanizes him (e.g. terrible cook, chronically late)"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Relationship-Witness Stories",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "First time you saw him with his now-spouse and noticed the change"
-                                                                          },
-                                                                          {
-                                                                              "text":  "A specific moment that proved this relationship was \u0027it\u0027"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Humor Calibration (how far to push the jokes)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Safe, Family-Friendly Jokes",
-                                                         "axis":  "humor_risk",
-                                                         "direction":  "safe",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Light teasing about a harmless quirk (snoring, bad dancing)",
-                                                                              "axis":  "humor_risk",
-                                                                              "direction":  "safe"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Callback joke to something from earlier in the toast",
-                                                                              "axis":  "humor_risk",
-                                                                              "direction":  "safe"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Edgier Roast-Style Jokes",
-                                                         "axis":  "humor_risk",
-                                                         "direction":  "edgy",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Reference to an old dating disaster or ex",
-                                                                              "axis":  "humor_risk",
-                                                                              "direction":  "edgy"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Joke about how surprised people are he \u0027landed\u0027 his spouse",
-                                                                              "axis":  "humor_risk",
-                                                                              "direction":  "edgy"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Emotional Core (the sincere turn)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Praise of the Groom",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Name one specific quality (loyalty, kindness) with proof, not just adjective"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Statement of pride/gratitude for his friendship"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Praise of the Couple",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Observation of how partner changed/completed him"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Welcome statement to the spouse joining the friend group/family"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Closing \u0026 Toast Call (final 15 seconds)",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Classic Toast Lines",
-                                                         "axis":  "closer",
-                                                         "direction":  "classic",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "\u0027To [Groom] and [Spouse]\u0027 simple raise-glass line",
-                                                                              "axis":  "closer",
-                                                                              "direction":  "classic"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Short blessing/wish for their future",
-                                                                              "axis":  "closer",
-                                                                              "direction":  "classic"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Personalized/Callback Closers",
-                                                         "axis":  "closer",
-                                                         "direction":  "personalized",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Callback to the opening joke or theme for a full-circle close",
-                                                                              "axis":  "closer",
-                                                                              "direction":  "personalized"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Direct address to groom (\u0027So here\u0027s to you, brother...\u0027)",
-                                                                              "axis":  "closer",
-                                                                              "direction":  "personalized"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           },
-                           {
-                               "name":  "Delivery \u0026 Timing Mechanics",
-                               "subcategories":  [
-                                                     {
-                                                         "name":  "Length Control (targeting ~2 minutes / ~250-300 words)",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Written index card with key phrases only (not full script)"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Practice with a timer 3+ times before the wedding"
-                                                                          }
-                                                                      ]
-                                                     },
-                                                     {
-                                                         "name":  "Delivery Techniques",
-                                                         "elements":  [
-                                                                          {
-                                                                              "text":  "Pause after the joke line for laughter before continuing"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Make eye contact with groom during the sincere middle section"
-                                                                          },
-                                                                          {
-                                                                              "text":  "Raise glass and cue guests to stand/raise theirs at the very end"
-                                                                          }
-                                                                      ]
-                                                     }
-                                                 ]
-                           }
-                       ],
-        "selections":  [
-                           "Open with how you met, close with today",
-                           "Self-deprecating joke about your own toast-giving nerves",
-                           "How-we-met story with an embarrassing detail",
-                           "Light teasing about a harmless quirk (snoring, bad dancing)"
-                       ],
-        "genre":  "definition"
-    },
-{
-    "label": "Kitchen Renovation",
-    "input": "I want to renovate my kitchen",
-    "topic": "Kitchen Renovation",
+const DEMO_CASES = [
+  {
+    "label": "Food Garden (Georgia)",
+    "input": "I want to plant a food garden in Georgia",
+    "genre": "action_item",
+    "topic": "Planning a food garden in Georgia (USA)",
     "categories": [
       {
-        "name": "Scope of Renovation",
+        "name": "Region within Georgia (determines climate & soil baseline)",
+        "fixedness": 0.1,
+        "subcategories": [
+          {
+            "name": "North Georgia Mountains (Zone 6b–7a, cooler microclimate, shorter frost-free season)",
+            "axis": "region",
+            "direction": "mountains",
+            "elements": [
+              {
+                "text": "Blue Ridge/Appalachian foothills growing pockets",
+                "axis": "region",
+                "direction": "mountains"
+              },
+              {
+                "text": "High-elevation cold-air-drainage sites (frost pockets to avoid)",
+                "axis": "region",
+                "direction": "mountains"
+              },
+              {
+                "text": "Rocky, thin mountain topsoil requiring raised beds",
+                "axis": "region",
+                "direction": "mountains"
+              }
+            ]
+          },
+          {
+            "name": "Piedmont (Zone 7b–8a, red clay belt, Atlanta metro & central GA)",
+            "axis": "region",
+            "direction": "piedmont",
+            "elements": [
+              {
+                "text": "Heavy red clay soil needing amendment",
+                "axis": "region",
+                "direction": "piedmont"
+              },
+              {
+                "text": "Rolling terrain with erosion-prone slopes",
+                "axis": "region",
+                "direction": "piedmont"
+              },
+              {
+                "text": "Urban/suburban lot gardening (Atlanta metro)",
+                "axis": "region",
+                "direction": "piedmont"
+              }
+            ]
+          },
+          {
+            "name": "Coastal Plain (Zone 8a–9a, sandy soil, longer/humid growing season)",
+            "axis": "region",
+            "direction": "coastal",
+            "elements": [
+              {
+                "text": "Sandy, fast-draining soils of south GA",
+                "axis": "region",
+                "direction": "coastal"
+              },
+              {
+                "text": "Coastal salt-air-tolerant plantings (near Savannah/coast)",
+                "axis": "region",
+                "direction": "coastal"
+              },
+              {
+                "text": "High humidity/heat disease pressure (fungal issues)",
+                "axis": "region",
+                "direction": "coastal"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Site assessment & bed setup",
+        "fixedness": 0.6,
+        "subcategories": [
+          {
+            "name": "Sunlight & site layout",
+            "elements": [
+              {
+                "text": "Full-sun site (6+ hrs) for fruiting crops"
+              },
+              {
+                "text": "Partial-shade site for leafy greens/herbs"
+              },
+              {
+                "text": "Orienting rows north-south for even light"
+              }
+            ]
+          },
+          {
+            "name": "Bed style (in-ground vs raised)",
+            "elements": [
+              {
+                "text": "In-ground beds with clay-breaking double-dig/broadfork",
+                "axis": "bed_style",
+                "direction": "in_ground"
+              },
+              {
+                "text": "Raised wooden beds (8–12in) for drainage over clay/rock",
+                "axis": "bed_style",
+                "direction": "raised"
+              },
+              {
+                "text": "Hugelkultur mounds for sandy coastal soils",
+                "axis": "bed_style",
+                "direction": "raised"
+              },
+              {
+                "text": "Container/grow-bag gardening for small urban lots"
+              }
+            ]
+          },
+          {
+            "name": "Soil amendment strategy",
+            "elements": [
+              {
+                "text": "Georgia clay conditioner: gypsum + compost tilling"
+              },
+              {
+                "text": "Soil test through UGA Cooperative Extension office"
+              },
+              {
+                "text": "Lime application to correct acidic Piedmont/mountain soils"
+              },
+              {
+                "text": "Cover cropping (crimson clover, rye) fall/winter fallow beds"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "What & when to plant (crop calendar)",
         "fixedness": 0.9,
         "subcategories": [
           {
-            "name": "Cosmetic Refresh (keep layout & boxes, swap surfaces)",
+            "name": "Cool-season crops (spring/fall, tolerate frost)",
+            "axis": "season",
+            "direction": "cool",
+            "elements": [
+              {
+                "text": "Collards & kale (GA staple greens, frost-sweetened)",
+                "axis": "season",
+                "direction": "cool"
+              },
+              {
+                "text": "Turnips & mustard greens",
+                "axis": "season",
+                "direction": "cool"
+              },
+              {
+                "text": "Sugar snap peas (early spring trellised)",
+                "axis": "season",
+                "direction": "cool"
+              },
+              {
+                "text": "Vidalia-type sweet onions (fall-planted, spring harvest)",
+                "axis": "season",
+                "direction": "cool"
+              }
+            ]
+          },
+          {
+            "name": "Warm-season crops (after last frost into summer heat)",
+            "axis": "season",
+            "direction": "warm",
+            "elements": [
+              {
+                "text": "Okra (thrives in GA heat/humidity)",
+                "axis": "season",
+                "direction": "warm"
+              },
+              {
+                "text": "Heat-tolerant tomato varieties (e.g., 'Heatwave', 'Arkansas Traveler')",
+                "axis": "season",
+                "direction": "warm"
+              },
+              {
+                "text": "Southern peas / field peas (cowpeas)",
+                "axis": "season",
+                "direction": "warm"
+              },
+              {
+                "text": "Muscadine grapes (native Southeastern perennial vine)",
+                "axis": "season",
+                "direction": "warm"
+              }
+            ]
+          },
+          {
+            "name": "Succession & second-season planning",
+            "elements": [
+              {
+                "text": "Spring-to-fall succession sowing every 2-3 weeks"
+              },
+              {
+                "text": "Fall garden restart in August for winter harvest"
+              },
+              {
+                "text": "Row-cover/low tunnel season extension into winter"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Pest, disease & wildlife pressure (Southeast-specific)",
+        "fixedness": 0.4,
+        "subcategories": [
+          {
+            "name": "Insect pests",
+            "elements": [
+              {
+                "text": "Squash vine borer (kills squash/zucchini stems)"
+              },
+              {
+                "text": "Harlequin bug on brassicas"
+              },
+              {
+                "text": "Japanese beetles on beans/grapes"
+              },
+              {
+                "text": "Row covers/floating fabric as physical barrier"
+              }
+            ]
+          },
+          {
+            "name": "Fungal & humidity-driven disease",
+            "elements": [
+              {
+                "text": "Early blight/septoria on tomatoes"
+              },
+              {
+                "text": "Powdery mildew on squash/cucurbits"
+              },
+              {
+                "text": "Drip irrigation instead of overhead watering to reduce leaf wetness"
+              }
+            ]
+          },
+          {
+            "name": "Wildlife pressure",
+            "elements": [
+              {
+                "text": "Deer fencing (7ft+) for mountain/rural sites"
+              },
+              {
+                "text": "Rabbit/vole exclusion fencing for raised beds"
+              },
+              {
+                "text": "Bird netting for berries"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Water & garden management systems",
+        "fixedness": 0.5,
+        "subcategories": [
+          {
+            "name": "Irrigation approach",
+            "elements": [
+              {
+                "text": "Drip irrigation on timer for reliable summer watering"
+              },
+              {
+                "text": "Rain barrel collection off gutters/downspouts"
+              },
+              {
+                "text": "Soaker hoses for budget in-ground beds"
+              }
+            ]
+          },
+          {
+            "name": "Mulching for heat & moisture retention",
+            "elements": [
+              {
+                "text": "Pine straw mulch (widely available, acidifying)"
+              },
+              {
+                "text": "Wheat straw mulch for vegetable beds"
+              },
+              {
+                "text": "Landscape fabric under mulch for weed suppression"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Growing method philosophy",
+        "fixedness": 0.7,
+        "subcategories": [
+          {
+            "name": "Organic/no-spray approach",
+            "axis": "method",
+            "direction": "organic",
+            "elements": [
+              {
+                "text": "OMRI-listed organic pesticides (spinosad, neem oil)",
+                "axis": "method",
+                "direction": "organic"
+              },
+              {
+                "text": "Companion planting (marigolds, basil interplanting)",
+                "axis": "method",
+                "direction": "organic"
+              }
+            ]
+          },
+          {
+            "name": "Conventional approach",
+            "axis": "method",
+            "direction": "conventional",
+            "elements": [
+              {
+                "text": "Synthetic fertilizer program (10-10-10 granular)",
+                "axis": "method",
+                "direction": "conventional"
+              },
+              {
+                "text": "Targeted synthetic insecticide/fungicide spray schedule",
+                "axis": "method",
+                "direction": "conventional"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Region within Georgia (determines climate & soil baseline)",
+      "Full-sun site (6+ hrs) for fruiting crops",
+      "In-ground beds with clay-breaking double-dig/broadfork",
+      "Georgia clay conditioner: gypsum + compost tilling",
+      "Collards & kale (GA staple greens, frost-sweetened)",
+      "Spring-to-fall succession sowing every 2-3 weeks",
+      "Squash vine borer (kills squash/zucchini stems)",
+      "Early blight/septoria on tomatoes",
+      "Deer fencing (7ft+) for mountain/rural sites",
+      "Drip irrigation on timer for reliable summer watering",
+      "Pine straw mulch (widely available, acidifying)",
+      "OMRI-listed organic pesticides (spinosad, neem oil)"
+    ]
+  },
+  {
+    "label": "7th Grade Story",
+    "input": "I need to write a fictional story for my 7th grade English class",
+    "topic": "Choosing and writing a fictional story for 7th grade English class",
+    "categories": [
+      {
+        "name": "Genre & Story Type (pick one lane first)",
+        "subcategories": [
+          {
+            "name": "Realistic Fiction (grounded in real-world rules)",
+            "axis": "genre",
+            "direction": "realistic",
+            "elements": [
+              {
+                "text": "Coming-of-age school story"
+              },
+              {
+                "text": "Friendship/betrayal drama"
+              },
+              {
+                "text": "Family conflict story"
+              },
+              {
+                "text": "Sports competition story"
+              }
+            ]
+          },
+          {
+            "name": "Speculative Fiction (bends real-world rules)",
+            "axis": "genre",
+            "direction": "speculative",
+            "elements": [
+              {
+                "text": "Fantasy quest with magic system"
+              },
+              {
+                "text": "Sci-fi/dystopian future world"
+              },
+              {
+                "text": "Ghost/horror mystery"
+              },
+              {
+                "text": "Fairy-tale retelling with a twist"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Plot Structure & Conflict",
+        "subcategories": [
+          {
+            "name": "Conflict Type (the engine of the plot)",
+            "elements": [
+              {
+                "text": "Character vs. character"
+              },
+              {
+                "text": "Character vs. self (internal struggle)"
+              },
+              {
+                "text": "Character vs. nature/environment"
+              },
+              {
+                "text": "Character vs. society/rules"
+              }
+            ]
+          },
+          {
+            "name": "Plot Shape (how events are ordered)",
+            "axis": "timeline",
+            "direction": "structure",
+            "elements": [
+              {
+                "text": "Classic linear five-part arc (setup, rising action, climax, falling action, resolution)",
+                "axis": "timeline",
+                "direction": "linear"
+              },
+              {
+                "text": "Flashback-framed structure (start near the end, then rewind)",
+                "axis": "timeline",
+                "direction": "nonlinear"
+              },
+              {
+                "text": "Twist-ending structure (hidden reveal changes everything)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Point of View & Narrator",
+        "subcategories": [
+          {
+            "name": "Narrative Voice (who tells it)",
+            "elements": [
+              {
+                "text": "First-person narrator (I/me, inside one head)",
+                "axis": "pov",
+                "direction": "first"
+              },
+              {
+                "text": "Third-person limited (follows one character closely)",
+                "axis": "pov",
+                "direction": "third-limited"
+              },
+              {
+                "text": "Third-person omniscient (knows everything, all characters)",
+                "axis": "pov",
+                "direction": "third-omniscient"
+              }
+            ]
+          },
+          {
+            "name": "Narrator Reliability",
+            "elements": [
+              {
+                "text": "Reliable, trustworthy narrator"
+              },
+              {
+                "text": "Unreliable narrator (hides or misunderstands truth)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Characters",
+        "subcategories": [
+          {
+            "name": "Protagonist Design",
+            "elements": [
+              {
+                "text": "Clear external goal (wins the game, finds the item)"
+              },
+              {
+                "text": "Hidden internal flaw to overcome"
+              },
+              {
+                "text": "Specific personality quirk or habit"
+              }
+            ]
+          },
+          {
+            "name": "Supporting Cast Roles",
+            "elements": [
+              {
+                "text": "Best friend/sidekick"
+              },
+              {
+                "text": "Antagonist with understandable motive"
+              },
+              {
+                "text": "Mentor or authority figure"
+              },
+              {
+                "text": "Foil character (contrasts protagonist's traits)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Setting & World",
+        "subcategories": [
+          {
+            "name": "Time Period",
+            "axis": "era",
+            "direction": "time",
+            "elements": [
+              {
+                "text": "Present-day setting",
+                "axis": "era",
+                "direction": "present"
+              },
+              {
+                "text": "Historical setting (specific decade/event)",
+                "axis": "era",
+                "direction": "past"
+              },
+              {
+                "text": "Futuristic setting",
+                "axis": "era",
+                "direction": "future"
+              }
+            ]
+          },
+          {
+            "name": "Location Type",
+            "elements": [
+              {
+                "text": "Familiar everyday place (school, neighborhood)"
+              },
+              {
+                "text": "Invented fantasy world with its own rules"
+              },
+              {
+                "text": "Isolated/confined setting (island, spaceship, cabin)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Craft & Technique",
+        "subcategories": [
+          {
+            "name": "Opening Hook Strategy",
+            "elements": [
+              {
+                "text": "Start mid-action (in medias res)"
+              },
+              {
+                "text": "Start with vivid sensory description"
+              },
+              {
+                "text": "Start with intriguing dialogue line"
+              }
+            ]
+          },
+          {
+            "name": "Dialogue & Description Balance",
+            "elements": [
+              {
+                "text": "Dialogue-heavy scenes to reveal character"
+              },
+              {
+                "text": "Descriptive narration to build mood/setting"
+              }
+            ]
+          },
+          {
+            "name": "Theme & Message",
+            "elements": [
+              {
+                "text": "Theme about friendship/loyalty"
+              },
+              {
+                "text": "Theme about courage/facing fear"
+              },
+              {
+                "text": "Theme about honesty/consequences"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Assignment Fit & Revision",
+        "subcategories": [
+          {
+            "name": "Meeting Class Requirements",
+            "elements": [
+              {
+                "text": "Check required word/page count"
+              },
+              {
+                "text": "Confirm required story elements are present (rubric checklist)"
+              },
+              {
+                "text": "Pick title that reflects theme"
+              }
+            ]
+          },
+          {
+            "name": "Revision Pass Types",
+            "elements": [
+              {
+                "text": "Read-aloud pass for flow/dialogue realism"
+              },
+              {
+                "text": "Peer feedback pass"
+              },
+              {
+                "text": "Grammar/spelling proofread pass"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Coming-of-age school story",
+      "Character vs. character",
+      "First-person narrator (I/me, inside one head)",
+      "Clear external goal (wins the game, finds the item)"
+    ],
+    "genre": "story"
+  },
+  {
+    "label": "3D Print Gear Set",
+    "input": "I want to 3D print a custom gear set",
+    "genre": "essay",
+    "topic": "Designing and 3D printing a custom gear set",
+    "categories": [
+      {
+        "name": "Application / use case",
+        "fixedness": 0.7,
+        "subcategories": [
+          {
+            "name": "Functional mechanical load (transmits real torque/repeated cycling)",
+            "axis": "use_case",
+            "direction": "functional",
+            "elements": [
+              {
+                "text": "Hand-crank mechanism (low speed, low torque, occasional use)",
+                "axis": "use_case",
+                "direction": "functional"
+              },
+              {
+                "text": "Motor-driven gearbox (continuous rotation, motor torque)",
+                "axis": "use_case",
+                "direction": "functional"
+              },
+              {
+                "text": "Load-bearing machine part (replacement for a broken metal gear)",
+                "axis": "use_case",
+                "direction": "functional"
+              }
+            ]
+          },
+          {
+            "name": "Prototype / decorative / display (no sustained load)",
+            "axis": "use_case",
+            "direction": "decorative",
+            "elements": [
+              {
+                "text": "Fit-check prototype (verifying dimensions before final material)",
+                "axis": "use_case",
+                "direction": "decorative"
+              },
+              {
+                "text": "Display/educational model (kinematics demo, no torque)",
+                "axis": "use_case",
+                "direction": "decorative"
+              },
+              {
+                "text": "Cosplay/prop gear (visual only)",
+                "axis": "use_case",
+                "direction": "decorative"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Gear geometry & type",
+        "fixedness": 0.85,
+        "subcategories": [
+          {
+            "name": "Gear tooth form",
+            "elements": [
+              {
+                "text": "Spur gear (straight teeth, parallel shafts)"
+              },
+              {
+                "text": "Helical gear (angled teeth, quieter, adds axial thrust)"
+              },
+              {
+                "text": "Bevel gear (intersecting shafts, cone-shaped teeth)"
+              },
+              {
+                "text": "Worm gear set (high reduction, self-locking)"
+              },
+              {
+                "text": "Planetary/epicyclic gear set (compact high ratio)"
+              }
+            ]
+          },
+          {
+            "name": "Sizing parameters",
+            "elements": [
+              {
+                "text": "Module/pitch selection (mm per tooth — must match mating gear)"
+              },
+              {
+                "text": "Pressure angle choice (typically 20° — affects tooth strength/mesh)"
+              },
+              {
+                "text": "Gear ratio target (input:output speed/torque)"
+              },
+              {
+                "text": "Backlash allowance (extra clearance between meshing teeth)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Material selection",
+        "fixedness": 0.75,
+        "subcategories": [
+          {
+            "name": "Standard FDM filaments (desktop printer compatible)",
+            "axis": "printer_class",
+            "direction": "fdm",
+            "elements": [
+              {
+                "text": "PLA (easy to print, brittle, low heat resistance — prototypes only)"
+              },
+              {
+                "text": "Nylon (PA12) (high wear resistance, low friction, absorbs moisture)"
+              },
+              {
+                "text": "ABS (heat resistant, prone to warping without enclosure)"
+              }
+            ]
+          },
+          {
+            "name": "Reinforced / engineering filaments",
+            "axis": "printer_class",
+            "direction": "reinforced",
+            "elements": [
+              {
+                "text": "Carbon-fiber-filled nylon (high stiffness, abrasive to nozzles)"
+              },
+              {
+                "text": "Polycarbonate (PC) (very high strength/heat tolerance, hard to print)"
+              }
+            ]
+          },
+          {
+            "name": "Resin (SLA/DLP) options",
+            "axis": "process",
+            "direction": "resin",
+            "elements": [
+              {
+                "text": "Standard tough resin (fine detail, brittle under repeated flex)"
+              },
+              {
+                "text": "Engineering/ABS-like resin (better impact resistance)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Printer process & tolerances",
+        "fixedness": 0.4,
+        "subcategories": [
+          {
+            "name": "FDM (fused deposition, layer lines, lower resolution)",
+            "axis": "process",
+            "direction": "fdm",
+            "elements": [
+              {
+                "text": "0.4mm nozzle standard resolution print"
+              },
+              {
+                "text": "Fine nozzle (0.2mm) for smaller teeth/higher accuracy"
+              },
+              {
+                "text": "XY calibration/hole-size compensation (correcting known FDM oversize/undersize error)"
+              }
+            ]
+          },
+          {
+            "name": "Resin (SLA/DLP, high resolution, brittle by default)",
+            "axis": "process",
+            "direction": "resin",
+            "elements": [
+              {
+                "text": "Standard SLA print (fine tooth detail, needs post-cure)"
+              },
+              {
+                "text": "Support orientation planning (minimizing tooth-surface support marks)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Design & modeling workflow",
+        "fixedness": 0.65,
+        "subcategories": [
+          {
+            "name": "CAD gear generation methods",
+            "elements": [
+              {
+                "text": "Parametric CAD gear plugin (e.g. Fusion 360 spur gear generator)"
+              },
+              {
+                "text": "Online involute gear generator (exports STL/DXF from ratio inputs)"
+              },
+              {
+                "text": "Manual involute curve construction (full control, more effort)"
+              }
+            ]
+          },
+          {
+            "name": "Fit & tolerance features",
+            "elements": [
+              {
+                "text": "Bore/shaft fit design (press-fit vs. clearance fit for shaft)"
+              },
+              {
+                "text": "Keyway or D-shaft flat (prevents shaft slippage under torque)"
+              },
+              {
+                "text": "Set screw boss (secures gear to shaft radially)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Post-processing & assembly",
+        "fixedness": 0.5,
+        "subcategories": [
+          {
+            "name": "Surface/tooth finishing",
+            "elements": [
+              {
+                "text": "Manual deburring/sanding of tooth flanks"
+              },
+              {
+                "text": "Vapor smoothing (for ABS/nylon, softens layer lines)"
+              },
+              {
+                "text": "Running-in break-in period (letting mating gears wear to match)"
+              }
+            ]
+          },
+          {
+            "name": "Lubrication & wear management",
+            "elements": [
+              {
+                "text": "PTFE-based dry lubricant (safe for plastic-on-plastic gears)"
+              },
+              {
+                "text": "Silicone grease (compatible with most printed polymers)"
+              },
+              {
+                "text": "No lubrication (acceptable for low-load display models only)"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Hand-crank mechanism (low speed, low torque, occasional use)",
+      "Spur gear (straight teeth, parallel shafts)",
+      "Module/pitch selection (mm per tooth — must match mating gear)",
+      "PLA (easy to print, brittle, low heat resistance — prototypes only)",
+      "Carbon-fiber-filled nylon (high stiffness, abrasive to nozzles)",
+      "Standard tough resin (fine detail, brittle under repeated flex)",
+      "0.4mm nozzle standard resolution print",
+      "Standard SLA print (fine tooth detail, needs post-cure)",
+      "Parametric CAD gear plugin (e.g. Fusion 360 spur gear generator)",
+      "Bore/shaft fit design (press-fit vs. clearance fit for shaft)",
+      "Manual deburring/sanding of tooth flanks",
+      "PTFE-based dry lubricant (safe for plastic-on-plastic gears)"
+    ]
+  },
+  {
+    "label": "Retirement City",
+    "input": "I'm selecting a retirement city in the U.S.",
+    "genre": "argument",
+    "topic": "Choosing a Retirement City in the U.S.",
+    "categories": [
+      {
+        "name": "Primary Priority Driving the Search",
+        "fixedness": 0.6,
+        "subcategories": [
+          {
+            "name": "Lifestyle & Environment Priorities",
+            "elements": [
+              {
+                "text": "Climate-first (year-round temperature/humidity comfort)",
+                "axis": "priority",
+                "direction": "climate"
+              },
+              {
+                "text": "Proximity-to-family-first (within driving distance or one flight of adult kids/grandkids)",
+                "axis": "priority",
+                "direction": "family"
+              }
+            ]
+          },
+          {
+            "name": "Financial Priorities",
+            "elements": [
+              {
+                "text": "Cost-of-living-first (housing, groceries, services)",
+                "axis": "priority",
+                "direction": "cost"
+              },
+              {
+                "text": "Tax-first (state income, estate, and property tax exposure)",
+                "axis": "priority",
+                "direction": "taxes"
+              }
+            ]
+          },
+          {
+            "name": "Health & Safety Priorities",
+            "elements": [
+              {
+                "text": "Healthcare-access-first (proximity to major medical centers)",
+                "axis": "priority",
+                "direction": "healthcare"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "State & Regional Tax Treatment",
+        "fixedness": 0.3,
+        "subcategories": [
+          {
+            "name": "Retirement Income Taxation",
+            "elements": [
+              {
+                "text": "No state income tax states (e.g., Florida, Texas, Nevada)",
+                "axis": "taxes",
+                "direction": "no-income-tax"
+              },
+              {
+                "text": "States exempting Social Security & pensions but taxing other income (e.g., Pennsylvania, Illinois)",
+                "axis": "taxes",
+                "direction": "partial-exempt"
+              },
+              {
+                "text": "States fully taxing retirement income (e.g., California, Vermont)",
+                "axis": "taxes",
+                "direction": "full-tax"
+              }
+            ]
+          },
+          {
+            "name": "Property & Estate Tax Burden",
+            "elements": [
+              {
+                "text": "Homestead exemption states capping property tax growth (e.g., Florida's Save Our Homes)"
+              },
+              {
+                "text": "States with estate or inheritance tax (e.g., Maryland, Oregon)"
+              },
+              {
+                "text": "Low-property-tax states (e.g., Alabama, Hawaii nominal rate)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Climate & Geographic Risk Profile",
+        "fixedness": 0.7,
+        "subcategories": [
+          {
+            "name": "Climate Zone Preference",
+            "elements": [
+              {
+                "text": "Sunbelt year-round warmth (Phoenix, AZ / Naples, FL)",
+                "axis": "climate-zone",
+                "direction": "warm"
+              },
+              {
+                "text": "Four-season mild climate (Asheville, NC / Greenville, SC)",
+                "axis": "climate-zone",
+                "direction": "mild-seasonal"
+              },
+              {
+                "text": "Cooler, low-humidity mountain/high-desert (Boise, ID / Santa Fe, NM)",
+                "axis": "climate-zone",
+                "direction": "cool-dry"
+              }
+            ]
+          },
+          {
+            "name": "Natural Disaster Exposure (insurability & evacuation risk)",
+            "elements": [
+              {
+                "text": "Hurricane-prone Gulf/Atlantic coast (rising homeowners insurance premiums)",
+                "axis": "disaster-risk",
+                "direction": "hurricane"
+              },
+              {
+                "text": "Wildfire-prone West (WUI zones in CA, CO foothills)",
+                "axis": "disaster-risk",
+                "direction": "wildfire"
+              },
+              {
+                "text": "Low-disaster-risk interior regions (Midwest, parts of Appalachia)",
+                "axis": "disaster-risk",
+                "direction": "low-risk"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Healthcare Infrastructure",
+        "fixedness": 0.4,
+        "subcategories": [
+          {
+            "name": "Access to Specialized Care",
+            "elements": [
+              {
+                "text": "Metro with Level I trauma center & academic medical center (e.g., Nashville, Denver)"
+              },
+              {
+                "text": "Metro with strong geriatric/cardiac specialty network (e.g., Rochester MN near Mayo Clinic)"
+              },
+              {
+                "text": "Smaller town relying on regional hub 30+ min away"
+              }
+            ]
+          },
+          {
+            "name": "Medicare & Insurance Landscape",
+            "elements": [
+              {
+                "text": "High Medicare Advantage plan density/competition county"
+              },
+              {
+                "text": "Areas requiring Medigap supplement due to limited MA options"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Cost of Living & Housing Structure",
+        "fixedness": 0.6,
+        "subcategories": [
+          {
+            "name": "Housing Tenure Strategy",
+            "elements": [
+              {
+                "text": "Buy a single-family home outright (equity as inflation hedge)",
+                "axis": "tenure",
+                "direction": "buy"
+              },
+              {
+                "text": "Rent (flexibility, no maintenance, avoids market timing)",
+                "axis": "tenure",
+                "direction": "rent"
+              },
+              {
+                "text": "Age-restricted 55+ active adult community (HOA, amenities bundled)",
+                "axis": "tenure",
+                "direction": "age-restricted"
+              }
+            ]
+          },
+          {
+            "name": "Daily Cost Structure",
+            "elements": [
+              {
+                "text": "Low-cost mid-size metro (e.g., Huntsville AL, Chattanooga TN)"
+              },
+              {
+                "text": "High-cost coastal metro trading cost for amenities (e.g., San Diego, CA)"
+              },
+              {
+                "text": "College town with cultural amenities at moderate cost (e.g., Athens, GA)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Social Fabric & Daily Life",
+        "fixedness": 0.9,
+        "subcategories": [
+          {
+            "name": "Community & Social Connection Model",
+            "elements": [
+              {
+                "text": "Purpose-built retirement community (The Villages, FL)"
+              },
+              {
+                "text": "Multigenerational neighborhood near family",
+                "axis": "priority",
+                "direction": "family"
+              },
+              {
+                "text": "University town with lifelong-learning/audit programs"
+              }
+            ]
+          },
+          {
+            "name": "Mobility & Transportation Needs",
+            "elements": [
+              {
+                "text": "Walkable urban core reducing driving dependency as skills decline"
+              },
+              {
+                "text": "Car-dependent suburb requiring long-term driving ability"
+              },
+              {
+                "text": "Transit/paratransit-served city with senior ride programs"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Climate-first (year-round temperature/humidity comfort)",
+      "State & Regional Tax Treatment",
+      "Sunbelt year-round warmth (Phoenix, AZ / Naples, FL)",
+      "Hurricane-prone Gulf/Atlantic coast (rising homeowners insurance premiums)",
+      "Metro with Level I trauma center & academic medical center (e.g., Nashville, Denver)",
+      "High Medicare Advantage plan density/competition county",
+      "Buy a single-family home outright (equity as inflation hedge)",
+      "Low-cost mid-size metro (e.g., Huntsville AL, Chattanooga TN)",
+      "Purpose-built retirement community (The Villages, FL)",
+      "Walkable urban core reducing driving dependency as skills decline"
+    ]
+  },
+  {
+    "label": "First Marathon",
+    "input": "I want to train for my first marathon",
+    "genre": "summary",
+    "topic": "Training for a first marathon",
+    "categories": [
+      {
+        "name": "Current fitness/running base",
+        "fixedness": 0.1,
+        "subcategories": [
+          {
+            "name": "Beginner base (currently running 0-10 miles/week or new to running)",
+            "axis": "base_level",
+            "direction": "beginner",
+            "elements": [
+              {
+                "text": "Couch-to-5K style run/walk starting point"
+              },
+              {
+                "text": "18-20 week training plan (longer runway needed to build base safely)"
+              },
+              {
+                "text": "Walk-run intervals for early long runs"
+              }
+            ]
+          },
+          {
+            "name": "Intermediate base (already running 15-25 miles/week consistently)",
+            "axis": "base_level",
+            "direction": "intermediate",
+            "elements": [
+              {
+                "text": "12-16 week training plan"
+              },
+              {
+                "text": "Continuous long runs from week one"
+              },
+              {
+                "text": "Add tempo runs earlier in the plan"
+              }
+            ]
+          },
+          {
+            "name": "Injury/health screening before starting",
+            "elements": [
+              {
+                "text": "Gait/biomechanics assessment at a running store"
+              },
+              {
+                "text": "Cardiovascular clearance check with a doctor (esp. if over 40 or sedentary)"
+              },
+              {
+                "text": "Baseline check of prior injuries (shin splints, IT band, plantar fasciitis)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Training plan structure",
+        "fixedness": 0.8,
+        "subcategories": [
+          {
+            "name": "Plan philosophy",
+            "elements": [
+              {
+                "text": "Hal Higdon Novice plan (run-focused, moderate mileage)",
+                "axis": "plan_style",
+                "direction": "traditional_mileage"
+              },
+              {
+                "text": "Jeff Galloway run-walk-run method",
+                "axis": "plan_style",
+                "direction": "run_walk"
+              },
+              {
+                "text": "McMillan/Pfitzinger plan (higher mileage, pace-based)",
+                "axis": "plan_style",
+                "direction": "traditional_mileage"
+              }
+            ]
+          },
+          {
+            "name": "Weekly run types",
+            "elements": [
+              {
+                "text": "Long slow distance (LSD) run"
+              },
+              {
+                "text": "Easy/recovery runs"
+              },
+              {
+                "text": "Tempo run (sustained comfortably-hard pace)"
+              },
+              {
+                "text": "Interval/speed workouts (e.g. 400m/800m repeats)"
+              },
+              {
+                "text": "Hill repeats"
+              }
+            ]
+          },
+          {
+            "name": "Long run peak strategy",
+            "elements": [
+              {
+                "text": "Peak long run to 20 miles (traditional cap)",
+                "axis": "peak_distance",
+                "direction": "20mi"
+              },
+              {
+                "text": "Peak long run to 26+ miles (Galloway-style full distance rehearsal)",
+                "axis": "peak_distance",
+                "direction": "full_distance"
+              },
+              {
+                "text": "3-week taper before race day"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Cross-training and strength",
+        "fixedness": 0.7,
+        "subcategories": [
+          {
+            "name": "Strength work",
+            "elements": [
+              {
+                "text": "Lower-body strength (squats, lunges, calf raises)"
+              },
+              {
+                "text": "Core stability work (planks, dead bugs)"
+              },
+              {
+                "text": "Single-leg/balance drills to prevent injury"
+              }
+            ]
+          },
+          {
+            "name": "Low-impact cross-training",
+            "elements": [
+              {
+                "text": "Cycling for aerobic volume without pounding"
+              },
+              {
+                "text": "Swimming as active recovery"
+              },
+              {
+                "text": "Elliptical sessions on rest-from-running days"
+              }
+            ]
+          },
+          {
+            "name": "Mobility and injury prevention",
+            "elements": [
+              {
+                "text": "Dynamic warm-up routine before runs"
+              },
+              {
+                "text": "Foam rolling/self-myofascial release"
+              },
+              {
+                "text": "Static stretching post-run"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Nutrition and fueling",
+        "fixedness": 0.6,
+        "subcategories": [
+          {
+            "name": "Daily/training nutrition",
+            "elements": [
+              {
+                "text": "Carbohydrate-focused meal timing around long runs"
+              },
+              {
+                "text": "Hydration and electrolyte routine on hot runs"
+              }
+            ]
+          },
+          {
+            "name": "Race-day fueling strategy",
+            "elements": [
+              {
+                "text": "Energy gels every 45 minutes (e.g. GU, Maurten)",
+                "axis": "fuel_type",
+                "direction": "gels"
+              },
+              {
+                "text": "Sports drink/chews as primary fuel",
+                "axis": "fuel_type",
+                "direction": "drinks_chews"
+              },
+              {
+                "text": "Practicing race-day fuel during long training runs"
+              }
+            ]
+          },
+          {
+            "name": "Carb-loading in final days",
+            "elements": [
+              {
+                "text": "3-day carb-load before race"
+              },
+              {
+                "text": "Pre-race dinner low in fiber/fat to avoid GI issues"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Gear and equipment",
+        "fixedness": 0.5,
+        "subcategories": [
+          {
+            "name": "Footwear",
+            "elements": [
+              {
+                "text": "Daily trainer shoe fitted for gait"
+              },
+              {
+                "text": "Carbon-plated racing shoe for race day (e.g. Nike Vaporfly, Alphafly)"
+              },
+              {
+                "text": "Rotating two shoe pairs to reduce injury risk"
+              }
+            ]
+          },
+          {
+            "name": "Race-day gear",
+            "elements": [
+              {
+                "text": "Moisture-wicking apparel tested in training (no cotton)"
+              },
+              {
+                "text": "Anti-chafe balm (e.g. Body Glide)"
+              },
+              {
+                "text": "GPS running watch for pacing"
+              },
+              {
+                "text": "Hydration belt/vest vs relying on aid stations"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Race selection and goal setting",
+        "fixedness": 0.9,
+        "subcategories": [
+          {
+            "name": "Goal type",
+            "elements": [
+              {
+                "text": "Finish goal (just complete the distance)",
+                "axis": "goal_type",
+                "direction": "finish"
+              },
+              {
+                "text": "Time goal (target pace, e.g. sub-4:00)",
+                "axis": "goal_type",
+                "direction": "time"
+              }
+            ]
+          },
+          {
+            "name": "Course/race characteristics",
+            "elements": [
+              {
+                "text": "Flat, fast course (e.g. Chicago, Berlin)",
+                "axis": "course_type",
+                "direction": "flat"
+              },
+              {
+                "text": "Hilly/scenic course (e.g. Big Sur, New York)",
+                "axis": "course_type",
+                "direction": "hilly"
+              },
+              {
+                "text": "Local/regional race for lower-stakes first attempt"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Current fitness/running base",
+      "Hal Higdon Novice plan (run-focused, moderate mileage)",
+      "Long slow distance (LSD) run",
+      "Peak long run to 20 miles (traditional cap)",
+      "Lower-body strength (squats, lunges, calf raises)",
+      "Cycling for aerobic volume without pounding",
+      "Dynamic warm-up routine before runs",
+      "Carbohydrate-focused meal timing around long runs",
+      "Energy gels every 45 minutes (e.g. GU, Maurten)",
+      "3-day carb-load before race",
+      "Daily trainer shoe fitted for gait",
+      "Moisture-wicking apparel tested in training (no cotton)",
+      "Finish goal (just complete the distance)",
+      "Flat, fast course (e.g. Chicago, Berlin)"
+    ]
+  },
+  {
+    "label": "Wedding Toast",
+    "input": "I need to give a toast at my best friend's wedding",
+    "topic": "Best Man Toast for a 15-Year Best Friend (Warm, Slightly Funny, ~2 Minutes)",
+    "categories": [
+      {
+        "name": "Structural Approach (pick one overall shape)",
+        "subcategories": [
+          {
+            "name": "Chronological Story Arc",
+            "axis": "structure",
+            "direction": "chronological",
+            "elements": [
+              {
+                "text": "Open with how you met, close with today",
+                "axis": "structure",
+                "direction": "chronological"
+              },
+              {
+                "text": "Single origin anecdote stretched into full arc (meet → test → today)",
+                "axis": "structure",
+                "direction": "chronological"
+              }
+            ]
+          },
+          {
+            "name": "Theme-First Structure (one metaphor threaded throughout)",
+            "axis": "structure",
+            "direction": "thematic",
+            "elements": [
+              {
+                "text": "Running joke/metaphor (e.g. 'he's always been bad at directions, but he found the right one')",
+                "axis": "structure",
+                "direction": "thematic"
+              },
+              {
+                "text": "Three-word throughline repeated at start, middle, end",
+                "axis": "structure",
+                "direction": "thematic"
+              }
+            ]
+          },
+          {
+            "name": "Toast-to-Bride Pivot Structure",
+            "axis": "structure",
+            "direction": "pivot",
+            "elements": [
+              {
+                "text": "Groom-focused story that pivots to 'then he met her'",
+                "axis": "structure",
+                "direction": "pivot"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Opening Line (first 10 seconds)",
+        "subcategories": [
+          {
+            "name": "Humor-Forward Openers",
+            "axis": "opener",
+            "direction": "funny",
+            "elements": [
+              {
+                "text": "Self-deprecating joke about your own toast-giving nerves",
+                "axis": "opener",
+                "direction": "funny"
+              },
+              {
+                "text": "Mock-serious 'I was told to keep this short' bit",
+                "axis": "opener",
+                "direction": "funny"
+              },
+              {
+                "text": "Playful roast line about the groom's reaction to being asked to marry",
+                "axis": "opener",
+                "direction": "funny"
+              }
+            ]
+          },
+          {
+            "name": "Sincere Openers",
+            "axis": "opener",
+            "direction": "warm",
+            "elements": [
+              {
+                "text": "Direct statement: 'I've known this man for 15 years'",
+                "axis": "opener",
+                "direction": "warm"
+              },
+              {
+                "text": "Address the couple by name and thank them for including you",
+                "axis": "opener",
+                "direction": "warm"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Core Anecdote Bank (choose one signature story)",
+        "subcategories": [
+          {
+            "name": "Origin-of-Friendship Stories",
+            "elements": [
+              {
+                "text": "How-we-met story with an embarrassing detail"
+              },
+              {
+                "text": "A shared dumb hobby/inside joke from early years"
+              }
+            ]
+          },
+          {
+            "name": "Character-Revealing Stories",
+            "elements": [
+              {
+                "text": "A time he showed up for you (loyalty proof point)"
+              },
+              {
+                "text": "A funny flaw story that humanizes him (e.g. terrible cook, chronically late)"
+              }
+            ]
+          },
+          {
+            "name": "Relationship-Witness Stories",
+            "elements": [
+              {
+                "text": "First time you saw him with his now-spouse and noticed the change"
+              },
+              {
+                "text": "A specific moment that proved this relationship was 'it'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Humor Calibration (how far to push the jokes)",
+        "subcategories": [
+          {
+            "name": "Safe, Family-Friendly Jokes",
+            "axis": "humor_risk",
+            "direction": "safe",
+            "elements": [
+              {
+                "text": "Light teasing about a harmless quirk (snoring, bad dancing)",
+                "axis": "humor_risk",
+                "direction": "safe"
+              },
+              {
+                "text": "Callback joke to something from earlier in the toast",
+                "axis": "humor_risk",
+                "direction": "safe"
+              }
+            ]
+          },
+          {
+            "name": "Edgier Roast-Style Jokes",
+            "axis": "humor_risk",
+            "direction": "edgy",
+            "elements": [
+              {
+                "text": "Reference to an old dating disaster or ex",
+                "axis": "humor_risk",
+                "direction": "edgy"
+              },
+              {
+                "text": "Joke about how surprised people are he 'landed' his spouse",
+                "axis": "humor_risk",
+                "direction": "edgy"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Emotional Core (the sincere turn)",
+        "subcategories": [
+          {
+            "name": "Praise of the Groom",
+            "elements": [
+              {
+                "text": "Name one specific quality (loyalty, kindness) with proof, not just adjective"
+              },
+              {
+                "text": "Statement of pride/gratitude for his friendship"
+              }
+            ]
+          },
+          {
+            "name": "Praise of the Couple",
+            "elements": [
+              {
+                "text": "Observation of how partner changed/completed him"
+              },
+              {
+                "text": "Welcome statement to the spouse joining the friend group/family"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Closing & Toast Call (final 15 seconds)",
+        "subcategories": [
+          {
+            "name": "Classic Toast Lines",
+            "axis": "closer",
+            "direction": "classic",
+            "elements": [
+              {
+                "text": "'To [Groom] and [Spouse]' simple raise-glass line",
+                "axis": "closer",
+                "direction": "classic"
+              },
+              {
+                "text": "Short blessing/wish for their future",
+                "axis": "closer",
+                "direction": "classic"
+              }
+            ]
+          },
+          {
+            "name": "Personalized/Callback Closers",
+            "axis": "closer",
+            "direction": "personalized",
+            "elements": [
+              {
+                "text": "Callback to the opening joke or theme for a full-circle close",
+                "axis": "closer",
+                "direction": "personalized"
+              },
+              {
+                "text": "Direct address to groom ('So here's to you, brother...')",
+                "axis": "closer",
+                "direction": "personalized"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Delivery & Timing Mechanics",
+        "subcategories": [
+          {
+            "name": "Length Control (targeting ~2 minutes / ~250-300 words)",
+            "elements": [
+              {
+                "text": "Written index card with key phrases only (not full script)"
+              },
+              {
+                "text": "Practice with a timer 3+ times before the wedding"
+              }
+            ]
+          },
+          {
+            "name": "Delivery Techniques",
+            "elements": [
+              {
+                "text": "Pause after the joke line for laughter before continuing"
+              },
+              {
+                "text": "Make eye contact with groom during the sincere middle section"
+              },
+              {
+                "text": "Raise glass and cue guests to stand/raise theirs at the very end"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Open with how you met, close with today",
+      "Self-deprecating joke about your own toast-giving nerves",
+      "How-we-met story with an embarrassing detail",
+      "Light teasing about a harmless quirk (snoring, bad dancing)"
+    ],
+    "genre": "definition"
+  },
+  {
+    "label": "Kitchen Renovation",
+    "input": "I want to renovate my kitchen",
+    "genre": "essay",
+    "topic": "Kitchen Renovation Planning",
+    "categories": [
+      {
+        "name": "Scope of Renovation",
+        "fixedness": 0.85,
+        "subcategories": [
+          {
+            "name": "Cosmetic Refresh (surface-level swap, no plumbing/electrical moves)",
             "axis": "scope",
             "direction": "cosmetic",
             "elements": [
               {
-                "text": "Reface existing cabinet boxes with new doors/fronts",
+                "text": "Cabinet reface (new doors/veneer over existing boxes)",
                 "axis": "scope",
                 "direction": "cosmetic"
               },
               {
-                "text": "Paint or restain existing cabinets",
+                "text": "Paint cabinets and walls only",
                 "axis": "scope",
                 "direction": "cosmetic"
               },
               {
-                "text": "Swap countertops only, keep cabinet carcasses",
+                "text": "Swap countertops in place",
                 "axis": "scope",
                 "direction": "cosmetic"
               },
               {
-                "text": "Replace backsplash tile",
-                "axis": "scope",
-                "direction": "cosmetic"
-              },
-              {
-                "text": "Update hardware, faucet, and lighting fixtures",
+                "text": "Replace hardware and lighting fixtures",
                 "axis": "scope",
                 "direction": "cosmetic"
               }
             ]
           },
           {
-            "name": "Full Gut Renovation (same footprint, all new components)",
+            "name": "Full Layout Overhaul (moving plumbing, electrical, or walls)",
             "axis": "scope",
-            "direction": "gut",
+            "direction": "full",
             "elements": [
               {
-                "text": "Demo down to studs/subfloor, rebuild in place",
+                "text": "Relocate sink/dishwasher plumbing lines",
                 "axis": "scope",
-                "direction": "gut"
+                "direction": "full"
               },
               {
-                "text": "All-new cabinetry in existing footprint",
+                "text": "Remove load-bearing wall (requires structural beam)",
                 "axis": "scope",
-                "direction": "gut"
+                "direction": "full"
               },
               {
-                "text": "Replace all plumbing and electrical rough-in behind walls",
+                "text": "Reconfigure cabinet footprint/work triangle",
                 "axis": "scope",
-                "direction": "gut"
+                "direction": "full"
               },
               {
-                "text": "New flooring throughout",
+                "text": "Add or move a kitchen island with new electrical/plumbing runs",
                 "axis": "scope",
-                "direction": "gut"
-              }
-            ]
-          },
-          {
-            "name": "Layout Reconfiguration (move walls, plumbing, or footprint)",
-            "axis": "scope",
-            "direction": "reconfigure",
-            "elements": [
-              {
-                "text": "Remove wall to open kitchen to living/dining area",
-                "axis": "scope",
-                "direction": "reconfigure"
-              },
-              {
-                "text": "Relocate sink/plumbing wet wall",
-                "axis": "scope",
-                "direction": "reconfigure"
-              },
-              {
-                "text": "Add or reposition kitchen island",
-                "axis": "scope",
-                "direction": "reconfigure"
-              },
-              {
-                "text": "Expand footprint via bump-out or addition",
-                "axis": "scope",
-                "direction": "reconfigure"
-              },
-              {
-                "text": "Convert adjacent room (pantry, mudroom) into kitchen space",
-                "axis": "scope",
-                "direction": "reconfigure"
+                "direction": "full"
               }
             ]
           }
@@ -1685,22 +1826,19 @@
       },
       {
         "name": "Budget & Financing",
-        "fixedness": 0.2,
+        "fixedness": 0.3,
         "subcategories": [
           {
             "name": "Funding Source",
             "elements": [
               {
-                "text": "Cash/savings"
+                "text": "Cash savings"
               },
               {
                 "text": "Home equity line of credit (HELOC)"
               },
               {
-                "text": "Cash-out refinance"
-              },
-              {
-                "text": "Personal or renovation loan"
+                "text": "Personal renovation loan"
               }
             ]
           },
@@ -1711,107 +1849,153 @@
                 "text": "Splurge on cabinetry, save on countertops"
               },
               {
-                "text": "Splurge on appliances, save on cabinetry (stock/semi-custom)"
+                "text": "Splurge on appliances, save on finishes"
               },
               {
-                "text": "Reserve 10-20% contingency for hidden issues"
+                "text": "Reserve 10-20% contingency for hidden issues (mold, old wiring, rot)"
               }
             ]
           }
         ]
       },
       {
-        "name": "Design & Materials",
-        "fixedness": 0.85,
+        "name": "Layout & Design",
+        "fixedness": 0.9,
         "subcategories": [
           {
-            "name": "Cabinetry Style & Construction",
+            "name": "Kitchen Shape/Configuration",
             "elements": [
               {
-                "text": "Framed inset cabinets"
+                "text": "Galley layout (two parallel runs, narrow footprint)"
               },
               {
-                "text": "Frameless full-overlay (European style)"
+                "text": "L-shaped layout"
               },
               {
-                "text": "Stock cabinets"
+                "text": "U-shaped layout"
               },
               {
-                "text": "Semi-custom cabinets"
-              },
-              {
-                "text": "Full custom cabinets"
+                "text": "Island layout (requires min. 42-48in clearance)"
               }
             ]
           },
+          {
+            "name": "Storage Style",
+            "axis": "storage",
+            "direction": "closed",
+            "elements": [
+              {
+                "text": "Full-overlay cabinet doors (concealed hinges, flush look)",
+                "axis": "storage",
+                "direction": "closed"
+              },
+              {
+                "text": "Pull-out pantry cabinets",
+                "axis": "storage",
+                "direction": "closed"
+              }
+            ]
+          },
+          {
+            "name": "Open Shelving (exposed storage, no cabinet doors)",
+            "axis": "storage",
+            "direction": "open",
+            "elements": [
+              {
+                "text": "Floating open shelves",
+                "axis": "storage",
+                "direction": "open"
+              },
+              {
+                "text": "Glass-front display cabinets",
+                "axis": "storage",
+                "direction": "open"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Materials & Finishes",
+        "fixedness": 0.9,
+        "subcategories": [
           {
             "name": "Countertop Material",
             "elements": [
               {
-                "text": "Quartz engineered stone"
+                "text": "Quartz (engineered, non-porous, no sealing needed)"
               },
               {
-                "text": "Granite slab"
+                "text": "Granite (natural stone, needs periodic sealing)"
               },
               {
-                "text": "Butcher block wood"
+                "text": "Butcher block (wood, warm look, prone to scratches/water damage)"
               },
               {
-                "text": "Concrete poured-in-place"
+                "text": "Concrete (custom-poured, industrial look, can crack)"
               }
             ]
           },
           {
-            "name": "Layout Configuration Pattern",
+            "name": "Backsplash",
             "elements": [
               {
-                "text": "Galley (two parallel runs)",
-                "axis": "floorplan",
-                "direction": "galley"
+                "text": "Subway tile"
               },
               {
-                "text": "L-shaped with island",
-                "axis": "floorplan",
-                "direction": "l-island"
+                "text": "Slab backsplash (matching countertop material, seamless)"
               },
               {
-                "text": "U-shaped/horseshoe",
-                "axis": "floorplan",
-                "direction": "u-shape"
+                "text": "Zellige tile (handmade Moroccan tile, irregular glaze)"
+              }
+            ]
+          },
+          {
+            "name": "Flooring",
+            "elements": [
+              {
+                "text": "Luxury vinyl plank (LVP, waterproof, budget-friendly)"
               },
               {
-                "text": "Single-wall (one-line) kitchen",
-                "axis": "floorplan",
-                "direction": "single-wall"
+                "text": "Porcelain tile"
+              },
+              {
+                "text": "Engineered hardwood"
               }
             ]
           }
         ]
       },
       {
-        "name": "Appliances & Fixtures",
-        "fixedness": 0.75,
+        "name": "Appliances & Systems",
+        "fixedness": 0.7,
         "subcategories": [
           {
             "name": "Cooking Appliance Fuel Type",
+            "axis": "fuel",
+            "direction": "gas",
             "elements": [
               {
-                "text": "Gas range/cooktop",
+                "text": "Gas range (requires existing/new gas line)",
                 "axis": "fuel",
                 "direction": "gas"
-              },
+              }
+            ]
+          },
+          {
+            "name": "Electric/Induction Cooking (requires 240V circuit)",
+            "axis": "fuel",
+            "direction": "electric",
+            "elements": [
               {
-                "text": "Electric coil or radiant range",
+                "text": "Induction cooktop (magnetic heating, needs ferrous cookware)",
                 "axis": "fuel",
                 "direction": "electric"
               },
               {
-                "text": "Induction cooktop",
+                "text": "Standard electric coil/glass-top range",
                 "axis": "fuel",
-                "direction": "induction"
-              },
-              {
-                "text": "Dual-fuel range"
+                "direction": "electric"
               }
             ]
           },
@@ -1819,50 +2003,53 @@
             "name": "Ventilation",
             "elements": [
               {
-                "text": "Ducted range hood venting outside",
-                "axis": "venting",
-                "direction": "ducted"
+                "text": "Ducted range hood (vents outside)"
               },
               {
-                "text": "Recirculating/ductless hood",
-                "axis": "venting",
-                "direction": "ductless"
+                "text": "Recirculating hood (filters and returns air to room)"
               },
               {
-                "text": "Downdraft ventilation at cooktop",
-                "axis": "venting",
-                "direction": "downdraft"
-              }
-            ]
-          },
-          {
-            "name": "Sink & Faucet",
-            "elements": [
-              {
-                "text": "Undermount single-basin sink"
-              },
-              {
-                "text": "Farmhouse apron-front sink"
-              },
-              {
-                "text": "Pull-down touchless faucet"
+                "text": "Downdraft vent (retracts into island/counter)"
               }
             ]
           }
         ]
       },
       {
-        "name": "Structural, Permits & Code Constraints",
-        "fixedness": 0.1,
+        "name": "Permits, Codes & Contractors",
+        "fixedness": 0.15,
         "subcategories": [
           {
-            "name": "Load-Bearing & Structural Checks",
+            "name": "Project Delivery Method",
+            "axis": "labor",
+            "direction": "pro",
             "elements": [
               {
-                "text": "Engineer assessment for load-bearing wall removal"
+                "text": "General contractor (single point of accountability, oversees subs)",
+                "axis": "labor",
+                "direction": "pro"
               },
               {
-                "text": "Install steel beam/header if wall removed"
+                "text": "Design-build firm (design and construction under one contract)",
+                "axis": "labor",
+                "direction": "pro"
+              }
+            ]
+          },
+          {
+            "name": "DIY/Owner-Managed (self-coordinated trades)",
+            "axis": "labor",
+            "direction": "diy",
+            "elements": [
+              {
+                "text": "Self-manage individual trades (plumber, electrician, tiler separately)",
+                "axis": "labor",
+                "direction": "diy"
+              },
+              {
+                "text": "DIY cosmetic work, hire pros for electrical/plumbing only",
+                "axis": "labor",
+                "direction": "diy"
               }
             ]
           },
@@ -1870,53 +2057,13 @@
             "name": "Permitting Requirements",
             "elements": [
               {
-                "text": "Building permit for structural work"
+                "text": "Electrical permit (for new circuits/outlets)"
               },
               {
-                "text": "Electrical permit for new circuits"
+                "text": "Plumbing permit (for moved fixtures)"
               },
               {
-                "text": "Plumbing permit for relocated fixtures"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Project Execution",
-        "fixedness": 0.4,
-        "subcategories": [
-          {
-            "name": "Labor Approach",
-            "elements": [
-              {
-                "text": "Hire general contractor to manage full project",
-                "axis": "labor",
-                "direction": "gc"
-              },
-              {
-                "text": "Owner acts as general contractor, hires subs directly",
-                "axis": "labor",
-                "direction": "owner-gc"
-              },
-              {
-                "text": "DIY select portions (painting, demo, install)",
-                "axis": "labor",
-                "direction": "diy"
-              }
-            ]
-          },
-          {
-            "name": "Living Arrangement During Work",
-            "elements": [
-              {
-                "text": "Set up temporary kitchen elsewhere in home"
-              },
-              {
-                "text": "Move out during construction"
-              },
-              {
-                "text": "Phase work to keep partial kitchen function"
+                "text": "Structural permit (for load-bearing wall removal)"
               }
             ]
           }
@@ -1924,321 +2071,282 @@
       }
     ],
     "selections": [
-      "Remove wall to open kitchen to living/dining area",
-      "Quartz engineered stone",
-      "Hire general contractor to manage full project"
-    ],
-    "genre": "essay"
+      "Cabinet reface (new doors/veneer over existing boxes)",
+      "Budget & Financing",
+      "Galley layout (two parallel runs, narrow footprint)",
+      "Full-overlay cabinet doors (concealed hinges, flush look)",
+      "Quartz (engineered, non-porous, no sealing needed)",
+      "Subway tile",
+      "Luxury vinyl plank (LVP, waterproof, budget-friendly)",
+      "Gas range (requires existing/new gas line)",
+      "Ducted range hood (vents outside)",
+      "Permits, Codes & Contractors"
+    ]
   },
   {
     "label": "UX Career Pivot",
     "input": "I am thinking about switching careers into UX design",
+    "genre": "argument",
     "topic": "Switching careers into UX design",
     "categories": [
       {
-        "name": "Entry path into UX design",
-        "fixedness": 0.9,
+        "name": "Entry path by prior background",
+        "fixedness": 0.1,
         "subcategories": [
           {
-            "name": "Bootcamp / accelerated program",
-            "axis": "entry_path",
-            "direction": "bootcamp",
+            "name": "From visual/graphic design",
+            "axis": "background",
+            "direction": "visual-design",
             "elements": [
               {
-                "text": "General Assembly UX Design Immersive (10-12 weeks, full-time)"
+                "text": "Reframe portfolio pieces around problem-solving rather than aesthetics"
               },
               {
-                "text": "Springboard UX Design Career Track (mentor-guided, part-time)"
+                "text": "Add user research artifacts (personas, journey maps) to existing work"
               },
               {
-                "text": "CareerFoundry UX Design Program (self-paced online)"
+                "text": "Learn interaction/prototyping tools (Figma auto-layout, components)"
               }
             ]
           },
           {
-            "name": "Self-taught / portfolio-first path",
-            "axis": "entry_path",
-            "direction": "self_taught",
+            "name": "From software development",
+            "axis": "background",
+            "direction": "dev",
             "elements": [
               {
-                "text": "Google UX Design Professional Certificate (Coursera)"
+                "text": "Lean into UX engineering / design systems roles"
               },
               {
-                "text": "Freelance redesign case studies (unsolicited app/website redesigns)"
+                "text": "Build front-end prototypes to demonstrate design thinking"
               },
               {
-                "text": "Pro-bono nonprofit UX projects for real-client experience"
-              },
-              {
-                "text": "UX design books + YouTube curriculum (Don Norman, NN/g resources)"
+                "text": "Translate technical constraints experience into feasibility-aware design"
               }
             ]
           },
           {
-            "name": "Formal degree route",
-            "axis": "entry_path",
-            "direction": "formal_degree",
+            "name": "From marketing/business analyst roles",
+            "axis": "background",
+            "direction": "marketing",
             "elements": [
               {
-                "text": "HCI/Human-Computer Interaction Master's (e.g., Carnegie Mellon, U. Michigan)"
+                "text": "Leverage stakeholder-management and data-analysis skills for UX research"
               },
               {
-                "text": "MS in Information/UX Design (e.g., University of Washington iSchool)"
-              },
-              {
-                "text": "Graphic/Interaction Design BFA with UX concentration"
+                "text": "Reposition A/B testing and funnel analysis experience as UX metrics work"
               }
             ]
           },
           {
-            "name": "Adjacent-field internal transfer",
-            "axis": "entry_path",
-            "direction": "adjacent_transfer",
+            "name": "No prior design/tech experience (career changer)",
+            "axis": "background",
+            "direction": "none",
             "elements": [
               {
-                "text": "Graphic/visual designer moving into product design"
+                "text": "Complete a structured bootcamp (e.g., General Assembly, Springboard) for credibility signal"
               },
               {
-                "text": "Front-end developer transitioning via UI/interaction skills"
+                "text": "Build 2-3 speculative case-study projects from scratch"
               },
               {
-                "text": "Product manager pivoting using domain + stakeholder knowledge"
-              },
-              {
-                "text": "Market/UX researcher moving into design-research hybrid roles"
+                "text": "Find an entry adjacent role (QA, support, research assistant) to get inside a product org"
               }
             ]
           }
         ]
       },
       {
-        "name": "UX specialization / role focus",
+        "name": "Learning path & credentials",
+        "fixedness": 0.8,
+        "subcategories": [
+          {
+            "name": "Structured programs (paid, fixed curriculum)",
+            "axis": "learning-mode",
+            "direction": "structured",
+            "elements": [
+              {
+                "text": "Immersive bootcamp (8-12 weeks full-time)"
+              },
+              {
+                "text": "Part-time bootcamp (3-6 months, evenings/weekends)"
+              },
+              {
+                "text": "University certificate program (e.g., extension UX cert)"
+              },
+              {
+                "text": "Google UX Design Professional Certificate (Coursera, self-paced)"
+              }
+            ]
+          },
+          {
+            "name": "Self-directed learning (unpaid/low-cost, flexible pace)",
+            "axis": "learning-mode",
+            "direction": "self-directed",
+            "elements": [
+              {
+                "text": "Follow a book-based curriculum (e.g., 'The Design of Everyday Things', 'Don't Make Me Think')"
+              },
+              {
+                "text": "Recreate case studies of existing apps ('redesign challenges')"
+              },
+              {
+                "text": "Join design critique communities (ADPList mentorship, Designer Hangout Slack)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Portfolio & proof of skill",
+        "fixedness": 0.9,
+        "subcategories": [
+          {
+            "name": "Project sourcing strategy",
+            "elements": [
+              {
+                "text": "Freelance for a small business or nonprofit (real client, real constraints)"
+              },
+              {
+                "text": "Volunteer via UX-for-good platforms (Catchafire, UX Ripple)"
+              },
+              {
+                "text": "Speculative redesign of an app with usability problems"
+              },
+              {
+                "text": "Contribute to open-source project design"
+              }
+            ]
+          },
+          {
+            "name": "Case study presentation format",
+            "elements": [
+              {
+                "text": "Problem-process-outcome narrative deck (Notion/PDF)"
+              },
+              {
+                "text": "Interactive Figma prototype walkthrough"
+              },
+              {
+                "text": "Short video case-study walkthrough (Loom) for async recruiter review"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Specialization within UX",
         "fixedness": 0.85,
         "subcategories": [
           {
-            "name": "Research-heavy roles",
+            "name": "Research-heavy track",
             "axis": "specialization",
             "direction": "research",
             "elements": [
               {
-                "text": "UX Researcher (qualitative/quantitative studies)"
+                "text": "UX researcher (qualitative interviews, usability testing)"
               },
               {
-                "text": "Design strategist / discovery lead"
+                "text": "UX/design strategist (mixed research + business framing)"
               }
             ]
           },
           {
-            "name": "Interaction & visual design roles",
+            "name": "Craft-heavy track",
             "axis": "specialization",
-            "direction": "design",
+            "direction": "craft",
             "elements": [
               {
-                "text": "Product/UX Designer (end-to-end flows + wireframes)"
+                "text": "Product/interaction designer (screens, flows, prototypes)"
               },
               {
-                "text": "UI/Visual Designer (high-fidelity systems, branding)"
+                "text": "UI/visual designer (systems, typography, visual polish)"
               },
               {
-                "text": "Interaction Designer (motion, prototyping, micro-interactions)"
+                "text": "Design systems designer (component libraries, tokens)"
               }
             ]
           },
           {
-            "name": "Systems & content roles",
+            "name": "Hybrid/adjacent tracks",
             "elements": [
               {
-                "text": "Design Systems Designer (component libraries, design tokens)"
+                "text": "Product designer generalist (research + UI + some front-end)"
               },
               {
-                "text": "UX Writer / Content Designer (microcopy, flows)"
-              }
-            ]
-          },
-          {
-            "name": "Hybrid technical roles",
-            "elements": [
-              {
-                "text": "UX Engineer (design + code prototyping)"
-              },
-              {
-                "text": "Service Designer (end-to-end journey mapping across channels)"
+                "text": "Content/UX writer specializing in microcopy and flows"
               }
             ]
           }
         ]
       },
       {
-        "name": "Core skills & tools to build",
-        "fixedness": 0.6,
+        "name": "Job market & entry strategy",
+        "fixedness": 0.5,
         "subcategories": [
           {
-            "name": "Design software fluency",
+            "name": "Target employer type",
+            "axis": "employer-type",
+            "direction": "n/a",
             "elements": [
               {
-                "text": "Figma (industry-standard interface design)"
+                "text": "Early-stage startup (generalist scope, faster title jump)"
               },
               {
-                "text": "Sketch (legacy but still used at some orgs)"
+                "text": "Agency/consultancy (varied client projects, faster portfolio building)"
               },
               {
-                "text": "Adobe XD / Creative Cloud suite"
+                "text": "Large tech company (structured mentorship, narrower scope)"
               }
             ]
           },
           {
-            "name": "Research & testing methods",
+            "name": "Transition tactics while employed",
             "elements": [
               {
-                "text": "Usability testing (moderated/unmoderated)"
+                "text": "Internal transfer by volunteering for UX-adjacent projects at current employer"
               },
               {
-                "text": "User interviews & contextual inquiry"
+                "text": "Negotiate a hybrid title (e.g., 'UX-adjacent analyst') as stepping stone"
               },
               {
-                "text": "Card sorting & tree testing for IA"
-              },
-              {
-                "text": "A/B testing & analytics interpretation (e.g., Amplitude, Mixpanel)"
-              }
-            ]
-          },
-          {
-            "name": "Process & deliverables",
-            "elements": [
-              {
-                "text": "Wireframing & low-fidelity prototyping"
-              },
-              {
-                "text": "User journey mapping"
-              },
-              {
-                "text": "Design critique & stakeholder presentation skills"
+                "text": "Network via local IxDA/UXPA chapter meetups"
               }
             ]
           }
         ]
       },
       {
-        "name": "Building a portfolio & proof of skill",
-        "fixedness": 0.8,
-        "subcategories": [
-          {
-            "name": "Case study sourcing",
-            "axis": "portfolio_source",
-            "direction": "real_vs_speculative",
-            "elements": [
-              {
-                "text": "Real client/nonprofit project with measurable outcomes",
-                "axis": "portfolio_source",
-                "direction": "real"
-              },
-              {
-                "text": "Speculative redesign of existing well-known product",
-                "axis": "portfolio_source",
-                "direction": "speculative"
-              },
-              {
-                "text": "Design challenge / hackathon project"
-              }
-            ]
-          },
-          {
-            "name": "Portfolio presentation format",
-            "elements": [
-              {
-                "text": "Personal portfolio website (Webflow, Framer)"
-              },
-              {
-                "text": "PDF case study deck for direct sharing"
-              },
-              {
-                "text": "Process-focused storytelling (problem, research, iteration, outcome)"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Job search & positioning strategy",
-        "fixedness": 0.7,
-        "subcategories": [
-          {
-            "name": "Leveraging prior career background",
-            "elements": [
-              {
-                "text": "Targeting industry where old-career domain knowledge is an asset (e.g., ex-teacher into edtech UX)"
-              },
-              {
-                "text": "Positioning transferable soft skills (stakeholder management, research)"
-              }
-            ]
-          },
-          {
-            "name": "Company size / environment fit",
-            "axis": "company_env",
-            "direction": "context",
-            "elements": [
-              {
-                "text": "Startup (broad generalist ownership, faster shipping)",
-                "axis": "company_env",
-                "direction": "startup"
-              },
-              {
-                "text": "Large enterprise/agency (specialized role, structured process)",
-                "axis": "company_env",
-                "direction": "enterprise"
-              }
-            ]
-          },
-          {
-            "name": "Networking & credibility building",
-            "elements": [
-              {
-                "text": "Local UX meetups / ADPList mentorship matching"
-              },
-              {
-                "text": "Contributing to UX communities (Designer Hangout, Slack groups)"
-              },
-              {
-                "text": "Informational interviews with working UX designers"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Financial & timeline planning for the transition",
-        "fixedness": 0.3,
+        "name": "Financial & timeline planning",
+        "fixedness": 0.2,
         "subcategories": [
           {
             "name": "Transition pacing",
             "axis": "pacing",
-            "direction": "context",
+            "direction": "n/a",
             "elements": [
               {
-                "text": "Full-time immersion (quit current job, study intensively)",
-                "axis": "pacing",
-                "direction": "fast"
+                "text": "Full quit-and-retrain (fast but high financial risk)"
               },
               {
-                "text": "Part-time transition while employed (nights/weekends)",
-                "axis": "pacing",
-                "direction": "gradual"
+                "text": "Nights-and-weekends transition while keeping current job (slower, lower risk)"
+              },
+              {
+                "text": "Reduced-hours/sabbatical transition (moderate risk, moderate speed)"
               }
             ]
           },
           {
-            "name": "Funding the transition",
+            "name": "Budget for retraining",
             "elements": [
               {
-                "text": "Savings runway budgeting (3-6 months buffer)"
+                "text": "Low-cost path (<$500: books, free communities, self-taught)"
               },
               {
-                "text": "Income-share agreement bootcamp financing"
+                "text": "Mid-cost path ($500-3000: Coursera cert, part-time bootcamp)"
               },
               {
-                "text": "Employer tuition assistance / reskilling programs"
+                "text": "High-cost path ($8000-15000+: immersive bootcamp tuition)"
               }
             ]
           }
@@ -2246,334 +2354,315 @@
       }
     ],
     "selections": [
-      "Google UX Design Professional Certificate (Coursera)",
-      "Real client/nonprofit project with measurable outcomes",
-      "Part-time transition while employed (nights/weekends)"
-    ],
-    "genre": "argument"
+      "Entry path by prior background",
+      "Immersive bootcamp (8-12 weeks full-time)",
+      "Follow a book-based curriculum (e.g., 'The Design of Everyday Things', 'Don't Make Me Think')",
+      "Freelance for a small business or nonprofit (real client, real constraints)",
+      "Problem-process-outcome narrative deck (Notion/PDF)",
+      "UX researcher (qualitative interviews, usability testing)",
+      "Product/interaction designer (screens, flows, prototypes)",
+      "Product designer generalist (research + UI + some front-end)",
+      "Early-stage startup (generalist scope, faster title jump)",
+      "Internal transfer by volunteering for UX-adjacent projects at current employer",
+      "Financial & timeline planning"
+    ]
   },
   {
     "label": "Coffee Cart Business",
     "input": "I want to start a small mobile coffee cart business",
+    "genre": "action_item",
     "topic": "Starting a small mobile coffee cart business",
     "categories": [
       {
-        "name": "Business Model & Venue Type",
+        "name": "Business model and location type",
         "fixedness": 0.9,
         "subcategories": [
           {
-            "name": "Fixed/Recurring Spot Vending",
-            "axis": "venue_commitment",
+            "name": "Recurring fixed-pitch model (same spot daily/weekly)",
+            "axis": "model",
             "direction": "fixed",
             "elements": [
               {
-                "text": "Daily street corner or sidewalk spot",
-                "axis": "venue_commitment",
+                "text": "Sidewalk/street vending permit spot (city-issued, location-specific license)",
+                "axis": "model",
                 "direction": "fixed"
               },
               {
-                "text": "Farmers market weekly stall",
-                "axis": "venue_commitment",
+                "text": "Corporate campus contract (recurring gig serving one employer's lot)",
+                "axis": "model",
                 "direction": "fixed"
               },
               {
-                "text": "Office park courtyard morning route",
-                "axis": "venue_commitment",
+                "text": "Farmers market stall (weekly recurring booth fee)",
+                "axis": "model",
                 "direction": "fixed"
               },
               {
-                "text": "Gym or co-working lobby partnership",
-                "axis": "venue_commitment",
-                "direction": "fixed"
+                "text": "Gas station/retail lot partnership (rent a corner of an existing lot)"
               }
             ]
           },
           {
-            "name": "Event & Festival Circuit",
-            "axis": "venue_commitment",
-            "direction": "variable",
+            "name": "Event catering model (booked one-off gigs, no fixed pitch)",
+            "axis": "model",
+            "direction": "mobile-event",
             "elements": [
               {
-                "text": "Weekend music/food festivals",
-                "axis": "venue_commitment",
-                "direction": "variable"
+                "text": "Wedding and private party catering"
               },
               {
-                "text": "Private weddings & corporate parties",
-                "axis": "venue_commitment",
-                "direction": "variable"
+                "text": "Corporate meeting/conference catering"
               },
               {
-                "text": "Sports tournament concessions",
-                "axis": "venue_commitment",
-                "direction": "variable"
+                "text": "Festival and concert vending (day-rate booth fee to organizer)"
               },
               {
-                "text": "Farmers/artisan pop-up fairs",
-                "axis": "venue_commitment",
-                "direction": "variable"
+                "text": "Farm-to-cart pop-up at breweries or wineries"
               }
             ]
           },
           {
-            "name": "B2B Office Catering",
+            "name": "Hybrid roaming model (moves between multiple spots by schedule)",
             "elements": [
               {
-                "text": "Scheduled office coffee cart visits"
+                "text": "Rotating weekday route (different neighborhood/office park each day)"
               },
               {
-                "text": "Contracted building lobby service"
-              },
-              {
-                "text": "Conference & trade show booth staffing"
+                "text": "Seasonal relocation (beach town summers, ski town winters)"
               }
             ]
           }
         ]
       },
       {
-        "name": "Cart Format & Mobility",
-        "fixedness": 0.7,
+        "name": "Cart type and equipment",
+        "fixedness": 0.75,
         "subcategories": [
           {
-            "name": "Push/Bike Carts (walkable footprint)",
-            "axis": "vehicle_scale",
-            "direction": "small",
+            "name": "Cart platform (the vehicle/structure itself)",
             "elements": [
               {
-                "text": "Compact 3-wheel espresso tricycle",
-                "axis": "vehicle_scale",
-                "direction": "small"
+                "text": "Trailer-mounted cart (towed behind a vehicle, needs a hitch and tow-capable vehicle)",
+                "axis": "platform",
+                "direction": "trailer"
               },
               {
-                "text": "Push cart with propane espresso machine",
-                "axis": "vehicle_scale",
-                "direction": "small"
+                "text": "Push cart / walk-behind cart (no towing, limited storage and water capacity)",
+                "axis": "platform",
+                "direction": "push"
               },
               {
-                "text": "Foldable pop-up tent + counter setup",
-                "axis": "vehicle_scale",
-                "direction": "small"
+                "text": "Converted vending truck or van (full commercial kitchen build-out)",
+                "axis": "platform",
+                "direction": "truck"
+              },
+              {
+                "text": "Bicycle-powered cart (pedal or e-assist, niche for dense urban routes)",
+                "axis": "platform",
+                "direction": "bike"
               }
             ]
           },
           {
-            "name": "Trailer & Vehicle-Based Units",
-            "axis": "vehicle_scale",
-            "direction": "large",
+            "name": "Espresso and brewing equipment",
             "elements": [
               {
-                "text": "Enclosed concession trailer",
-                "axis": "vehicle_scale",
-                "direction": "large"
+                "text": "Propane-fired espresso machine (no shore power needed, common for carts)",
+                "axis": "power",
+                "direction": "propane"
               },
               {
-                "text": "Converted cargo van",
-                "axis": "vehicle_scale",
-                "direction": "large"
-              },
-              {
-                "text": "Converted vintage truck (e.g., step van)",
-                "axis": "vehicle_scale",
-                "direction": "large"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Equipment & Menu Setup",
-        "fixedness": 0.85,
-        "subcategories": [
-          {
-            "name": "Brewing Equipment Choice",
-            "axis": "power_source",
-            "direction": "electric",
-            "elements": [
-              {
-                "text": "Compact electric espresso machine (2-group)",
-                "axis": "power_source",
+                "text": "Battery/generator-powered electric espresso machine",
+                "axis": "power",
                 "direction": "electric"
               },
               {
-                "text": "Battery/generator-powered setup",
-                "axis": "power_source",
-                "direction": "electric"
+                "text": "Manual lever espresso machine (low power draw, requires more barista skill)"
+              },
+              {
+                "text": "Pour-over/batch brew station (for drip coffee alongside espresso)"
               }
             ]
           },
           {
-            "name": "Off-Grid Brewing Methods",
-            "axis": "power_source",
-            "direction": "manual",
+            "name": "Water and power systems",
             "elements": [
               {
-                "text": "Manual lever espresso machine (propane-heated)",
-                "axis": "power_source",
-                "direction": "manual"
+                "text": "Onboard fresh/greywater tank system (self-contained, required by most health depts)"
               },
               {
-                "text": "Pour-over/batch brew station",
-                "axis": "power_source",
-                "direction": "manual"
+                "text": "Municipal hookup dependency (relies on host site's water/power)"
               },
               {
-                "text": "Nitro cold brew kegerator",
-                "axis": "power_source",
-                "direction": "manual"
-              }
-            ]
-          },
-          {
-            "name": "Menu Positioning",
-            "elements": [
-              {
-                "text": "Specialty espresso-focused menu"
-              },
-              {
-                "text": "Drip/batch coffee volume menu"
-              },
-              {
-                "text": "Seasonal/flavored latte menu"
-              },
-              {
-                "text": "Add-on pastries and light food"
+                "text": "Solar panel + battery bank setup"
               }
             ]
           }
         ]
       },
       {
-        "name": "Legal, Licensing & Compliance",
+        "name": "Licensing, permits, and compliance",
         "fixedness": 0.15,
         "subcategories": [
           {
-            "name": "Business Registration",
+            "name": "Health department requirements",
             "elements": [
               {
-                "text": "LLC formation"
+                "text": "Mobile food unit permit (health-dept inspection of the cart itself)"
               },
               {
-                "text": "Sole proprietorship with DBA"
+                "text": "Commissary kitchen agreement (licensed base kitchen for prep, cleaning, and overnight storage)"
+              },
+              {
+                "text": "ServSafe or local food handler certification"
               }
             ]
           },
           {
-            "name": "Health & Safety Permits",
+            "name": "Local and vending-specific licenses",
             "elements": [
               {
-                "text": "Mobile food vendor permit"
+                "text": "General business license/registration"
               },
               {
-                "text": "County health department inspection certificate"
+                "text": "Street vending permit (specific to right-of-way/sidewalk sales)"
               },
               {
-                "text": "Commissary kitchen agreement"
+                "text": "Fire department approval (required if using propane onboard)"
               },
               {
-                "text": "Fire department propane/equipment inspection"
+                "text": "Zoning variance for private-lot vending"
               }
             ]
           },
           {
-            "name": "Insurance & Local Zoning",
+            "name": "Insurance",
             "elements": [
               {
-                "text": "General liability insurance policy"
+                "text": "General liability policy"
               },
               {
-                "text": "Vehicle/commercial auto insurance"
+                "text": "Commercial auto policy (if towing/driving the cart)"
               },
               {
-                "text": "City street-vending zoning permit"
+                "text": "Product liability coverage"
               }
             ]
           }
         ]
       },
       {
-        "name": "Startup Costs & Financing",
-        "fixedness": 0.6,
+        "name": "Sourcing and menu design",
+        "fixedness": 0.85,
         "subcategories": [
           {
-            "name": "Funding Sources",
+            "name": "Coffee sourcing model",
             "elements": [
               {
-                "text": "Personal savings bootstrap"
+                "text": "Local roaster partnership (buy pre-roasted, house-blend branding)",
+                "axis": "sourcing",
+                "direction": "buy-roasted"
               },
               {
-                "text": "Small business equipment loan"
+                "text": "Own small-batch roasting (roast green beans yourself for differentiation)",
+                "axis": "sourcing",
+                "direction": "self-roast"
               },
               {
-                "text": "Crowdfunding pre-launch campaign"
+                "text": "Direct-trade single-origin beans (higher cost, story-driven marketing)"
               }
             ]
           },
           {
-            "name": "Cart Acquisition Method",
-            "axis": "asset_acquisition",
-            "direction": "buy",
+            "name": "Menu breadth",
             "elements": [
               {
-                "text": "Buy new custom-built cart",
-                "axis": "asset_acquisition",
-                "direction": "buy"
+                "text": "Espresso-only minimalist menu (fast service, small footprint)",
+                "axis": "menu",
+                "direction": "minimal"
               },
               {
-                "text": "Buy used cart/trailer",
-                "axis": "asset_acquisition",
-                "direction": "buy"
-              }
-            ]
-          },
-          {
-            "name": "Cart Leasing/Rental",
-            "axis": "asset_acquisition",
-            "direction": "lease",
-            "elements": [
-              {
-                "text": "Monthly cart lease-to-own program",
-                "axis": "asset_acquisition",
-                "direction": "lease"
+                "text": "Full specialty menu (espresso, drip, cold brew, seasonal lattes)",
+                "axis": "menu",
+                "direction": "full"
               },
               {
-                "text": "Event-only cart rental service",
-                "axis": "asset_acquisition",
-                "direction": "lease"
+                "text": "Add-on food pairings (pastries, breakfast items from local bakery)"
+              },
+              {
+                "text": "Non-coffee alternatives (matcha, chai, hot chocolate) for broader appeal"
               }
             ]
           }
         ]
       },
       {
-        "name": "Marketing & Customer Acquisition",
+        "name": "Startup capital and financing",
+        "fixedness": 0.4,
+        "subcategories": [
+          {
+            "name": "Cart acquisition financing",
+            "elements": [
+              {
+                "text": "Buy new custom-built cart from a manufacturer",
+                "axis": "acquisition",
+                "direction": "new"
+              },
+              {
+                "text": "Buy used cart secondhand (lower cost, inspect for equipment condition)",
+                "axis": "acquisition",
+                "direction": "used"
+              },
+              {
+                "text": "Equipment leasing arrangement"
+              }
+            ]
+          },
+          {
+            "name": "Funding sources",
+            "elements": [
+              {
+                "text": "SBA microloan"
+              },
+              {
+                "text": "Personal savings/bootstrap"
+              },
+              {
+                "text": "Equipment financing loan (secured against the cart itself)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Marketing and customer acquisition",
         "fixedness": 0.8,
         "subcategories": [
           {
-            "name": "Local Brand Presence",
+            "name": "Brand and visibility",
             "elements": [
               {
-                "text": "Instagram/TikTok location updates"
+                "text": "Cart wrap/signage design (visual branding on the cart itself)"
+              },
+              {
+                "text": "Instagram/TikTok location-of-the-day posting"
               },
               {
                 "text": "Loyalty punch-card or app program"
-              },
-              {
-                "text": "Branded cart wrap & signage design"
               }
             ]
           },
           {
-            "name": "Partnership Building",
+            "name": "Booking and repeat business channels",
             "elements": [
               {
-                "text": "Corporate catering client outreach"
+                "text": "Direct event-booking website with calendar"
               },
               {
-                "text": "Event organizer vendor applications"
+                "text": "Third-party catering marketplace listing"
               },
               {
-                "text": "Cross-promotion with local bakeries"
+                "text": "Corporate B2B outreach for recurring office contracts"
               }
             ]
           }
@@ -2581,89 +2670,92 @@
       }
     ],
     "selections": [
-      "Weekend music/food festivals",
-      "Compact 3-wheel espresso tricycle",
-      "Mobile food vendor permit"
-    ],
-    "genre": "action_item"
+      "Sidewalk/street vending permit spot (city-issued, location-specific license)",
+      "Rotating weekday route (different neighborhood/office park each day)",
+      "Trailer-mounted cart (towed behind a vehicle, needs a hitch and tow-capable vehicle)",
+      "Propane-fired espresso machine (no shore power needed, common for carts)",
+      "Onboard fresh/greywater tank system (self-contained, required by most health depts)",
+      "Licensing, permits, and compliance",
+      "Local roaster partnership (buy pre-roasted, house-blend branding)",
+      "Espresso-only minimalist menu (fast service, small footprint)",
+      "Buy new custom-built cart from a manufacturer",
+      "SBA microloan",
+      "Cart wrap/signage design (visual branding on the cart itself)",
+      "Direct event-booking website with calendar"
+    ]
   },
   {
     "label": "Japan Trip",
     "input": "I am planning a two-week trip to Japan",
+    "genre": "summary",
     "topic": "Planning a Two-Week Trip to Japan",
     "categories": [
       {
-        "name": "Region/Route Focus",
+        "name": "Region/Itinerary Focus",
         "fixedness": 0.9,
         "subcategories": [
           {
-            "name": "Classic Golden Route (Tokyo–Kyoto–Osaka)",
-            "axis": "route",
-            "direction": "classic",
+            "name": "Golden Route (Tokyo–Osaka classic corridor, first-timer friendly)",
+            "axis": "itinerary_style",
+            "direction": "golden_route",
             "elements": [
               {
-                "text": "Tokyo + day trip to Nikko or Kamakura, then Kyoto, then Osaka",
-                "axis": "route",
-                "direction": "classic"
+                "text": "Tokyo → Kyoto → Osaka (linear Shinkansen route)",
+                "axis": "itinerary_style",
+                "direction": "golden_route"
               },
               {
-                "text": "Add Hiroshima/Miyajima extension via Shinkansen",
-                "axis": "route",
-                "direction": "classic"
+                "text": "Add Hakone (day-trip onsen/Mt. Fuji viewpoint) between Tokyo and Kyoto"
               },
               {
-                "text": "Add Hakone/Mt. Fuji stopover en route to Kyoto",
-                "axis": "route",
-                "direction": "classic"
+                "text": "Add Nara (day-trip, deer park + Todaiji Buddha) from Kyoto/Osaka"
+              },
+              {
+                "text": "Add Hiroshima/Miyajima extension (Peace Park + floating torii gate)"
               }
             ]
           },
           {
-            "name": "Off-the-Beaten-Path Focus",
-            "axis": "route",
-            "direction": "offbeat",
+            "name": "Regional/Off-Path Focus (fewer crowds, requires more logistics)",
+            "axis": "itinerary_style",
+            "direction": "regional",
             "elements": [
               {
-                "text": "Kanazawa and the Noto Peninsula",
-                "axis": "route",
-                "direction": "offbeat"
+                "text": "Tohoku region (northern Honshu, rural onsen towns, less English signage)",
+                "axis": "itinerary_style",
+                "direction": "regional"
               },
               {
-                "text": "Shikoku pilgrimage towns and Iya Valley",
-                "axis": "route",
-                "direction": "offbeat"
+                "text": "Shikoku 88-temple pilgrimage route (partial, driving loop)",
+                "axis": "itinerary_style",
+                "direction": "regional"
               },
               {
-                "text": "Tohoku region (Sendai, Aomori, Akita)",
-                "axis": "route",
-                "direction": "offbeat"
+                "text": "Kyushu (Fukuoka, Beppu hot springs, Kagoshima volcano)",
+                "axis": "itinerary_style",
+                "direction": "regional"
               },
               {
-                "text": "Kyushu hot springs and volcanoes (Beppu, Aso)",
-                "axis": "route",
-                "direction": "offbeat"
+                "text": "Hokkaido (Sapporo, Niseko, seasonal snow/flower focus)",
+                "axis": "itinerary_style",
+                "direction": "regional"
               }
             ]
           },
           {
-            "name": "All-Japan Grand Tour (fast-paced, multi-region)",
-            "axis": "route",
-            "direction": "grandtour",
+            "name": "Single-Base Deep Dive (one city, slow travel)",
+            "axis": "itinerary_style",
+            "direction": "single_base",
             "elements": [
               {
-                "text": "Tokyo → Kyoto/Osaka → Hiroshima → back to Tokyo loop",
-                "axis": "route",
-                "direction": "grandtour"
+                "text": "Kyoto-based (day trips to Nara, Osaka, Uji only)",
+                "axis": "itinerary_style",
+                "direction": "single_base"
               },
               {
-                "text": "Add Hokkaido leg via domestic flight",
-                "axis": "route",
-                "direction": "grandtour"
-              },
-              {
-                "text": "Add Okinawa island leg via domestic flight",
-                "axis": "route",
-                "direction": "grandtour"
+                "text": "Tokyo-based (day trips to Kamakura, Nikko, Yokohama only)",
+                "axis": "itinerary_style",
+                "direction": "single_base"
               }
             ]
           }
@@ -2671,107 +2763,112 @@
       },
       {
         "name": "Season & Timing",
-        "fixedness": 0.3,
+        "fixedness": 0.2,
         "subcategories": [
           {
-            "name": "Cherry Blossom Season (late Mar–early Apr)",
+            "name": "Cherry Blossom Season (late Mar–early Apr, sakura, peak crowds/prices)",
             "axis": "season",
             "direction": "sakura",
             "elements": [
               {
-                "text": "Book Kyoto/Tokyo hotels 6+ months ahead",
+                "text": "Book Kyoto hanami spots (Maruyama Park, Philosopher's Path) 6+ months ahead",
                 "axis": "season",
                 "direction": "sakura"
               },
               {
-                "text": "Plan route north-to-south or vice versa to chase bloom front",
+                "text": "Track sakura zensen (blossom forecast front) to time route north-to-south",
                 "axis": "season",
                 "direction": "sakura"
               }
             ]
           },
           {
-            "name": "Autumn Foliage Season (mid-Nov–early Dec)",
+            "name": "Autumn Foliage Season (mid-Nov–early Dec, koyo, second peak crowds)",
             "axis": "season",
-            "direction": "koyo",
+            "direction": "autumn",
             "elements": [
               {
-                "text": "Prioritize Kyoto temples (Tofukuji, Arashiyama)",
+                "text": "Arashiyama/Kyoto temple foliage viewing",
                 "axis": "season",
-                "direction": "koyo"
+                "direction": "autumn"
               },
               {
-                "text": "Day trip to Nikko or Nara for foliage",
+                "text": "Nikko foliage (Toshogu Shrine area, day trip from Tokyo)",
                 "axis": "season",
-                "direction": "koyo"
+                "direction": "autumn"
               }
             ]
           },
           {
-            "name": "Off-Peak Winter/Summer Travel",
+            "name": "Shoulder/Off-Season (Jun–Aug humid heat, Jan–Feb cold, lower costs)",
             "axis": "season",
-            "direction": "offpeak",
+            "direction": "off_peak",
             "elements": [
               {
-                "text": "Winter: Snow Festival (Sapporo) and hot springs",
+                "text": "Summer festival focus (Gion Matsuri Kyoto, fireworks/hanabi displays)",
                 "axis": "season",
-                "direction": "offpeak"
+                "direction": "off_peak"
               },
               {
-                "text": "Summer: mountain retreats (Kamikochi, Nagano) to escape heat",
+                "text": "Winter illuminations + snow monkeys (Jigokudani, Nagano)",
                 "axis": "season",
-                "direction": "offpeak"
+                "direction": "off_peak"
+              },
+              {
+                "text": "Rainy season (tsuyu, mid-Jun–mid-Jul) indoor/museum-heavy planning"
               }
             ]
           }
         ]
       },
       {
-        "name": "Transportation Strategy",
-        "fixedness": 0.6,
+        "name": "Transportation & Passes",
+        "fixedness": 0.55,
         "subcategories": [
           {
-            "name": "Japan Rail Pass Options",
+            "name": "Rail Pass Strategy",
             "axis": "rail_pass",
-            "direction": "pass",
+            "direction": "jr_pass",
             "elements": [
               {
-                "text": "7-day JR Pass timed to cover long-haul Shinkansen legs",
+                "text": "JR Pass nationwide (7/14/21-day, unlimited JR trains incl. most Shinkansen)",
                 "axis": "rail_pass",
-                "direction": "pass"
+                "direction": "jr_pass"
               },
               {
-                "text": "Regional pass (JR Kansai, JR East) for localized touring",
+                "text": "Regional JR pass (e.g. JR Kansai Wide Pass) for shorter regional focus",
                 "axis": "rail_pass",
-                "direction": "pass"
+                "direction": "regional_pass"
+              },
+              {
+                "text": "Pay-as-you-go with IC card (Suica/Pasmo tap card, no pass) for city-heavy trips",
+                "axis": "rail_pass",
+                "direction": "no_pass"
               }
             ]
           },
           {
-            "name": "Pay-As-You-Go IC Card Travel",
-            "axis": "rail_pass",
-            "direction": "payg",
+            "name": "Intercity Transport Mode",
             "elements": [
               {
-                "text": "Suica or Pasmo card for city subways/buses",
-                "axis": "rail_pass",
-                "direction": "payg"
+                "text": "Shinkansen bullet train (fastest, most expensive without pass)"
               },
               {
-                "text": "Individual Shinkansen tickets booked via Smart-EX",
-                "axis": "rail_pass",
-                "direction": "payg"
+                "text": "Overnight/highway bus (budget option, saves a hotel night)"
+              },
+              {
+                "text": "Rental car (only practical for rural regions like Shikoku/Hokkaido)"
               }
             ]
           },
           {
-            "name": "Domestic Flights & Rental Car",
+            "name": "Airport Entry/Exit Points",
             "elements": [
               {
-                "text": "Peach or Jetstar budget flights for Hokkaido/Okinawa legs"
+                "text": "Fly into Narita/Haneda, out of Kansai (Osaka) — open-jaw itinerary"
               },
               {
-                "text": "Rental car for rural Shikoku/Tohoku/Iya Valley stretches"
+                "text": "Round-trip through single hub (Tokyo or Osaka only)"
               }
             ]
           }
@@ -2779,167 +2876,125 @@
       },
       {
         "name": "Accommodation Style",
-        "fixedness": 0.8,
+        "fixedness": 0.75,
         "subcategories": [
           {
-            "name": "Traditional Ryokan Stays",
-            "axis": "lodging",
-            "direction": "traditional",
+            "name": "Traditional Lodging",
             "elements": [
               {
-                "text": "One-night kaiseki ryokan in Hakone or Kinosaki Onsen",
-                "axis": "lodging",
-                "direction": "traditional"
+                "text": "Ryokan stay with kaiseki dinner (multi-course traditional meal) + onsen"
               },
               {
-                "text": "Multi-night temple lodging (shukubo) on Mt. Koya",
-                "axis": "lodging",
-                "direction": "traditional"
+                "text": "Shukubo temple lodging (Koyasan monastery stay, morning prayers)"
               }
             ]
           },
           {
-            "name": "Modern City Hotels & Capsule Stays",
-            "axis": "lodging",
-            "direction": "modern",
+            "name": "Budget/Modern Lodging",
             "elements": [
               {
-                "text": "Business hotel chain (APA, Toyoko Inn) for city nights",
-                "axis": "lodging",
-                "direction": "modern"
+                "text": "Capsule hotel (bunk-pod rooms, common in stations)"
               },
               {
-                "text": "Capsule hotel or pod stay for one novelty night in Tokyo",
-                "axis": "lodging",
-                "direction": "modern"
+                "text": "Business hotel chain (compact Western-style rooms, e.g. APA, Toyoko Inn)"
+              },
+              {
+                "text": "Manga/internet cafe (overnight budget stay, common for late transit)"
               }
             ]
           },
           {
-            "name": "Apartment/Airbnb Base",
-            "axis": "lodging",
-            "direction": "apartment",
+            "name": "Neighborhood Base Choice (per city)",
             "elements": [
               {
-                "text": "Kyoto machiya townhouse rental for a multi-night base",
-                "axis": "lodging",
-                "direction": "apartment"
+                "text": "Shinjuku/Shibuya base in Tokyo (nightlife, transit hub)"
+              },
+              {
+                "text": "Asakusa base in Tokyo (traditional, closer to Senso-ji, quieter)"
               }
             ]
           }
         ]
       },
       {
-        "name": "Experience & Activity Themes",
-        "fixedness": 0.95,
+        "name": "Cultural Experiences & Activities",
+        "fixedness": 0.85,
         "subcategories": [
           {
-            "name": "Food & Culinary Deep Dive",
+            "name": "Nature & Scenic",
             "elements": [
               {
-                "text": "Tsukiji/Toyosu outer market food crawl"
+                "text": "Mt. Fuji viewing/climbing season (climbing season only Jul–Sep)"
               },
               {
-                "text": "Osaka street food tour (takoyaki, okonomiyaki, kushikatsu)"
+                "text": "Arashiyama bamboo grove + monkey park"
               },
               {
-                "text": "Sake brewery tour in Fushimi or Niigata"
+                "text": "Fushimi Inari torii gate hike (thousands of red gates, Kyoto)"
               }
             ]
           },
           {
-            "name": "Culture & History Immersion",
-            "elements": [
-              {
-                "text": "Kyoto temple/shrine circuit (Kiyomizu, Fushimi Inari)"
-              },
-              {
-                "text": "Hiroshima Peace Memorial and Miyajima torii gate"
-              },
-              {
-                "text": "Samurai/Ninja museum experience in Kyoto or Nagano"
-              }
-            ]
-          },
-          {
-            "name": "Pop Culture & Modern Tokyo",
+            "name": "Modern/Pop Culture",
             "elements": [
               {
                 "text": "Akihabara anime/electronics district"
               },
               {
-                "text": "teamLab digital art museum"
+                "text": "teamLab digital art museum (immersive light installations)"
               },
               {
-                "text": "Shibuya/Harajuku fashion and nightlife district"
+                "text": "Studio Ghibli Museum/Park (timed-entry tickets, book early)"
               }
             ]
           },
           {
-            "name": "Nature & Outdoor Adventure",
+            "name": "Food Experiences",
             "elements": [
               {
-                "text": "Mt. Fuji 5th Station visit or day hike"
+                "text": "Tsukiji Outer Market/Toyosu Market sushi breakfast"
               },
               {
-                "text": "Arashiyama bamboo grove and Sagano trails"
+                "text": "Depachika department store food halls (gourmet takeaway)"
               },
               {
-                "text": "Kamikochi alpine valley trek"
+                "text": "Izakaya crawl (pub-style small plates, evening dining)"
               }
             ]
           }
         ]
       },
       {
-        "name": "Budget & Pacing",
-        "fixedness": 0.4,
+        "name": "Budget & Logistics Prep",
+        "fixedness": 0.3,
         "subcategories": [
           {
-            "name": "Fast-Paced Multi-City Itinerary",
-            "axis": "pace",
-            "direction": "fast",
+            "name": "Money Handling",
             "elements": [
               {
-                "text": "Change base city every 2 nights",
-                "axis": "pace",
-                "direction": "fast"
+                "text": "Cash-heavy budgeting (many rural shops/temples are cash-only)"
               },
               {
-                "text": "Pack 3-4 regions into 14 days",
-                "axis": "pace",
-                "direction": "fast"
+                "text": "7-Eleven ATM withdrawals (reliable for foreign cards)"
               }
             ]
           },
           {
-            "name": "Slow Travel with Fewer Bases",
-            "axis": "pace",
-            "direction": "slow",
+            "name": "Connectivity",
             "elements": [
               {
-                "text": "2-3 bases with day trips radiating out",
-                "axis": "pace",
-                "direction": "slow"
+                "text": "Pocket WiFi rental (pickup at airport)"
               },
               {
-                "text": "Build in unscheduled free days",
-                "axis": "pace",
-                "direction": "slow"
+                "text": "eSIM data plan (no physical pickup needed)"
               }
             ]
           },
           {
-            "name": "Budget Tier Planning",
+            "name": "Luggage Logistics",
             "elements": [
               {
-                "text": "Backpacker-style budget (hostels, convenience store meals)"
-              },
-              {
-                "text": "Mid-range comfort budget (business hotels, mix of dining)"
-              },
-              {
-                "text": "Luxury tier (ryokan kaiseki, private guides, Shinkansen Green Car)"
+                "text": "Takkyubin luggage forwarding service (send bags ahead between hotels)"
               }
             ]
           }
@@ -2947,116 +3002,109 @@
       }
     ],
     "selections": [
-      "Tokyo + day trip to Nikko or Kamakura, then Kyoto, then Osaka",
-      "7-day JR Pass timed to cover long-haul Shinkansen legs",
-      "Osaka street food tour (takoyaki, okonomiyaki, kushikatsu)"
-    ],
-    "genre": "summary"
+      "Tokyo → Kyoto → Osaka (linear Shinkansen route)",
+      "Season & Timing",
+      "JR Pass nationwide (7/14/21-day, unlimited JR trains incl. most Shinkansen)",
+      "Shinkansen bullet train (fastest, most expensive without pass)",
+      "Fly into Narita/Haneda, out of Kansai (Osaka) — open-jaw itinerary",
+      "Ryokan stay with kaiseki dinner (multi-course traditional meal) + onsen",
+      "Capsule hotel (bunk-pod rooms, common in stations)",
+      "Shinjuku/Shibuya base in Tokyo (nightlife, transit hub)",
+      "Mt. Fuji viewing/climbing season (climbing season only Jul–Sep)",
+      "Akihabara anime/electronics district",
+      "Tsukiji Outer Market/Toyosu Market sushi breakfast",
+      "Budget & Logistics Prep"
+    ]
   },
   {
     "label": "New Puppy Training",
     "input": "I just adopted a puppy and need to train it",
+    "genre": "story",
     "topic": "Training a newly adopted puppy",
     "categories": [
       {
-        "name": "Training focus area",
-        "fixedness": 0.9,
+        "name": "Training goal",
+        "fixedness": 0.7,
         "subcategories": [
           {
-            "name": "House training (potty training)",
+            "name": "Housebreaking (potty training)",
+            "axis": "goal",
+            "direction": "housebreaking",
             "elements": [
               {
-                "text": "Crate-based schedule (confinement + frequent outdoor trips)",
-                "axis": "containment",
-                "direction": "crate"
+                "text": "Crate training (confinement to prevent accidents when unsupervised)"
               },
               {
-                "text": "Puppy pads / indoor litter box method",
-                "axis": "containment",
-                "direction": "pad"
+                "text": "Scheduled potty breaks (fixed times tied to eating/waking/play)"
               },
               {
-                "text": "Bell-on-door signal training"
+                "text": "Bell training (teaching puppy to signal at the door)"
               },
               {
-                "text": "Umbilical cord (tethering puppy to you) method"
+                "text": "Umbilical cord method (leashing puppy to you indoors to catch cues)"
               }
             ]
           },
           {
-            "name": "Crate training",
-            "elements": [
-              {
-                "text": "Wire crate with divider panel"
-              },
-              {
-                "text": "Plastic airline-style crate"
-              },
-              {
-                "text": "Soft-sided crate (for trained/travel use)"
-              },
-              {
-                "text": "Gradual desensitization protocol (short absences first)"
-              }
-            ]
-          },
-          {
-            "name": "Basic obedience cues",
+            "name": "Basic obedience",
+            "axis": "goal",
+            "direction": "obedience",
             "elements": [
               {
                 "text": "Sit"
               },
               {
-                "text": "Down"
+                "text": "Stay (holding position until released)"
               },
               {
-                "text": "Stay"
+                "text": "Recall (\"come\" — returning reliably when called)"
               },
               {
-                "text": "Come (recall)"
+                "text": "Loose-leash walking (walking without pulling)"
               },
               {
-                "text": "Leave it / drop it"
-              }
-            ]
-          },
-          {
-            "name": "Leash training",
-            "elements": [
-              {
-                "text": "Loose-leash walking drills"
-              },
-              {
-                "text": "Front-clip harness",
-                "axis": "leash_gear",
-                "direction": "harness"
-              },
-              {
-                "text": "Flat buckle collar",
-                "axis": "leash_gear",
-                "direction": "collar"
-              },
-              {
-                "text": "Head halter (e.g., Gentle Leader)",
-                "axis": "leash_gear",
-                "direction": "head-halter"
+                "text": "Leave it / drop it (releasing or ignoring an item on cue)"
               }
             ]
           },
           {
             "name": "Socialization",
+            "axis": "goal",
+            "direction": "socialization",
             "elements": [
               {
-                "text": "Structured puppy socialization class"
+                "text": "Puppy socialization class (structured exposure to other dogs)"
               },
               {
-                "text": "Controlled exposure to novel sounds/surfaces/objects"
+                "text": "Novel surface and sound exposure (grates, umbrellas, vacuum noise)"
               },
               {
-                "text": "Supervised play with vaccinated adult dogs"
+                "text": "Handling exercises (getting comfortable with paws, ears, mouth touched)"
               },
               {
-                "text": "Handling exercises (paws, ears, mouth) for vet/grooming tolerance"
+                "text": "Stranger greetings (controlled introductions to new people)"
+              }
+            ]
+          },
+          {
+            "name": "Behavior issues",
+            "axis": "goal",
+            "direction": "behavior",
+            "elements": [
+              {
+                "text": "Nipping/biting inhibition (redirecting mouthy play)"
+              },
+              {
+                "text": "Jumping on people"
+              },
+              {
+                "text": "Resource guarding (protecting food/toys from people or dogs)"
+              },
+              {
+                "text": "Separation anxiety (distress when left alone)"
+              },
+              {
+                "text": "Excessive barking"
               }
             ]
           }
@@ -3064,131 +3112,37 @@
       },
       {
         "name": "Training method / philosophy",
-        "fixedness": 0.7,
+        "fixedness": 0.6,
         "subcategories": [
           {
-            "name": "Positive reinforcement (reward-based)",
+            "name": "Reward-based methods",
             "axis": "method",
-            "direction": "positive-reinforcement",
+            "direction": "reward-based",
             "elements": [
               {
-                "text": "Clicker marker training"
+                "text": "Clicker training (marker-based positive reinforcement)"
               },
               {
-                "text": "High-value treat luring/shaping"
+                "text": "Lure-and-reward (using treats to guide body position)"
+              },
+              {
+                "text": "Shaping (rewarding successive approximations toward a behavior)"
               }
             ]
           },
           {
-            "name": "Balanced training (rewards + corrections)",
+            "name": "Balanced/traditional methods",
             "axis": "method",
             "direction": "balanced",
             "elements": [
               {
-                "text": "Verbal interrupter + redirect"
+                "text": "Verbal correction ('no' or interrupter word)"
               },
               {
-                "text": "Slip lead correction (for leash manners)"
-              }
-            ]
-          },
-          {
-            "name": "Professional guidance",
-            "elements": [
-              {
-                "text": "Private in-home trainer"
+                "text": "Prong or e-collar use (aversive correction tools, controversial)"
               },
               {
-                "text": "Group puppy class at pet store/facility"
-              },
-              {
-                "text": "Online video-based training program"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Puppy developmental stage & timing",
-        "fixedness": 0.1,
-        "subcategories": [
-          {
-            "name": "Critical socialization window (roughly 3–14 weeks)",
-            "elements": [
-              {
-                "text": "Prioritize exposure before fear period sets in"
-              }
-            ]
-          },
-          {
-            "name": "Fear periods",
-            "elements": [
-              {
-                "text": "Adjust intensity of new experiences during first fear period (~8-11 wks)"
-              },
-              {
-                "text": "Adjust intensity during adolescent fear period (~6-14 months)"
-              }
-            ]
-          },
-          {
-            "name": "Teething & adolescence",
-            "elements": [
-              {
-                "text": "Appropriate chew toy rotation during teething"
-              },
-              {
-                "text": "Reinforce recall/impulse control during adolescent regression"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Behavior problem prevention & management",
-        "fixedness": 0.6,
-        "subcategories": [
-          {
-            "name": "Bite inhibition & nipping",
-            "elements": [
-              {
-                "text": "Yelp-and-withdraw-attention technique"
-              },
-              {
-                "text": "Redirect to appropriate chew toy"
-              }
-            ]
-          },
-          {
-            "name": "Separation-related distress",
-            "elements": [
-              {
-                "text": "Departure cue desensitization"
-              },
-              {
-                "text": "Independence-building exercises (settle on a mat alone)"
-              }
-            ]
-          },
-          {
-            "name": "Jumping & impulse control",
-            "elements": [
-              {
-                "text": "Four-paws-on-floor reward rule"
-              },
-              {
-                "text": "Wait-at-door/threshold exercise"
-              }
-            ]
-          },
-          {
-            "name": "Resource guarding prevention",
-            "elements": [
-              {
-                "text": "Trade-up exercises (swap item for higher-value treat)"
-              },
-              {
-                "text": "Hand-feeding near food bowl during meals"
+                "text": "Leash pop correction (physical leash guidance)"
               }
             ]
           }
@@ -3199,63 +3153,103 @@
         "fixedness": 0.8,
         "subcategories": [
           {
-            "name": "Reward delivery tools",
+            "name": "Containment & walking gear",
             "elements": [
               {
-                "text": "Clicker"
+                "text": "Wire crate (open-sided, portable confinement)"
               },
               {
-                "text": "Treat pouch"
+                "text": "Exercise pen / x-pen (larger fenced play area)"
+              },
+              {
+                "text": "Standard flat collar with 6-ft leash"
               }
             ]
           },
           {
-            "name": "Containment & safety gear",
+            "name": "Reward & marker tools",
             "elements": [
               {
-                "text": "Exercise pen (x-pen)"
+                "text": "Training treat pouch"
               },
               {
-                "text": "Baby gates for room restriction"
+                "text": "Clicker device"
+              },
+              {
+                "text": "High-value treats (small, soft, high-motivation rewards)"
               }
             ]
           },
           {
-            "name": "Enrichment items",
+            "name": "Enrichment tools",
             "elements": [
               {
-                "text": "Snuffle mat"
+                "text": "Puzzle feeder / snuffle mat"
               },
               {
-                "text": "Kong stuffed with frozen treats"
+                "text": "Kong stuffed with frozen filling"
               },
               {
-                "text": "Puzzle feeder toy"
+                "text": "Teething-safe chew toys"
               }
             ]
           }
         ]
       },
       {
-        "name": "Health & readiness prerequisites",
-        "fixedness": 0.1,
+        "name": "Developmental stage & timing",
+        "fixedness": 0.2,
         "subcategories": [
           {
-            "name": "Vaccination status",
+            "name": "Critical socialization window (roughly 3–14 weeks)",
             "elements": [
               {
-                "text": "Complete core vaccine series before public dog-park exposure"
+                "text": "Pre-vaccination controlled exposure (carrying puppy in low-risk settings before full vaccine series)"
+              },
+              {
+                "text": "Fear period awareness (avoiding traumatic exposure around 8-11 weeks)"
               }
             ]
           },
           {
-            "name": "Breed-specific traits",
+            "name": "Adolescent phase (roughly 6-18 months)",
             "elements": [
               {
-                "text": "Account for herding-breed nipping tendency in training plan"
+                "text": "Reinforcing basics amid regression (re-teaching known cues that seem 'forgotten')"
               },
               {
-                "text": "Account for high-energy working breed exercise needs before sessions"
+                "text": "Adding distraction/duration/distance (proofing commands in harder contexts)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Professional support",
+        "fixedness": 0.9,
+        "subcategories": [
+          {
+            "name": "Group settings",
+            "elements": [
+              {
+                "text": "Puppy kindergarten class (group class focused on basics + socialization)"
+              },
+              {
+                "text": "Local dog park meetups"
+              }
+            ]
+          },
+          {
+            "name": "One-on-one/professional help",
+            "elements": [
+              {
+                "text": "Private certified trainer (CPDT-KA credentialed)"
+              },
+              {
+                "text": "Board-and-train program (trainer houses and trains dog for a set period)"
+              },
+              {
+                "text": "Veterinary behaviorist referral (for serious issues like aggression or severe anxiety)"
               }
             ]
           }
@@ -3263,51 +3257,60 @@
       }
     ],
     "selections": [
-      "Crate-based schedule (confinement + frequent outdoor trips)",
-      "Structured puppy socialization class",
-      "Clicker marker training"
-    ],
-    "genre": "story"
+      "Crate training (confinement to prevent accidents when unsupervised)",
+      "Sit",
+      "Puppy socialization class (structured exposure to other dogs)",
+      "Nipping/biting inhibition (redirecting mouthy play)",
+      "Clicker training (marker-based positive reinforcement)",
+      "Verbal correction ('no' or interrupter word)",
+      "Wire crate (open-sided, portable confinement)",
+      "Training treat pouch",
+      "Puzzle feeder / snuffle mat",
+      "Developmental stage & timing",
+      "Puppy kindergarten class (group class focused on basics + socialization)",
+      "Private certified trainer (CPDT-KA credentialed)"
+    ]
   },
   {
     "label": "AWS Certification",
     "input": "I am studying for the AWS Solutions Architect certification",
+    "genre": "definition",
     "topic": "Studying for AWS Solutions Architect Certification",
     "categories": [
       {
-        "name": "Certification Level",
+        "name": "Certification level (which exam you're actually targeting)",
         "fixedness": 0.3,
         "subcategories": [
           {
-            "name": "Solutions Architect Associate (SAA-C03)",
-            "axis": "cert-level",
+            "name": "Associate (SAA-C03) — entry-level, 130 min, 65 questions, no prerequisites",
+            "axis": "cert_level",
             "direction": "associate",
             "elements": [
               {
-                "text": "Target SAA-C03 exam (130 min, 65 questions)",
-                "axis": "cert-level",
+                "text": "SAA-C03 exam (current version, replaced SAA-C02 in 2022)",
+                "axis": "cert_level",
                 "direction": "associate"
               },
               {
-                "text": "Assume 0-1 years hands-on AWS experience prerequisite",
-                "axis": "cert-level",
+                "text": "Target: 1 year hands-on AWS experience recommended by AWS",
+                "axis": "cert_level",
                 "direction": "associate"
               }
             ]
           },
           {
-            "name": "Solutions Architect Professional (SAP-C02)",
-            "axis": "cert-level",
+            "name": "Professional (SAP-C02) — advanced, 180 min, 75 questions, Associate-level knowledge assumed",
+            "axis": "cert_level",
             "direction": "professional",
             "elements": [
               {
-                "text": "Target SAP-C02 exam (180 min, scenario-heavy)",
-                "axis": "cert-level",
+                "text": "SAP-C02 exam (current version, replaced SAP-C01 in 2022)",
+                "axis": "cert_level",
                 "direction": "professional"
               },
               {
-                "text": "Require Associate cert (or equivalent experience) as prerequisite first",
-                "axis": "cert-level",
+                "text": "Multi-account, org-wide migration & cost-optimization scenarios",
+                "axis": "cert_level",
                 "direction": "professional"
               }
             ]
@@ -3315,131 +3318,76 @@
         ]
       },
       {
-        "name": "Core Domain Knowledge",
-        "fixedness": 0.6,
+        "name": "Core domains tested (exam blueprint weightings)",
+        "fixedness": 0.15,
         "subcategories": [
           {
-            "name": "Compute & Containers",
+            "name": "Domain 1: Design Resilient Architectures (~26%)",
             "elements": [
               {
-                "text": "EC2 instance families & purchasing options (Spot, RI, Savings Plans)"
+                "text": "Multi-AZ / Multi-Region failover patterns"
               },
               {
-                "text": "Auto Scaling Groups with launch templates"
+                "text": "Decoupling with SQS/SNS/EventBridge"
               },
               {
-                "text": "ECS/Fargate vs EKS for container workloads"
-              },
-              {
-                "text": "Lambda for event-driven/serverless compute"
+                "text": "RTO/RPO-driven disaster recovery strategy (backup & restore vs pilot light vs warm standby vs multi-site)"
               }
             ]
           },
           {
-            "name": "Storage & Databases",
+            "name": "Domain 2: Design High-Performing Architectures (~24%)",
             "elements": [
               {
-                "text": "S3 storage classes & lifecycle policies"
+                "text": "Storage class selection (S3 Standard/IA/Glacier tiers)"
               },
               {
-                "text": "EBS vs EFS vs FSx selection"
+                "text": "Caching layers (ElastiCache, CloudFront)"
               },
               {
-                "text": "RDS Multi-AZ vs Aurora Global Database"
-              },
-              {
-                "text": "DynamoDB partition key & GSI design"
+                "text": "Compute selection (EC2 vs Lambda vs Fargate vs Batch)"
               }
             ]
           },
           {
-            "name": "Networking & Content Delivery",
+            "name": "Domain 3: Design Secure Architectures (~30%)",
             "elements": [
               {
-                "text": "VPC design with public/private/isolated subnets"
+                "text": "IAM policy design (least privilege, resource-based vs identity-based policies)"
               },
               {
-                "text": "Transit Gateway vs VPC Peering vs PrivateLink"
+                "text": "Data encryption (KMS envelope encryption, at-rest vs in-transit)"
               },
               {
-                "text": "CloudFront + Route 53 routing policies"
-              },
-              {
-                "text": "Direct Connect vs Site-to-Site VPN"
+                "text": "Network isolation (VPC security groups vs NACLs)"
               }
             ]
           },
           {
-            "name": "Security, Identity & Compliance",
+            "name": "Domain 4: Design Cost-Optimized Architectures (~20%)",
             "elements": [
               {
-                "text": "IAM policies, roles, and permission boundaries"
+                "text": "Purchasing options (On-Demand vs Reserved vs Savings Plans vs Spot)"
               },
               {
-                "text": "KMS encryption key management"
-              },
-              {
-                "text": "AWS Organizations SCPs for multi-account guardrails"
-              },
-              {
-                "text": "GuardDuty & Security Hub for threat detection"
+                "text": "Right-sizing with Compute Optimizer / Trusted Advisor"
               }
             ]
           }
         ]
       },
       {
-        "name": "Architectural Framework Mastery",
-        "fixedness": 0.5,
-        "subcategories": [
-          {
-            "name": "AWS Well-Architected Framework Pillars",
-            "elements": [
-              {
-                "text": "Reliability pillar (multi-AZ, failover design)"
-              },
-              {
-                "text": "Cost Optimization pillar (right-sizing, Savings Plans)"
-              },
-              {
-                "text": "Security pillar (defense in depth)"
-              },
-              {
-                "text": "Performance Efficiency pillar (caching, elasticity)"
-              },
-              {
-                "text": "Operational Excellence pillar (IaC, automation)"
-              }
-            ]
-          },
-          {
-            "name": "Migration & Modernization Strategies",
-            "elements": [
-              {
-                "text": "6 R's of migration (rehost, replatform, refactor, etc.)"
-              },
-              {
-                "text": "AWS Migration Hub & Application Discovery Service"
-              },
-              {
-                "text": "Database Migration Service (DMS) for cutover"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Study Resources & Formats",
+        "name": "Study materials & prep resources",
         "fixedness": 0.9,
         "subcategories": [
           {
-            "name": "Video Courses",
+            "name": "Video/course platforms",
             "elements": [
               {
-                "text": "Adrian Cantrill's SAA/SAP course"
+                "text": "Adrian Cantrill's SAA-C03 course"
               },
               {
-                "text": "Stephane Maarek Udemy course"
+                "text": "Stephane Maarek's Udemy SAA-C03 course"
               },
               {
                 "text": "AWS Skill Builder official digital training"
@@ -3447,13 +3395,13 @@
             ]
           },
           {
-            "name": "Practice Exams & Question Banks",
+            "name": "Practice exams & question banks",
             "elements": [
               {
-                "text": "Tutorials Dojo practice tests"
+                "text": "Tutorials Dojo practice tests (Jon Bonso)"
               },
               {
-                "text": "Official AWS practice question sets"
+                "text": "AWS official practice question set"
               },
               {
                 "text": "Whizlabs practice exams"
@@ -3461,93 +3409,98 @@
             ]
           },
           {
-            "name": "Reference & Documentation",
+            "name": "Reference documentation",
             "elements": [
               {
                 "text": "AWS Well-Architected Framework whitepaper"
               },
               {
-                "text": "AWS FAQs pages per service"
-              },
-              {
-                "text": "AWS re:Invent session recordings"
+                "text": "AWS FAQs pages (per-service)"
               }
             ]
           }
         ]
       },
       {
-        "name": "Hands-On Practice",
-        "fixedness": 0.8,
+        "name": "Hands-on practice approach",
+        "fixedness": 0.75,
         "subcategories": [
           {
-            "name": "Free-Tier Lab Building",
+            "name": "Sandbox environment choice",
             "elements": [
               {
-                "text": "Build a 3-tier VPC architecture manually"
+                "text": "Personal AWS account within Free Tier limits",
+                "axis": "sandbox",
+                "direction": "personal"
               },
               {
-                "text": "Deploy static site via S3 + CloudFront"
-              },
-              {
-                "text": "Set up Auto Scaling with an ALB"
+                "text": "AWS Skill Builder cloud sandbox labs (pre-provisioned, time-boxed)",
+                "axis": "sandbox",
+                "direction": "provided_labs"
               }
             ]
           },
           {
-            "name": "Guided Lab Platforms",
+            "name": "Guided lab platforms",
             "elements": [
               {
-                "text": "AWS Skill Builder hands-on labs"
+                "text": "A Cloud Guru / Pluralsight hands-on labs"
               },
               {
-                "text": "A Cloud Guru cloud playground labs"
-              },
-              {
-                "text": "Cantrill.io practice-exam-linked labs"
+                "text": "Qwiklabs / Skill Builder lab challenges"
               }
             ]
           },
           {
-            "name": "Infrastructure as Code Practice",
+            "name": "Self-directed build projects",
             "elements": [
               {
-                "text": "CloudFormation template authoring"
+                "text": "3-tier VPC architecture (public/private/data subnets)"
               },
               {
-                "text": "AWS CDK for programmatic infrastructure"
+                "text": "Static site with S3 + CloudFront + Route 53"
+              },
+              {
+                "text": "Serverless API with API Gateway + Lambda + DynamoDB"
               }
             ]
           }
         ]
       },
       {
-        "name": "Exam Logistics & Scheduling",
+        "name": "Exam logistics & scheduling",
         "fixedness": 0.1,
         "subcategories": [
           {
-            "name": "Delivery Method",
+            "name": "Testing format",
             "elements": [
               {
-                "text": "Pearson VUE test center",
-                "axis": "delivery",
-                "direction": "in-person"
+                "text": "Pearson VUE testing center (in-person)",
+                "axis": "exam_format",
+                "direction": "in_person"
               },
               {
-                "text": "Online proctored exam from home",
-                "axis": "delivery",
-                "direction": "remote"
+                "text": "Online proctored exam (via OnVUE, home setup)",
+                "axis": "exam_format",
+                "direction": "online"
               }
             ]
           },
           {
-            "name": "Registration & Cost Details",
+            "name": "Registration & fees",
             "elements": [
               {
-                "text": "Register via AWS Certification portal"
+                "text": "Associate exam fee ($150 USD)",
+                "axis": "cert_level",
+                "direction": "associate"
               },
               {
-                "text": "Apply AWS re:Invent/Cloud Practitioner discount voucher"
+                "text": "Professional exam fee ($300 USD)",
+                "axis": "cert_level",
+                "direction": "professional"
+              },
+              {
+                "text": "AWS Certification voucher (from re/Start or partner programs, covers retake)"
               }
             ]
           }
@@ -3555,191 +3508,143 @@
       }
     ],
     "selections": [
-      "Target SAA-C03 exam (130 min, 65 questions)",
-      "VPC design with public/private/isolated subnets",
-      "Tutorials Dojo practice tests"
-    ],
-    "genre": "definition"
+      "Certification level (which exam you're actually targeting)",
+      "Core domains tested (exam blueprint weightings)",
+      "Adrian Cantrill's SAA-C03 course",
+      "Tutorials Dojo practice tests (Jon Bonso)",
+      "AWS Well-Architected Framework whitepaper",
+      "Personal AWS account within Free Tier limits",
+      "A Cloud Guru / Pluralsight hands-on labs",
+      "3-tier VPC architecture (public/private/data subnets)",
+      "Exam logistics & scheduling"
+    ]
   },
   {
     "label": "First Car Purchase",
     "input": "I want to buy my first car",
-    "topic": "Buying Your First Car",
+    "genre": "essay",
+    "topic": "Buying my first car",
     "categories": [
       {
-        "name": "Budget Range",
-        "fixedness": 0.2,
+        "name": "Budget range",
+        "fixedness": 0.3,
         "subcategories": [
           {
-            "name": "Under $10k (used, high-mileage or older)",
+            "name": "Economy (under $15k, new or used)",
             "axis": "budget",
-            "direction": "low",
+            "direction": "economy",
             "elements": [
               {
-                "text": "5-8 year old economy sedan (60k-100k miles)",
+                "text": "Certified pre-owned (CPO) compact sedan, e.g. Honda Civic",
                 "axis": "budget",
-                "direction": "low"
+                "direction": "economy"
               },
               {
-                "text": "Certified pre-owned from a private seller",
+                "text": "Base-trim new subcompact, e.g. Nissan Versa",
                 "axis": "budget",
-                "direction": "low"
+                "direction": "economy"
               },
               {
-                "text": "Auction/dealer lot 'as-is' car",
+                "text": "3-5 year old used hatchback with under 60k miles",
                 "axis": "budget",
-                "direction": "low"
+                "direction": "economy"
               }
             ]
           },
           {
-            "name": "$10k-20k (newer used or base new)",
+            "name": "Mid-range ($15k-$30k)",
             "axis": "budget",
             "direction": "mid",
             "elements": [
               {
-                "text": "2-4 year old certified pre-owned (CPO)",
+                "text": "New mainstream sedan, e.g. Toyota Camry",
                 "axis": "budget",
                 "direction": "mid"
               },
               {
-                "text": "Entry-level new model (base trim)",
+                "text": "Lightly used compact SUV, e.g. Mazda CX-5",
+                "axis": "budget",
+                "direction": "mid"
+              },
+              {
+                "text": "Certified pre-owned entry-level luxury sedan",
                 "axis": "budget",
                 "direction": "mid"
               }
             ]
           },
           {
-            "name": "$20k+ (new or well-equipped used)",
+            "name": "Premium ($30k+)",
             "axis": "budget",
-            "direction": "high",
+            "direction": "premium",
             "elements": [
               {
-                "text": "New car with mid/upper trim package",
+                "text": "New luxury SUV, e.g. Audi Q5",
                 "axis": "budget",
-                "direction": "high"
+                "direction": "premium"
               },
               {
-                "text": "1-2 year old lightly used CPO with financing incentives",
+                "text": "New electric vehicle with tax credit, e.g. Tesla Model 3",
                 "axis": "budget",
-                "direction": "high"
+                "direction": "premium"
+              },
+              {
+                "text": "Performance trim of mainstream brand, e.g. Civic Si",
+                "axis": "budget",
+                "direction": "premium"
               }
             ]
           }
         ]
       },
       {
-        "name": "Financing Method",
+        "name": "New vs used",
         "fixedness": 0.7,
         "subcategories": [
           {
-            "name": "Cash Purchase",
-            "axis": "payment",
-            "direction": "cash",
-            "elements": [
-              {
-                "text": "Pay full amount upfront, no loan",
-                "axis": "payment",
-                "direction": "cash"
-              },
-              {
-                "text": "Negotiate 'cash price' discount with dealer",
-                "axis": "payment",
-                "direction": "cash"
-              }
-            ]
-          },
-          {
-            "name": "Auto Loan",
-            "axis": "payment",
-            "direction": "loan",
-            "elements": [
-              {
-                "text": "Credit union pre-approved loan",
-                "axis": "payment",
-                "direction": "loan"
-              },
-              {
-                "text": "Dealer-arranged financing (manufacturer incentive rate)",
-                "axis": "payment",
-                "direction": "loan"
-              },
-              {
-                "text": "Bank auto loan",
-                "axis": "payment",
-                "direction": "loan"
-              }
-            ]
-          },
-          {
-            "name": "Lease",
-            "axis": "payment",
-            "direction": "lease",
-            "elements": [
-              {
-                "text": "Manufacturer lease deal (low mileage cap)",
-                "axis": "payment",
-                "direction": "lease"
-              },
-              {
-                "text": "Lease-to-own agreement",
-                "axis": "payment",
-                "direction": "lease"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "New vs Used Condition",
-        "fixedness": 0.8,
-        "subcategories": [
-          {
-            "name": "Brand New",
+            "name": "Buying new (factory warranty, no prior wear)",
             "axis": "condition",
             "direction": "new",
             "elements": [
               {
-                "text": "Full factory warranty vehicle",
+                "text": "Dealer-ordered build (wait 4-12 weeks for exact spec)",
                 "axis": "condition",
                 "direction": "new"
               },
               {
-                "text": "Custom-ordered trim/color from factory",
+                "text": "In-stock dealer inventory (immediate but limited trims)",
+                "axis": "condition",
+                "direction": "new"
+              },
+              {
+                "text": "End-of-model-year clearance unit",
                 "axis": "condition",
                 "direction": "new"
               }
             ]
           },
           {
-            "name": "Certified Pre-Owned (CPO)",
-            "axis": "condition",
-            "direction": "cpo",
-            "elements": [
-              {
-                "text": "Manufacturer CPO with extended warranty",
-                "axis": "condition",
-                "direction": "cpo"
-              },
-              {
-                "text": "Dealer CPO inspection program",
-                "axis": "condition",
-                "direction": "cpo"
-              }
-            ]
-          },
-          {
-            "name": "Private-Party Used",
+            "name": "Buying used (lower price, depreciation already absorbed)",
             "axis": "condition",
             "direction": "used",
             "elements": [
               {
-                "text": "Individual seller listing (Craigslist/Facebook Marketplace)",
+                "text": "Certified Pre-Owned (CPO, manufacturer-backed inspection & extended warranty)",
                 "axis": "condition",
                 "direction": "used"
               },
               {
-                "text": "Estate/inherited vehicle sale",
+                "text": "Private-party sale (cheaper but no dealer recourse)",
+                "axis": "condition",
+                "direction": "used"
+              },
+              {
+                "text": "Off-lease vehicle (2-3 yrs old, low mileage)",
+                "axis": "condition",
+                "direction": "used"
+              },
+              {
+                "text": "Salvage/rebuilt-title vehicle (major prior damage, discounted)",
                 "axis": "condition",
                 "direction": "used"
               }
@@ -3748,68 +3653,128 @@
         ]
       },
       {
-        "name": "Vehicle Type & Use Case",
-        "fixedness": 0.9,
-        "subcategories": [
-          {
-            "name": "Commuter/Daily Driver",
-            "elements": [
-              {
-                "text": "Compact sedan (e.g. Honda Civic, Toyota Corolla)",
-                "axis": "bodytype",
-                "direction": "sedan"
-              },
-              {
-                "text": "Hatchback (e.g. Mazda3, VW Golf)",
-                "axis": "bodytype",
-                "direction": "hatchback"
-              },
-              {
-                "text": "Hybrid commuter (e.g. Toyota Prius, Honda Insight)",
-                "axis": "powertrain",
-                "direction": "hybrid"
-              }
-            ]
-          },
-          {
-            "name": "Family/Cargo Needs",
-            "elements": [
-              {
-                "text": "Compact SUV (e.g. Honda CR-V, Toyota RAV4)",
-                "axis": "bodytype",
-                "direction": "suv"
-              },
-              {
-                "text": "Minivan (e.g. Honda Odyssey, Toyota Sienna)",
-                "axis": "bodytype",
-                "direction": "minivan"
-              }
-            ]
-          },
-          {
-            "name": "Performance/Enthusiast",
-            "elements": [
-              {
-                "text": "Sport compact (e.g. Subaru WRX, Honda Civic Si)"
-              },
-              {
-                "text": "Used sports coupe (e.g. Ford Mustang, Mazda MX-5)"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Powertrain Choice",
+        "name": "Financing method",
         "fixedness": 0.6,
         "subcategories": [
           {
-            "name": "Gasoline (Internal Combustion)",
+            "name": "Cash purchase",
+            "axis": "payment",
+            "direction": "cash",
+            "elements": [
+              {
+                "text": "Pay full price outright, no loan",
+                "axis": "payment",
+                "direction": "cash"
+              },
+              {
+                "text": "Negotiate cash-only discount at dealer",
+                "axis": "payment",
+                "direction": "cash"
+              }
+            ]
+          },
+          {
+            "name": "Auto loan (financed over term)",
+            "axis": "payment",
+            "direction": "loan",
+            "elements": [
+              {
+                "text": "Bank or credit union pre-approval loan",
+                "axis": "payment",
+                "direction": "loan"
+              },
+              {
+                "text": "Dealer-arranged financing (may include markup)",
+                "axis": "payment",
+                "direction": "loan"
+              },
+              {
+                "text": "Manufacturer promotional APR (e.g. 0-2.9% for qualified buyers)",
+                "axis": "payment",
+                "direction": "loan"
+              }
+            ]
+          },
+          {
+            "name": "Leasing (multi-year rental, no ownership at end)",
+            "axis": "payment",
+            "direction": "lease",
+            "elements": [
+              {
+                "text": "Standard 36-month lease with mileage cap",
+                "axis": "payment",
+                "direction": "lease"
+              },
+              {
+                "text": "Lease with buyout option at term end",
+                "axis": "payment",
+                "direction": "lease"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Vehicle type / body style",
+        "fixedness": 0.9,
+        "subcategories": [
+          {
+            "name": "Sedans (fuel-efficient, easy to park)",
+            "elements": [
+              {
+                "text": "Compact sedan, e.g. Honda Civic"
+              },
+              {
+                "text": "Midsize sedan, e.g. Toyota Camry"
+              }
+            ]
+          },
+          {
+            "name": "SUVs/crossovers (higher seating, more cargo room)",
+            "elements": [
+              {
+                "text": "Subcompact crossover, e.g. Honda HR-V"
+              },
+              {
+                "text": "Compact SUV, e.g. Toyota RAV4"
+              }
+            ]
+          },
+          {
+            "name": "Hatchbacks (compact, versatile cargo space)",
+            "elements": [
+              {
+                "text": "Subcompact hatchback, e.g. Honda Fit"
+              },
+              {
+                "text": "Hot hatch performance variant, e.g. VW GTI"
+              }
+            ]
+          },
+          {
+            "name": "Trucks (towing/hauling capability)",
+            "elements": [
+              {
+                "text": "Compact/midsize pickup, e.g. Toyota Tacoma"
+              },
+              {
+                "text": "Full-size pickup, e.g. Ford F-150"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Powertrain type",
+        "fixedness": 0.85,
+        "subcategories": [
+          {
+            "name": "Gasoline (internal combustion)",
             "axis": "powertrain",
             "direction": "gas",
             "elements": [
               {
-                "text": "Standard gas 4-cylinder engine",
+                "text": "Standard gasoline engine",
                 "axis": "powertrain",
                 "direction": "gas"
               },
@@ -3821,34 +3786,34 @@
             ]
           },
           {
-            "name": "Hybrid",
+            "name": "Hybrid (gas engine + electric motor assist)",
             "axis": "powertrain",
             "direction": "hybrid",
             "elements": [
               {
-                "text": "Standard hybrid (no plug-in)",
+                "text": "Standard hybrid, e.g. Toyota Prius",
                 "axis": "powertrain",
                 "direction": "hybrid"
               },
               {
-                "text": "Plug-in hybrid (PHEV) with electric-only range",
+                "text": "Plug-in hybrid (PHEV, short electric-only range)",
                 "axis": "powertrain",
                 "direction": "hybrid"
               }
             ]
           },
           {
-            "name": "Fully Electric (EV)",
+            "name": "Fully electric (EV, battery-only, needs charging access)",
             "axis": "powertrain",
             "direction": "electric",
             "elements": [
               {
-                "text": "Short-range budget EV (e.g. Chevy Bolt, Nissan Leaf)",
+                "text": "Short-range EV under 250mi, e.g. Chevy Bolt",
                 "axis": "powertrain",
                 "direction": "electric"
               },
               {
-                "text": "Long-range EV (e.g. Tesla Model 3, Hyundai Ioniq 6)",
+                "text": "Long-range EV over 300mi, e.g. Tesla Model 3",
                 "axis": "powertrain",
                 "direction": "electric"
               }
@@ -3857,45 +3822,34 @@
         ]
       },
       {
-        "name": "Purchase Process & Due Diligence",
-        "fixedness": 0.3,
+        "name": "Ownership costs & protection",
+        "fixedness": 0.4,
         "subcategories": [
           {
-            "name": "Pre-Purchase Verification",
+            "name": "Insurance",
             "elements": [
               {
-                "text": "Independent mechanic pre-purchase inspection"
+                "text": "Liability-only coverage (state minimum)"
               },
               {
-                "text": "Vehicle history report (Carfax/AutoCheck)"
+                "text": "Full coverage (collision + comprehensive)"
               },
               {
-                "text": "VIN check for recalls/liens"
+                "text": "Add young/first-time driver to parent's policy"
               }
             ]
           },
           {
-            "name": "Negotiation & Paperwork",
+            "name": "Warranty & maintenance plans",
             "elements": [
               {
-                "text": "Out-the-door price negotiation (fees included)"
+                "text": "Factory bumper-to-bumper warranty (typically 3yr/36k mi)"
               },
               {
-                "text": "Title transfer and registration filing"
+                "text": "Extended service contract (aftermarket warranty)"
               },
               {
-                "text": "Sales tax and DMV fee calculation"
-              }
-            ]
-          },
-          {
-            "name": "Insurance Setup",
-            "elements": [
-              {
-                "text": "Liability-only coverage quote"
-              },
-              {
-                "text": "Full coverage (comprehensive + collision) quote"
+                "text": "Prepaid maintenance package"
               }
             ]
           }
@@ -3903,10 +3857,16 @@
       }
     ],
     "selections": [
-      "2-4 year old certified pre-owned (CPO)",
-      "Credit union pre-approved loan",
-      "Compact SUV (e.g. Honda CR-V, Toyota RAV4)"
-    ],
-    "genre": "essay"
+      "Budget range",
+      "Dealer-ordered build (wait 4-12 weeks for exact spec)",
+      "Pay full price outright, no loan",
+      "Compact sedan, e.g. Honda Civic",
+      "Subcompact crossover, e.g. Honda HR-V",
+      "Subcompact hatchback, e.g. Honda Fit",
+      "Compact/midsize pickup, e.g. Toyota Tacoma",
+      "Standard gasoline engine",
+      "Liability-only coverage (state minimum)",
+      "Factory bumper-to-bumper warranty (typically 3yr/36k mi)"
+    ]
   }
 ];
