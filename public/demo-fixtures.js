@@ -346,10 +346,7 @@ const DEMO_CASES = [
       "Spring-to-fall succession sowing every 2-3 weeks",
       "Squash vine borer (kills squash/zucchini stems)",
       "Early blight/septoria on tomatoes",
-      "Deer fencing (7ft+) for mountain/rural sites",
-      "Drip irrigation on timer for reliable summer watering",
-      "Pine straw mulch (widely available, acidifying)",
-      "OMRI-listed organic pesticides (spinosad, neem oil)"
+      "Deer fencing (7ft+) for mountain/rural sites"
     ]
   },
   {
@@ -900,11 +897,7 @@ const DEMO_CASES = [
       "Carbon-fiber-filled nylon (high stiffness, abrasive to nozzles)",
       "Standard tough resin (fine detail, brittle under repeated flex)",
       "0.4mm nozzle standard resolution print",
-      "Standard SLA print (fine tooth detail, needs post-cure)",
-      "Parametric CAD gear plugin (e.g. Fusion 360 spur gear generator)",
-      "Bore/shaft fit design (press-fit vs. clearance fit for shaft)",
-      "Manual deburring/sanding of tooth flanks",
-      "PTFE-based dry lubricant (safe for plastic-on-plastic gears)"
+      "Standard SLA print (fine tooth detail, needs post-cure)"
     ]
   },
   {
@@ -1159,11 +1152,7 @@ const DEMO_CASES = [
       "Sunbelt year-round warmth (Phoenix, AZ / Naples, FL)",
       "Hurricane-prone Gulf/Atlantic coast (rising homeowners insurance premiums)",
       "Metro with Level I trauma center & academic medical center (e.g., Nashville, Denver)",
-      "High Medicare Advantage plan density/competition county",
-      "Buy a single-family home outright (equity as inflation hedge)",
-      "Low-cost mid-size metro (e.g., Huntsville AL, Chattanooga TN)",
-      "Purpose-built retirement community (The Villages, FL)",
-      "Walkable urban core reducing driving dependency as skills decline"
+      "High Medicare Advantage plan density/competition county"
     ]
   },
   {
@@ -1469,11 +1458,7 @@ const DEMO_CASES = [
       "Dynamic warm-up routine before runs",
       "Carbohydrate-focused meal timing around long runs",
       "Energy gels every 45 minutes (e.g. GU, Maurten)",
-      "3-day carb-load before race",
-      "Daily trainer shoe fitted for gait",
-      "Moisture-wicking apparel tested in training (no cotton)",
-      "Finish goal (just complete the distance)",
-      "Flat, fast course (e.g. Chicago, Berlin)"
+      "3-day carb-load before race"
     ]
   },
   {
@@ -2077,10 +2062,7 @@ const DEMO_CASES = [
       "Full-overlay cabinet doors (concealed hinges, flush look)",
       "Quartz (engineered, non-porous, no sealing needed)",
       "Subway tile",
-      "Luxury vinyl plank (LVP, waterproof, budget-friendly)",
-      "Gas range (requires existing/new gas line)",
-      "Ducted range hood (vents outside)",
-      "Permits, Codes & Contractors"
+      "Luxury vinyl plank (LVP, waterproof, budget-friendly)"
     ]
   },
   {
@@ -2361,10 +2343,7 @@ const DEMO_CASES = [
       "Problem-process-outcome narrative deck (Notion/PDF)",
       "UX researcher (qualitative interviews, usability testing)",
       "Product/interaction designer (screens, flows, prototypes)",
-      "Product designer generalist (research + UI + some front-end)",
-      "Early-stage startup (generalist scope, faster title jump)",
-      "Internal transfer by volunteering for UX-adjacent projects at current employer",
-      "Financial & timeline planning"
+      "Product designer generalist (research + UI + some front-end)"
     ]
   },
   {
@@ -2677,11 +2656,7 @@ const DEMO_CASES = [
       "Onboard fresh/greywater tank system (self-contained, required by most health depts)",
       "Licensing, permits, and compliance",
       "Local roaster partnership (buy pre-roasted, house-blend branding)",
-      "Espresso-only minimalist menu (fast service, small footprint)",
-      "Buy new custom-built cart from a manufacturer",
-      "SBA microloan",
-      "Cart wrap/signage design (visual branding on the cart itself)",
-      "Direct event-booking website with calendar"
+      "Espresso-only minimalist menu (fast service, small footprint)"
     ]
   },
   {
@@ -3009,11 +2984,7 @@ const DEMO_CASES = [
       "Fly into Narita/Haneda, out of Kansai (Osaka) — open-jaw itinerary",
       "Ryokan stay with kaiseki dinner (multi-course traditional meal) + onsen",
       "Capsule hotel (bunk-pod rooms, common in stations)",
-      "Shinjuku/Shibuya base in Tokyo (nightlife, transit hub)",
-      "Mt. Fuji viewing/climbing season (climbing season only Jul–Sep)",
-      "Akihabara anime/electronics district",
-      "Tsukiji Outer Market/Toyosu Market sushi breakfast",
-      "Budget & Logistics Prep"
+      "Shinjuku/Shibuya base in Tokyo (nightlife, transit hub)"
     ]
   },
   {
@@ -3265,10 +3236,7 @@ const DEMO_CASES = [
       "Verbal correction ('no' or interrupter word)",
       "Wire crate (open-sided, portable confinement)",
       "Training treat pouch",
-      "Puzzle feeder / snuffle mat",
-      "Developmental stage & timing",
-      "Puppy kindergarten class (group class focused on basics + socialization)",
-      "Private certified trainer (CPDT-KA credentialed)"
+      "Puzzle feeder / snuffle mat"
     ]
   },
   {
@@ -3512,11 +3480,7 @@ const DEMO_CASES = [
       "Core domains tested (exam blueprint weightings)",
       "Adrian Cantrill's SAA-C03 course",
       "Tutorials Dojo practice tests (Jon Bonso)",
-      "AWS Well-Architected Framework whitepaper",
-      "Personal AWS account within Free Tier limits",
-      "A Cloud Guru / Pluralsight hands-on labs",
-      "3-tier VPC architecture (public/private/data subnets)",
-      "Exam logistics & scheduling"
+      "AWS Well-Architected Framework whitepaper"
     ]
   },
   {
@@ -3863,10 +3827,7 @@ const DEMO_CASES = [
       "Compact sedan, e.g. Honda Civic",
       "Subcompact crossover, e.g. Honda HR-V",
       "Subcompact hatchback, e.g. Honda Fit",
-      "Compact/midsize pickup, e.g. Toyota Tacoma",
-      "Standard gasoline engine",
-      "Liability-only coverage (state minimum)",
-      "Factory bumper-to-bumper warranty (typically 3yr/36k mi)"
+      "Compact/midsize pickup, e.g. Toyota Tacoma"
     ]
   }
 ];
