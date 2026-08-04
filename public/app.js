@@ -31,6 +31,7 @@ const el = {
   reviseTopicSubmitBtn: document.getElementById("revise-topic-submit-btn"),
   reviseTopicCancelBtn: document.getElementById("revise-topic-cancel-btn"),
   printOutputBtn: document.getElementById("print-output-btn"),
+  exportPdfBtn: document.getElementById("export-pdf-btn"),
   shareOutputBtn: document.getElementById("share-output-btn"),
   sharedViewBanner: document.getElementById("shared-view-banner"),
   sharedViewDismissBtn: document.getElementById("shared-view-dismiss-btn"),
@@ -1842,6 +1843,157 @@ el.copyOutputBtn.addEventListener("click", async () => {
 
 if (el.printOutputBtn) {
   el.printOutputBtn.addEventListener("click", () => window.print());
+}
+
+// Strips **bold**/*italic* markers rather than rendering them as rich-text
+// runs in the PDF -- jsPDF doesn't make mixed styles within one line easy,
+// and structure (headings, lists, the table) matters far more for a
+// document meant to be handed to a client or employer than in-sentence
+// emphasis does.
+function stripInlineMarkdown(s) {
+  return sanitizeForPdfFont(s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1"));
+}
+
+// jsPDF's base "helvetica" font only supports Windows-1252, not full
+// Unicode -- confirmed by a real export: an arrow character in "Tokyo →
+// Kyoto" corrupted that entire line's spacing ("T o k y o !' K y o t o"),
+// not just the one glyph. Normalizes the common typographic characters the
+// model actually uses to ASCII equivalents, then strips anything else
+// non-ASCII as a last-resort safety net so an unanticipated character can
+// never corrupt a line again.
+function sanitizeForPdfFont(s) {
+  return s
+    .replace(/[→⇒]/g, "->")
+    .replace(/[←⇐]/g, "<-")
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[–—]/g, "-")
+    .replace(/…/g, "...")
+    .replace(/[•●▪]/g, "-")
+    .replace(/[^\x00-\x7E]/g, "");
+}
+
+// A second, simpler pass over the same line shapes renderMarkdown() already
+// classifies (heading/table/hr/bullet/numbered/paragraph), emitting jsPDF
+// draw calls instead of HTML. Kept independent of the DOM entirely --
+// works straight from the raw markdown text, not the already-rendered
+// output -- so it doesn't inherit any rendering quirks or need the result
+// to currently be on screen.
+function buildResultPdf(topic, genreLabel, markdownText) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 54;
+  const marginBottom = 54;
+  const contentWidth = pageWidth - marginX * 2;
+  let y = 60;
+
+  function ensureRoom(neededHeight) {
+    if (y + neededHeight > pageHeight - marginBottom) {
+      doc.addPage();
+      y = 60;
+    }
+  }
+
+  function writeWrapped(text, { fontSize = 11, fontStyle = "normal", lineHeight = 14, indent = 0, gapAfter = 8 } = {}) {
+    doc.setFont("helvetica", fontStyle);
+    doc.setFontSize(fontSize);
+    doc.splitTextToSize(text, contentWidth - indent).forEach(line => {
+      ensureRoom(lineHeight);
+      doc.text(line, marginX + indent, y);
+      y += lineHeight;
+    });
+    y += gapAfter;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.splitTextToSize(sanitizeForPdfFont(topic), contentWidth).forEach(line => { doc.text(line, marginX, y); y += 22; });
+  y += 4;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.text(sanitizeForPdfFont(`${genreLabel} - ${new Date().toLocaleDateString()} - fathmic.ai`), marginX, y);
+  doc.setTextColor(0);
+  y += 24;
+
+  const isTableSeparatorRow = rawLine => /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(rawLine.trim());
+  function splitTableRow(rawLine) {
+    let s = rawLine.trim();
+    if (s.startsWith("|")) s = s.slice(1);
+    if (s.endsWith("|")) s = s.slice(0, -1);
+    return s.split("|").map(cell => stripInlineMarkdown(cell.trim()));
+  }
+
+  const lines = markdownText.split("\n");
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].trim();
+    if (!line) { i++; continue; }
+
+    if (line.includes("|") && i + 1 < lines.length && isTableSeparatorRow(lines[i + 1])) {
+      const head = [splitTableRow(line)];
+      i += 2;
+      const body = [];
+      while (i < lines.length && lines[i].trim().includes("|")) { body.push(splitTableRow(lines[i])); i++; }
+      doc.autoTable({
+        head, body, startY: y,
+        margin: { left: marginX, right: marginX },
+        styles: { fontSize: 9, cellPadding: 6 },
+        headStyles: { fillColor: [15, 24, 107] }
+      });
+      y = doc.lastAutoTable.finalY + 16;
+      continue;
+    }
+
+    const hr = line.match(/^(-{3,}|\*{3,}|_{3,})$/);
+    if (hr) {
+      ensureRoom(20);
+      doc.setDrawColor(200);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 16;
+      i++;
+      continue;
+    }
+
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
+    const boldHeading = !heading && line.match(/^\*\*(.+?)\*\*(?:\s*\*\(([^)]*)\)\*)?$/);
+    if (heading || boldHeading) {
+      const text = heading ? heading[2] : boldHeading[1] + (boldHeading[2] ? ` (${boldHeading[2]})` : "");
+      ensureRoom(24);
+      y += 6;
+      writeWrapped(stripInlineMarkdown(text), { fontSize: 13, fontStyle: "bold", lineHeight: 16, gapAfter: 6 });
+      i++;
+      continue;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.*)$/);
+    if (bullet) { writeWrapped("-  " + stripInlineMarkdown(bullet[1]), { indent: 14, gapAfter: 4 }); i++; continue; }
+
+    const numbered = line.match(/^(\d+)[.)]\s+(.*)$/);
+    if (numbered) { writeWrapped(`${numbered[1]}.  ${stripInlineMarkdown(numbered[2])}`, { indent: 14, gapAfter: 4 }); i++; continue; }
+
+    writeWrapped(stripInlineMarkdown(line));
+    i++;
+  }
+
+  const safeTopic = topic.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) || "fathmic-result";
+  doc.save(`${safeTopic}.pdf`);
+}
+
+if (el.exportPdfBtn) {
+  el.exportPdfBtn.addEventListener("click", () => {
+    if (!state.lastResultText) return;
+    const original = el.exportPdfBtn.textContent;
+    try {
+      buildResultPdf(state.topic, state.lastGenreLabel || "Result", state.lastResultText);
+    } catch (err) {
+      console.error("[pdf export]", err);
+      el.exportPdfBtn.textContent = "Export failed";
+      setTimeout(() => { el.exportPdfBtn.textContent = original; }, 2000);
+    }
+  });
 }
 
 el.expandAllBtn.addEventListener("click", () => {

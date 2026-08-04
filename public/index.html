@@ -430,6 +430,7 @@
 
       <div id="output-text-wrap">
         <span id="blueprint-result-badge">BLUEPRINT</span>
+        <button id="export-pdf-btn" title="Download this result as a PDF">PDF</button>
         <button id="share-output-btn" title="Copy a shareable link to this result">Share</button>
         <button id="print-output-btn" title="Print this result">Print</button>
         <button id="copy-output-btn" title="Copy result to clipboard">Copy</button>
@@ -469,6 +470,8 @@
   </div>
 
   <script src="demo-fixtures.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="vendor/jspdf.plugin.autotable.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

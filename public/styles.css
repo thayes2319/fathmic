@@ -1240,6 +1240,20 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 #print-output-btn:hover { color: var(--accent); border-color: var(--accent); }
 
+#export-pdf-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 12.1rem;
+  margin-top: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+#export-pdf-btn:hover { color: var(--accent); border-color: var(--accent); }
+
 #share-output-btn {
   position: absolute;
   top: 0.7rem;
@@ -1290,7 +1304,7 @@ button:disabled { opacity: 0.5; cursor: default; }
     left: 0;
     width: 100%;
   }
-  #copy-output-btn, #print-output-btn, #share-output-btn { display: none; }
+  #copy-output-btn, #print-output-btn, #share-output-btn, #export-pdf-btn { display: none; }
 }
 
 #output-text {
