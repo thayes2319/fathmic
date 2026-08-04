@@ -561,6 +561,19 @@ button:disabled { opacity: 0.5; cursor: default; }
 .category > summary::-webkit-details-marker { display: none; }
 .category > summary::before { content: "\25B8  "; color: var(--accent); }
 .category[open] > summary::before { content: "\25BE  "; }
+
+/* Interview mode's question heading grows in on appearance rather than
+   just popping into place -- a small entrance moment for the thing that's
+   effectively "being asked" right now. Whole line scales up together
+   (not per-letter -- simpler, still reads as a deliberate arrival). */
+.interview-question-enter {
+  transform-origin: left center;
+  animation: interviewQuestionEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes interviewQuestionEnter {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 .category[open] { padding-bottom: 0.75rem; }
 
 .subcategory {
