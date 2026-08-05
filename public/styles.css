@@ -414,7 +414,7 @@ button:disabled { opacity: 0.5; cursor: default; }
    page's existing "ambient text change" pace (~4.2s, matching the tagline
    and Distill cycles) rather than the showcase carousel's faster tempo below
    -- this is a quiet detail, not competition for the showcase itself. */
-#blueprint-caption-cycle { display: inline-block; transition: opacity 0.2s ease; font-weight: 600; color: var(--logo-indigo); }
+#blueprint-caption-cycle { display: inline-block; transition: opacity 0.2s ease; font-weight: 600; color: var(--logo-indigo); text-transform: uppercase; }
 #blueprint-caption-cycle.caption-fading { opacity: 0; }
 .blueprint-chip {
   margin-top: 0;
