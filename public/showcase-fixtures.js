@@ -106,5 +106,53 @@ const SHOWCASE_FIXTURES = [
     "topic": "Generating a wiring harness specification with pinouts and BOM",
     "specSnippet": "Scope This spec covers a single point-to-point wiring harness plus one integrated power distribution sub-harness for an automotive/off-highway application. Included: connector selection and pinouts, wire stock (gauge/color/length/insulation), CAN bus segment,…",
     "image": "images/showcase/wiring-harness.jpg"
+  },
+  {
+    "label": "Brand Identity System",
+    "topic": "Creating a Brand Identity Specification with Tokens and Usage Rules",
+    "specSnippet": "Scope This spec defines the brand's design tokens and usage rules — the machine-readable and human-readable layer that sits between the brand's visual identity and its implementation in code. Covers: token architecture, color, typography, spacing, motion…",
+    "image": "images/showcase/brand-identity-system.jpg"
+  },
+  {
+    "label": "Logo System",
+    "topic": "Generating a Logo System Specification with Variants and Constraints",
+    "specSnippet": "Scope Logo system for one brand, single name, single icon mark. Covers three variants (wordmark, horizontal lockup, icon-only glyph), one primary color palette, sizing and clear-space rules, and the file package needed to deploy across print, web, and app…",
+    "image": "images/showcase/logo-system.jpg"
+  },
+  {
+    "label": "UI Design Tokens",
+    "topic": "Producing a UI Design Token Specification for a Multi-Platform App",
+    "specSnippet": "Scope Defines the design token architecture for a multi-platform app (web + iOS, extensible to Android). Covers: token tiers (global → semantic → component), source-of-truth format, build pipeline, platform outputs, one light theme, one density variant…",
+    "image": "images/showcase/ui-design-tokens.jpg"
+  },
+  {
+    "label": "AR Overlay",
+    "topic": "Producing an AR overlay specification with anchors and behaviors",
+    "specSnippet": "Scope This spec defines a single AR overlay layer: anchor types, the coordinate frame they resolve against, trigger/behavior bindings, one interaction gesture, rendering/environment integration, and the asset budget for content attached to anchors. Covers:…",
+    "image": "images/showcase/ar-overlay.jpg"
+  },
+  {
+    "label": "Signal Routing",
+    "topic": "Creating a Signal Routing Specification with Connector Rules",
+    "specSnippet": "Scope This spec covers signal routing for one system topology: analog audio, digital audio (AES67), and any control/data lines sharing the same pathways. It defines connector types, pinout standards, cable selection, run identification, and the compliance…",
+    "image": "images/showcase/signal-routing.jpg"
+  },
+  {
+    "label": "Drapery Pattern",
+    "topic": "Creating a Drapery Pattern Specification with Seam Rules",
+    "specSnippet": "Scope This spec covers pattern and cutting rules for a pair of pinch-pleat drapery panels, railroaded face fabric, locked-in lining, on a large-scale printed motif requiring repeat matching. Covers fullness ratio, seam placement, repeat allowance, cut length,…",
+    "image": "images/showcase/drapery-pattern.jpg"
+  },
+  {
+    "label": "Workflow Automation",
+    "topic": "Creating a Workflow Automation Specification with Triggers and Actions",
+    "specSnippet": "Scope This spec defines one workflow: a single event-based trigger driving a sequential action chain, terminating in one external API call. Covers: trigger definition, filter condition, event schema, shared context object, action definition, execution model,…",
+    "image": "images/showcase/workflow-automation.jpg"
+  },
+  {
+    "label": "Compliance Policy",
+    "topic": "Creating a Compliance Policy Specification with Clauses and Triggers",
+    "specSnippet": "Scope Spec covers one compliance policy artifact: the clause schema, trigger/condition logic, enforcement behavior, logging, and reporting for a rules engine enforcing obligations on data events. Included: clause structure, evaluation mechanics, action types,…",
+    "image": "images/showcase/compliance-policy.jpg"
   }
 ];

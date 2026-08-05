@@ -2641,13 +2641,36 @@ if (el.blueprintCaptionCycle) {
 const BLUEPRINT_SHOWCASE_SPEC_MS = 1700;
 const BLUEPRINT_SHOWCASE_IMAGE_MS = 1900;
 const BLUEPRINT_SHOWCASE_FADE_MS = 350;
+
+// Interleaves the first/second half of an array (A1,B1,A2,B2,...) -- a
+// different rhythm from either the raw generation order or its reverse,
+// so a repeat visit doesn't always see the exact same sequence.
+function interleaveHalves(arr) {
+  const mid = Math.ceil(arr.length / 2);
+  const first = arr.slice(0, mid);
+  const second = arr.slice(mid);
+  const result = [];
+  for (let i = 0; i < first.length; i++) {
+    result.push(first[i]);
+    if (second[i]) result.push(second[i]);
+  }
+  return result;
+}
+const BLUEPRINT_SHOWCASE_ORDERS = [
+  items => items.slice(),
+  items => items.slice().reverse(),
+  items => interleaveHalves(items)
+];
+
 if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE_FIXTURES.length) {
   el.blueprintShowcase.hidden = false;
   const stage = el.blueprintShowcaseStage || document.getElementById("blueprint-showcase-stage");
+  // One of the 3 orders, picked fresh per page load.
+  const showcaseOrder = BLUEPRINT_SHOWCASE_ORDERS[Math.floor(Math.random() * BLUEPRINT_SHOWCASE_ORDERS.length)](SHOWCASE_FIXTURES);
   let showcaseIndex = 0;
 
   function runShowcaseExample() {
-    const item = SHOWCASE_FIXTURES[showcaseIndex];
+    const item = showcaseOrder[showcaseIndex];
     el.blueprintShowcaseTopic.textContent = item.topic;
     el.blueprintShowcaseTopic.classList.remove("bp-fading");
     el.blueprintShowcaseSpec.textContent = item.specSnippet;
@@ -2659,7 +2682,7 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
       stage.classList.remove("showing-spec");
       stage.classList.add("showing-image");
       setTimeout(() => {
-        showcaseIndex = (showcaseIndex + 1) % SHOWCASE_FIXTURES.length;
+        showcaseIndex = (showcaseIndex + 1) % showcaseOrder.length;
         el.blueprintShowcaseTopic.classList.add("bp-fading");
         setTimeout(runShowcaseExample, BLUEPRINT_SHOWCASE_FADE_MS);
       }, BLUEPRINT_SHOWCASE_IMAGE_MS);
