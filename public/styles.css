@@ -14,6 +14,8 @@
   /* Sampled directly from the dot of the "i" in images/fathmic.png -- a
      fixed brand color from the logo asset itself either way. */
   --logo-dot: #34d1f8;
+  /* Sampled directly from the "FATH" wordmark stroke in the same image. */
+  --logo-indigo: #14146e;
 }
 
 * { box-sizing: border-box; }
@@ -393,13 +395,26 @@ button:disabled { opacity: 0.5; cursor: default; }
   text-transform: uppercase;
   border-radius: 999px;
 }
-#blueprint-caption { font-size: 0.82rem; color: var(--muted); font-style: italic; }
+/* Bold reads wider than normal at the same size -- font-size trimmed
+   slightly to compensate, plus a hard nowrap/ellipsis guarantee so even
+   the longest topic label on the narrowest supported width truncates
+   instead of ever wrapping to a second line. */
+#blueprint-caption {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 /* Same word-swap mechanic as the Distill button's own label cycle -- fixed
    sentence, one segment fades and swaps on an interval. Deliberately at the
    page's existing "ambient text change" pace (~4.2s, matching the tagline
    and Distill cycles) rather than the showcase carousel's faster tempo below
    -- this is a quiet detail, not competition for the showcase itself. */
-#blueprint-caption-cycle { display: inline-block; transition: opacity 0.2s ease; font-weight: 600; }
+#blueprint-caption-cycle { display: inline-block; transition: opacity 0.2s ease; font-weight: 600; color: var(--logo-indigo); }
 #blueprint-caption-cycle.caption-fading { opacity: 0; }
 .blueprint-chip {
   margin-top: 0;
