@@ -419,13 +419,17 @@ button:disabled { opacity: 0.5; cursor: default; }
 @media (max-width: 480px) {
   #action-row { gap: 0.35rem; }
   #action-row #distill-btn { width: 84px; padding: 0.45rem 0.35rem; font-size: 0.78rem; }
-  #demos-trending-details summary { padding: 0.3rem 0.35rem; font-size: 0.68rem; }
+  /* Explicit matching height on both -- their differing font-sizes would
+     otherwise render slightly different box heights even with identical
+     padding. box-sizing:border-box (global) plus flex/native centering
+     keeps each one's text centered within it regardless. */
+  #demos-trending-details summary { height: 30px; padding: 0 0.35rem; font-size: 0.68rem; }
   /* 182px was sized to the widest optgroup entry, not "Prefer not to say"
      itself -- the select's native intrinsic width accounts for every option
      in the list, not just the one currently showing, hence the reported
      daylight. Tighter cap + ellipsis back as a fallback for the rare longer
      selection. */
-  #persona-row select { max-width: 132px; overflow: hidden; text-overflow: ellipsis; }
+  #persona-row select { max-width: 132px; height: 30px; overflow: hidden; text-overflow: ellipsis; }
   #persona-row label { max-width: 97px; white-space: nowrap; font-size: 0.68rem; }
 }
 #demo-cases { margin-top: 0.75rem; }
