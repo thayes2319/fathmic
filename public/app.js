@@ -349,6 +349,7 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
     img.src = entry.image;
     img.alt = state.topic;
     el.illustrationCard.appendChild(img);
+    appendRegenerateBtn(el.illustrationCard, generateIllustration);
   } else {
     resetIllustrationCard();
     generateIllustration(); // fire-and-forget -- not persisted, so regenerated fresh
@@ -2117,14 +2118,27 @@ async function runSynthesisForGenre(genre, genreLabel) {
   const matchingBtn = Array.from(el.genreButtons.children).find(btn => btn.dataset.genre === genre);
   if (matchingBtn) matchingBtn.classList.add("active");
 
+  // Reference cards (reach, photo, illustration) are properties of the
+  // TOPIC, not the genre -- switching from Summary to Story on the same
+  // selections has no reason to touch any of them. Only a genuinely fresh
+  // result (no prior genre picked yet for this topic -- see
+  // resetDownstream/reviseTopic, both of which null this out) regenerates
+  // them automatically. On a plain genre switch they're left exactly as
+  // they are; Photo and Illustration each have their own manual Regenerate
+  // control for anyone who wants a different one on demand. Topic Reach
+  // has no such control at all -- it never regenerates after the first time.
+  const isFreshTopicResult = state.lastGenre === null;
+
   el.outputSection.hidden = false;
   el.outputSection.classList.toggle("blueprint-result", genre === "blueprint");
   el.outputHeading.textContent = `Result — ${genreLabel}`;
   el.outputText.innerHTML = buildQuickChart() || "Synthesizing...";
   el.staleBanner.hidden = true;
-  resetIllustrationCard();
-  resetPhotoCard();
-  resetPopularityCard();
+  if (isFreshTopicResult) {
+    resetIllustrationCard();
+    resetPhotoCard();
+    resetPopularityCard();
+  }
   resetResultFeedback();
 
   try {
@@ -2154,9 +2168,11 @@ async function runSynthesisForGenre(genre, genreLabel) {
       resultText: result.text,
       timestamp: Date.now()
     });
-    generateIllustration(); // fire-and-forget: don't block the text result on image generation
-    generatePhoto(); // fire-and-forget: same
-    generatePopularity(); // fire-and-forget: same
+    if (isFreshTopicResult) {
+      generateIllustration(); // fire-and-forget: don't block the text result on image generation
+      generatePhoto(); // fire-and-forget: same
+      generatePopularity(); // fire-and-forget: same
+    }
   } catch (err) {
     el.outputText.textContent = `Error: ${err.message}`;
   }
@@ -2944,6 +2960,26 @@ function attachImageToLatestHistoryEntry(dataUrl) {
   }
 }
 
+// Illustration and Photo each get an explicit, on-demand way to get a
+// different one -- neither auto-regenerates on a genre switch anymore (see
+// runSynthesisForGenre), so this is the only way to refresh either after
+// the first, automatic generation. Topic Reach has no equivalent; it's not
+// meant to change at all once set for a topic.
+function appendRegenerateBtn(cardEl, onClick) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "ref-card-regenerate-btn";
+  btn.textContent = "Regenerate";
+  btn.addEventListener("click", event => {
+    // The card itself opens a zoom lightbox on any click (delegated on
+    // #reference-cards) -- without this, regenerating would also pop the
+    // lightbox open over whatever was just replaced.
+    event.stopPropagation();
+    onClick();
+  });
+  cardEl.appendChild(btn);
+}
+
 async function generateIllustration() {
   if (!el.illustrationCard) return;
   el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">${illustrationPlaceholderLabel()}</div>`;
@@ -2960,8 +2996,10 @@ async function generateIllustration() {
     img.alt = state.topic;
     el.illustrationCard.appendChild(img);
     if (state.blueprintFit) attachImageToLatestHistoryEntry(img.src);
+    appendRegenerateBtn(el.illustrationCard, generateIllustration);
   } catch (err) {
     el.illustrationCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
+    appendRegenerateBtn(el.illustrationCard, generateIllustration);
   }
 }
 
@@ -2994,8 +3032,10 @@ async function generatePhoto() {
       : "Unsplash";
     credit.innerHTML = `Photo by ${photographerLink} on ${unsplashLink}`;
     el.photoCard.appendChild(credit);
+    appendRegenerateBtn(el.photoCard, generatePhoto);
   } catch (err) {
     el.photoCard.innerHTML = `<div class="ref-card-placeholder">Error: ${err.message}</div>`;
+    appendRegenerateBtn(el.photoCard, generatePhoto);
   }
 }
 

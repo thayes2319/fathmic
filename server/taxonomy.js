@@ -204,6 +204,7 @@ async function runTaxonomy(input, firstBranch, stakes) {
 
   let lastCategoryCount = 0;
   let lastThinSubcategory = null;
+  let lastUsableResult = null; // category count was fine, only a thin subcategory held it back
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const result = await callStructured({
@@ -232,11 +233,26 @@ async function runTaxonomy(input, firstBranch, stakes) {
     lastThinSubcategory = thinSubcategory;
     if (thinSubcategory) {
       console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS}: subcategory "${thinSubcategory}" has fewer than ${MIN_ELEMENTS_PER_SUBCATEGORY} elements — retrying`);
+      // Real category count is otherwise fine -- a thin subcategory is a
+      // quality nice-to-have, not a correctness requirement the way category
+      // count is (too few categories usually means a genuinely malformed/
+      // truncated response). Keep this attempt as a fallback in case every
+      // retry hits the same starved subcategory (a model's real bias for a
+      // given subject, not random variance a retry fixes) -- a taxonomy
+      // with one thin subcategory beats a hard failure with nothing at all.
+      if (categories.length >= MIN_ACCEPTABLE_CATEGORIES) {
+        lastUsableResult = { topic: result.topic || input, categories };
+      }
     } else {
       console.warn(`[taxonomy] attempt ${attempt}/${MAX_ATTEMPTS} reconstructed only ${categories.length} categories — retrying`);
       console.warn(`[taxonomy] failure shape: keys=${JSON.stringify(Object.keys(result || {}))}`);
       console.warn(`[taxonomy] failure dump: ${JSON.stringify(result).slice(0, 3000)}`);
     }
+  }
+
+  if (lastUsableResult) {
+    console.warn(`[taxonomy] all ${MAX_ATTEMPTS} attempts kept hitting a thin subcategory ("${lastThinSubcategory}") -- returning the last attempt anyway rather than failing outright, since category count was otherwise fine.`);
+    return lastUsableResult;
   }
 
   throw new Error(

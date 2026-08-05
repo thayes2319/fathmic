@@ -1073,6 +1073,26 @@ button:disabled { opacity: 0.5; cursor: default; }
 .ref-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ref-card-placeholder { color: var(--muted); font-size: 0.8rem; text-align: center; padding: 0.75rem; }
 
+/* Photo/Illustration only (never Topic Reach) -- floats over the bottom-
+   right corner of the image, same "small pill over media" language as the
+   Blueprint stamp elsewhere. stopPropagation in app.js keeps a click here
+   from also triggering the card's own zoom-lightbox behavior. */
+.ref-card-regenerate-btn {
+  position: absolute;
+  bottom: 0.4rem;
+  right: 0.4rem;
+  margin-top: 0;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  z-index: 2;
+}
+.ref-card-regenerate-btn:hover { background: rgba(0, 0, 0, 0.75); }
+
 /* Clickable for a zoomed view — most useful on mobile, where even the
    stacked full-width cards top out around 320-390px. Guarded in JS so
    clicking a card still in its placeholder/error state (nothing generated
@@ -1499,10 +1519,21 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 
 #output-text-wrap { position: relative; }
-#copy-output-btn {
+/* One flex container, evenly gapped, instead of 4 buttons each absolutely
+   positioned at an independently hand-picked "right" offset -- the old
+   approach assumed every button rendered the same width, so the actual
+   visual gap between adjacent buttons varied with each label's real width
+   ("PDF" vs "Share" vs "Print" vs "Copy") even though the right-edge
+   offsets themselves were evenly spaced. Real widths now decide the
+   spacing, not a guess. */
+#output-toolbar {
   position: absolute;
   top: 0.7rem;
   right: 0.7rem;
+  display: flex;
+  gap: 0.5rem;
+}
+#output-toolbar button {
   margin-top: 0;
   padding: 0.3rem 0.7rem;
   font-size: 0.75rem;
@@ -1511,51 +1542,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--muted);
   border: 1px solid var(--border);
 }
-#copy-output-btn:hover { color: var(--accent); border-color: var(--accent); }
-#copy-output-btn.copied { color: var(--accent); border-color: var(--accent); }
-
-#print-output-btn {
-  position: absolute;
-  top: 0.7rem;
-  right: 4.5rem;
-  margin-top: 0;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--bg);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-#print-output-btn:hover { color: var(--accent); border-color: var(--accent); }
-
-#export-pdf-btn {
-  position: absolute;
-  top: 0.7rem;
-  right: 12.1rem;
-  margin-top: 0;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--bg);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-#export-pdf-btn:hover { color: var(--accent); border-color: var(--accent); }
-
-#share-output-btn {
-  position: absolute;
-  top: 0.7rem;
-  right: 8.3rem;
-  margin-top: 0;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--bg);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-#share-output-btn:hover { color: var(--accent); border-color: var(--accent); }
-#share-output-btn.copied { color: var(--accent); border-color: var(--accent); }
+#output-toolbar button:hover { color: var(--accent); border-color: var(--accent); }
+#copy-output-btn.copied, #share-output-btn.copied { color: var(--accent); border-color: var(--accent); }
 
 #result-feedback {
   display: flex;
@@ -1592,16 +1580,20 @@ button:disabled { opacity: 0.5; cursor: default; }
     left: 0;
     width: 100%;
   }
-  #copy-output-btn, #print-output-btn, #share-output-btn, #export-pdf-btn { display: none; }
+  #output-toolbar { display: none; }
 }
 
+/* Top padding cleared for the always-present toolbar unconditionally, not
+   just the BLUEPRINT-only case below -- previously only the badge case got
+   extra clearance, so a non-BLUEPRINT result's first line of content still
+   rendered underneath the PDF/Share/Print/Copy row. */
 #output-text {
   font-family: inherit;
   font-size: 1.05rem;
   line-height: 1.65;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 1.25rem 3.2rem 1.25rem 1.4rem;
+  padding: 2.75rem 1.4rem 1.25rem 1.4rem;
   background: rgba(127, 127, 127, 0.05);
 }
 
