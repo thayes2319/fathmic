@@ -319,7 +319,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 /* Fixed width sized to the longest word in the cycle ("Concentrate") so the
    button doesn't visibly resize as DISTILL_LABELS rotates through it. */
 #action-row #distill-btn { margin-top: 0; width: 108px; text-align: center; }
-#persona-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; margin-top: 0; }
+#persona-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; margin: 0 auto; }
 #persona-row label { margin-bottom: 0; font-weight: normal; font-size: 0.8rem; color: var(--muted); }
 #persona-row select {
   padding: 0.3rem 0.5rem;
@@ -373,13 +373,15 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .blueprint-chip:hover { opacity: 0.85; }
 
-/* Opposite side of the row from Distill, same row -- margin-left:auto
-   pushes it to the far right while Distill/persona-row stay grouped left.
+/* Flush right on the same row as Distill -- persona-row's own margin:0 auto
+   (above) already consumes all the free space on the main axis split evenly
+   around itself, so this lands flush right as a natural consequence rather
+   than needing its own auto margin (that would instead pull free space
+   toward itself specifically, leaving persona-row off-center).
    Once opened, flex-basis:100% claims the whole row width so the expanded
    demo/trending panel drops to its own line below (action-row already has
    flex-wrap:wrap) instead of squeezing in beside the other controls. */
-#demos-trending-details { margin-left: auto; }
-#demos-trending-details[open] { flex-basis: 100%; margin-left: 0; margin-top: 1rem; }
+#demos-trending-details[open] { flex-basis: 100%; margin-top: 1rem; }
 #demos-trending-details summary {
   display: inline-flex;
   align-items: center;
