@@ -171,6 +171,36 @@ textarea, input[type="text"] {
    placeholder would sit. app.js hides it the moment there's real focus or
    input, same as a native placeholder disappearing once you start typing. */
 #input-wrap { position: relative; }
+
+/* Compact, non-radial stakes control surfaced at input time -- the full
+   dial (in #taxonomy-section) is the considered/correctable version once a
+   map exists; this is just "set it now if you already know," so a real
+   button row, not the ornate knob graphic. Same state.stakes, same
+   renderStakesDial() sync -- see app.js. */
+#stakes-quick-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+}
+#stakes-quick-label { color: var(--muted); }
+.stakes-quick-btn {
+  margin-top: 0;
+  padding: 0.3rem 0.7rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-radius: 999px;
+}
+.stakes-quick-btn:hover { border-color: var(--accent); color: var(--fg); }
+.stakes-quick-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 #placeholder-cycle {
   position: absolute;
   top: 0.6rem;
@@ -364,6 +394,13 @@ button:disabled { opacity: 0.5; cursor: default; }
   border-radius: 999px;
 }
 #blueprint-caption { font-size: 0.82rem; color: var(--muted); font-style: italic; }
+/* Same word-swap mechanic as the Distill button's own label cycle -- fixed
+   sentence, one segment fades and swaps on an interval. Deliberately at the
+   page's existing "ambient text change" pace (~4.2s, matching the tagline
+   and Distill cycles) rather than the showcase carousel's faster tempo below
+   -- this is a quiet detail, not competition for the showcase itself. */
+#blueprint-caption-cycle { display: inline-block; transition: opacity 0.2s ease; font-weight: 600; }
+#blueprint-caption-cycle.caption-fading { opacity: 0; }
 .blueprint-chip {
   margin-top: 0;
   background: var(--accent);
@@ -376,6 +413,55 @@ button:disabled { opacity: 0.5; cursor: default; }
   white-space: nowrap;
 }
 .blueprint-chip:hover { opacity: 0.85; }
+
+/* The showcase carousel: topic stays anchored/visible for the whole example
+   while the stage beneath it crossfades between a spec-text excerpt and the
+   real generated illustration -- deliberately faster-paced than the caption
+   cycle above (this is the actual "look how much range this has" moment,
+   the caption is just connective tissue). Hidden via JS (not just empty
+   content) when SHOWCASE_FIXTURES isn't loaded/populated. */
+#blueprint-showcase {
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+#blueprint-showcase-topic {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--fg);
+  margin-bottom: 0.5rem;
+  min-height: 1.3em;
+  transition: opacity 0.35s ease;
+}
+#blueprint-showcase-topic.bp-fading { opacity: 0; }
+#blueprint-showcase-stage {
+  position: relative;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(127, 127, 127, 0.08);
+}
+.bp-showcase-panel {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+#blueprint-showcase-spec {
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--fg);
+}
+#blueprint-showcase-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#blueprint-showcase-stage.showing-spec #blueprint-showcase-spec { opacity: 1; }
+#blueprint-showcase-stage.showing-image #blueprint-showcase-image { opacity: 1; }
 
 /* Flush right on the same row as Distill -- persona-row's own margin:0 auto
    (above) already consumes all the free space on the main axis split evenly

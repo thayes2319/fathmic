@@ -78,6 +78,12 @@ const el = {
   blueprintChips: document.getElementById("blueprint-chips"),
   blueprintScrollLeft: document.getElementById("blueprint-scroll-left"),
   blueprintScrollRight: document.getElementById("blueprint-scroll-right"),
+  blueprintCaptionCycle: document.getElementById("blueprint-caption-cycle"),
+  blueprintShowcase: document.getElementById("blueprint-showcase"),
+  blueprintShowcaseTopic: document.getElementById("blueprint-showcase-topic"),
+  blueprintShowcaseStage: document.getElementById("blueprint-showcase-stage"),
+  blueprintShowcaseSpec: document.getElementById("blueprint-showcase-spec"),
+  blueprintShowcaseImage: document.getElementById("blueprint-showcase-image"),
   demoScrollLeft: document.getElementById("demo-scroll-left"),
   demoScrollRight: document.getElementById("demo-scroll-right"),
   promptIcon: document.getElementById("prompt-icon"),
@@ -103,6 +109,7 @@ const el = {
   regenerateBtn: document.getElementById("regenerate-btn"),
   updateCategoriesBtn: document.getElementById("update-categories-btn"),
   stakesPositions: document.querySelectorAll(".stakes-marker"),
+  stakesQuickBtns: document.querySelectorAll(".stakes-quick-btn"),
   stakesNeedle: document.querySelector(".stakes-knob-needle"),
   stakesPointer: document.querySelector(".stakes-pointer"),
   referenceCards: document.getElementById("reference-cards"),
@@ -315,7 +322,7 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   if (matchingBtn) matchingBtn.classList.add("active");
 
   el.outputSection.hidden = false;
-  el.outputSection.classList.toggle("blueprint-result", state.blueprintFit);
+  el.outputSection.classList.toggle("blueprint-result", entry.genre === "blueprint");
   el.outputHeading.textContent = `Result — ${entry.genreLabel}`;
   el.outputText.innerHTML = renderMarkdown(entry.resultText);
   state.lastResultText = entry.resultText;
@@ -698,6 +705,7 @@ function exitActiveSession() {
 // scripted sequence finishes.
 const PROCESS_STEPS = [
   { key: "gate", label: "Checking specificity" },
+  { key: "stakes", label: "Weighing stakes" },
   { key: "categories", label: "Identifying core categories" },
   { key: "subcategories", label: "Mapping subcategories and options" },
   { key: "conflicts", label: "Tagging trade-offs and conflicts" },
@@ -795,9 +803,18 @@ async function runDistill(input) {
   try {
     const gate = await postJSON("/api/gate", { input, persona: el.personaSelect.value || null });
 
-    state.stakes = gate.stakes || "medium";
+    // An explicit pre-Distill choice (the quick stakes row) wins over the
+    // gate's own inference -- the gate only fills in a default for someone
+    // who didn't already tell it. Consumed here, not reset at the top of
+    // resetDownstream() (which runs before this point in the SAME click) --
+    // resetting it there would wipe the choice before it's ever read.
+    if (!stakesManuallySet) {
+      state.stakes = gate.stakes || "medium";
+    }
+    stakesManuallySet = false;
     state.blueprintFit = gate.blueprintFit === true;
     renderStakesDial();
+    setStepState("stakes", "active");
 
     if (gate.status === "block") {
       closeProcessModal();
@@ -809,6 +826,7 @@ async function runDistill(input) {
     }
 
     setStepState("gate", "done");
+    setStepState("stakes", "done");
     state.firstBranch = gate.firstBranch || null;
     el.gateStatus.textContent = gate.note || "Looks good.";
     await runTaxonomy();
@@ -864,6 +882,7 @@ el.clarifySubmitBtn.addEventListener("click", async () => {
   el.promptIcon.classList.add("icon-processing");
   openProcessModal();
   setStepState("gate", "done"); // already passed — no gate re-check on this path
+  setStepState("stakes", "done"); // already inferred by the original gate call
 
   try {
     await runTaxonomy();
@@ -886,6 +905,7 @@ el.clarifySkipBtn.addEventListener("click", async () => {
   el.promptIcon.classList.add("icon-processing");
   openProcessModal();
   setStepState("gate", "done");
+  setStepState("stakes", "done"); // already inferred by the original gate call
 
   try {
     await runTaxonomy();
@@ -1028,6 +1048,7 @@ async function reviseTopic(newInputText) {
   el.promptIcon.classList.add("icon-processing");
   openProcessModal();
   setStepState("gate", "done"); // revising skips the gate -- already passed once for this topic
+  setStepState("stakes", "done"); // uses whatever state.stakes currently is -- see runTaxonomy's stakesNote
 
   try {
     await runTaxonomy();
@@ -1994,6 +2015,9 @@ function renderStakesDial() {
   el.stakesPositions.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
   });
+  el.stakesQuickBtns.forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
+  });
   const angle = STAKES_NEEDLE_ANGLE[state.stakes] ?? 0;
   const color = STAKES_NEEDLE_COLOR[state.stakes] || "var(--accent)";
   if (el.stakesNeedle) {
@@ -2006,11 +2030,26 @@ function renderStakesDial() {
   }
 }
 
+// Set the instant a user touches either stakes control -- an explicit choice
+// made before Distill shouldn't get silently overwritten by the gate's own
+// inference when it comes back (see runDistill). Reset on resetDownstream()
+// so a fresh attempt goes back to auto-inferred by default.
+let stakesManuallySet = false;
+
 el.stakesPositions.forEach(btn => {
   btn.addEventListener("click", () => {
     state.stakes = btn.dataset.stakes;
+    stakesManuallySet = true;
     renderStakesDial();
     checkStaleness();
+  });
+});
+
+el.stakesQuickBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.stakes = btn.dataset.stakes;
+    stakesManuallySet = true;
+    renderStakesDial();
   });
 });
 
@@ -2048,7 +2087,7 @@ async function runSynthesisForGenre(genre, genreLabel) {
   if (matchingBtn) matchingBtn.classList.add("active");
 
   el.outputSection.hidden = false;
-  el.outputSection.classList.toggle("blueprint-result", state.blueprintFit);
+  el.outputSection.classList.toggle("blueprint-result", genre === "blueprint");
   el.outputHeading.textContent = `Result — ${genreLabel}`;
   el.outputText.innerHTML = buildQuickChart() || "Synthesizing...";
   el.staleBanner.hidden = true;
@@ -2459,6 +2498,64 @@ if (el.blueprintChips) {
     el.blueprintChips.appendChild(chip);
   });
   wireHScroll(el.blueprintChips, el.blueprintScrollLeft, el.blueprintScrollRight);
+}
+
+// Caption word-swap: same mechanic as the Distill button's own label cycle
+// (fade, swap text, fade back in) at the page's existing ~4.2s ambient pace,
+// naming a few of the actual verticals the showcase below draws from.
+const BLUEPRINT_CAPTION_EXAMPLES = [
+  "custom tattoos", "wiring harnesses", "engagement rings", "wallcovering patterns",
+  "scenic backdrops", "textile patterns", "custom furniture", "window film specs"
+];
+if (el.blueprintCaptionCycle) {
+  let captionIndex = 0;
+  setInterval(() => {
+    el.blueprintCaptionCycle.classList.add("caption-fading");
+    setTimeout(() => {
+      captionIndex = (captionIndex + 1) % BLUEPRINT_CAPTION_EXAMPLES.length;
+      el.blueprintCaptionCycle.textContent = BLUEPRINT_CAPTION_EXAMPLES[captionIndex];
+      el.blueprintCaptionCycle.classList.remove("caption-fading");
+    }, 200);
+  }, 4200);
+}
+
+// Showcase carousel: real pre-captured pipeline output (see
+// showcase-fixtures.js -- topic, a synthesized Blueprint spec excerpt, and
+// an actual generated illustration per entry), not live generation -- a
+// real taxonomy+synthesis+illustration run takes real seconds, far too slow
+// for a carousel meant to feel fast. Topic stays anchored through both
+// stages of its own example; the stage beneath it crossfades spec text ->
+// illustration, then the whole thing advances to the next example.
+// Deliberately faster than the caption cycle above -- this is the actual
+// "look how much range this has" moment, not connective tissue.
+const BLUEPRINT_SHOWCASE_SPEC_MS = 1700;
+const BLUEPRINT_SHOWCASE_IMAGE_MS = 1900;
+const BLUEPRINT_SHOWCASE_FADE_MS = 350;
+if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE_FIXTURES.length) {
+  el.blueprintShowcase.hidden = false;
+  const stage = el.blueprintShowcaseStage || document.getElementById("blueprint-showcase-stage");
+  let showcaseIndex = 0;
+
+  function runShowcaseExample() {
+    const item = SHOWCASE_FIXTURES[showcaseIndex];
+    el.blueprintShowcaseTopic.textContent = item.topic;
+    el.blueprintShowcaseTopic.classList.remove("bp-fading");
+    el.blueprintShowcaseSpec.textContent = item.specSnippet;
+    el.blueprintShowcaseImage.src = item.image;
+    stage.classList.remove("showing-image");
+    stage.classList.add("showing-spec");
+
+    setTimeout(() => {
+      stage.classList.remove("showing-spec");
+      stage.classList.add("showing-image");
+      setTimeout(() => {
+        showcaseIndex = (showcaseIndex + 1) % SHOWCASE_FIXTURES.length;
+        el.blueprintShowcaseTopic.classList.add("bp-fading");
+        setTimeout(runShowcaseExample, BLUEPRINT_SHOWCASE_FADE_MS);
+      }, BLUEPRINT_SHOWCASE_IMAGE_MS);
+    }, BLUEPRINT_SHOWCASE_SPEC_MS);
+  }
+  runShowcaseExample();
 }
 
 // Demo cases: real, pre-captured API responses (gate + taxonomy already run,

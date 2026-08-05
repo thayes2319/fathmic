@@ -99,6 +99,13 @@
         </div>
       </div>
 
+      <div id="stakes-quick-row">
+        <span id="stakes-quick-label">How much is riding on this?</span>
+        <button class="stakes-quick-btn" type="button" data-stakes="low">Low</button>
+        <button class="stakes-quick-btn" type="button" data-stakes="medium">Medium</button>
+        <button class="stakes-quick-btn" type="button" data-stakes="high">High</button>
+      </div>
+
       <div id="schematic-sequence" hidden>
         <svg id="schematic-svg" viewBox="0 0 640 350" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
           <!-- Stage 1: input node -->
@@ -284,12 +291,19 @@
       <div id="blueprint-section">
         <div id="blueprint-header">
           <span id="blueprint-stamp">Spec &amp; Blueprint</span>
-          <span id="blueprint-caption">tuned especially for your build</span>
+          <span id="blueprint-caption">100+ tuned starting points — from <span id="blueprint-caption-cycle">custom tattoos</span></span>
         </div>
         <div class="hscroll-wrap">
           <button id="blueprint-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
           <div id="blueprint-chips" class="hscroll-track"></div>
           <button id="blueprint-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+        </div>
+        <div id="blueprint-showcase" aria-hidden="true">
+          <div id="blueprint-showcase-topic"></div>
+          <div id="blueprint-showcase-stage">
+            <div id="blueprint-showcase-spec" class="bp-showcase-panel"></div>
+            <img id="blueprint-showcase-image" class="bp-showcase-panel" alt="" />
+          </div>
         </div>
       </div>
     </section>
@@ -494,6 +508,7 @@
   </div>
 
   <script src="demo-fixtures.js"></script>
+  <script src="showcase-fixtures.js"></script>
   <script src="vendor/jspdf.umd.min.js"></script>
   <script src="vendor/jspdf.plugin.autotable.min.js"></script>
   <script src="app.js"></script>
