@@ -60,6 +60,18 @@ const GENRE_PRESETS = {
     // subject rather than defaulting to "parts and materials" out of habit.
     modeGuidance: "Organize as a build brief, not prose, by the subject's own actual constituent pieces -- the way a real build sheet, spec sheet, or schema for THIS kind of subject would actually break it down. For a physical build that's parts/materials (body/neck/electronics for an instrument). For a brand system it's tokens and usage rules (color/type/spacing, each with its values and where it applies). For a UI system it's components and states. For a workflow automation it's triggers/conditions/actions. For a wiring harness it's connectors/pinouts/gauge. For a compliance policy it's clauses and the conditions that trigger them. Identify what the real pieces are for the specific subject at hand, then cover each one's concrete choices together within its own section -- never fall back to abstract information-type buckets (\"Overview,\" \"Considerations,\" \"Details\") when the subject has real constituent pieces to organize by instead.",
     voiceGuidance: "Precise, structured voice — the way a professional hands a brief to whoever is building this, not an essay. Short declarative lines grouped under headers, not narrative sentences."
+  },
+  // Same gating as BLUEPRINT (state.blueprintFit) -- this is another
+  // realization type for the same population of spec-shaped topics, not a
+  // separate category. Deliberately restrained: one self-contained artifact,
+  // never a multi-file app -- a flat selections list carries no types/file
+  // structure/signatures, so anything bigger would be confident-looking
+  // guesswork. The goal is a coherent, commented starting point a real
+  // coding session can pick up and finish, not a claim of working code.
+  code: {
+    mode: "scaffold",
+    modeGuidance: "Produce exactly ONE self-contained code artifact realizing the selections -- decide whether the subject calls for a script/function (imperative logic) or a structured data/config file (JSON/YAML/schema -- the safer default when the subject is really about defining values and rules rather than steps to execute), and write only that one thing. Not a full application, not multiple files. Real, syntactically correct code in whatever language actually fits the subject -- not pseudocode, not prose describing what the code would do. Comment the non-obvious parts (why, not what) so a real coding session can pick this up and understand the intent quickly. Where a selection can't be resolved into a concrete value or step without more context than the selections provide, leave a clearly marked placeholder (a TODO comment, an obviously-named constant) rather than inventing a fact.",
+    voiceGuidance: "A short paragraph (2-4 sentences) stating what the artifact is and how to use it, then the code itself in a single fenced block with the correct language tag. No narrative voice inside the code — comments are terse and functional."
   }
 };
 
@@ -85,10 +97,27 @@ const RISK_SECTION_GUIDANCE = {
   high: "The most substantive part of the piece. Be explicit about what's well-established vs. uncertain or reader-specific, name concrete failure modes, and state plainly that a qualified professional should be involved before acting on this — not buried, not softened."
 };
 
+// CODE gets its own risk framing entirely -- the risk isn't medical/legal/
+// financial, it's correctness and execution: nothing generated here has
+// been run or tested. Still scaled by stakes (a throwaway script needs less
+// hand-holding than something touching real data or production), but the
+// content is a different axis than RISK_SECTION_GUIDANCE above.
+const CODE_RISK_SECTION_GUIDANCE = {
+  low: "One line: note plainly this hasn't been run or tested, and name the one thing most likely to need a small tweak (a version number, a config value, a path) before it works as-is.",
+  medium: "A short list of what wasn't verified: assumed dependency/library versions, untested edge cases, and the one or two places most likely to need adjustment for the reader's actual environment.",
+  high: "Explicit and itemized: every assumption made (versions, environment, external services, data shape), every edge case not handled, and a plain statement that this needs review and testing by someone who can verify it before it's relied on — a real checklist, not a disclaimer buried at the end."
+};
+
 function buildSystemPrompt(genre, stakes) {
   const preset = GENRE_PRESETS[genre] || GENRE_PRESETS.summary;
   const stakesGuidance = STAKES_GUIDANCE[stakes] || STAKES_GUIDANCE.medium;
-  const riskGuidance = RISK_SECTION_GUIDANCE[stakes] || RISK_SECTION_GUIDANCE.medium;
+  // CODE's risk is correctness/execution, not medical/legal/financial --
+  // different guidance map entirely, plus a heading that matches ("Known
+  // limitations" reads as code-review notes; "Where it can go wrong" reads
+  // as real-world danger, which is the wrong register for a script).
+  const riskGuidanceMap = genre === "code" ? CODE_RISK_SECTION_GUIDANCE : RISK_SECTION_GUIDANCE;
+  const riskGuidance = riskGuidanceMap[stakes] || riskGuidanceMap.medium;
+  const riskHeading = genre === "code" ? "Known limitations" : "Where it can go wrong";
   // Folded into modeGuidance text first, but that reads as guidance the model
   // weighs against everything else in the same paragraph rather than a hard
   // requirement -- confirmed by testing, it got dropped twice. "Where it can
@@ -112,7 +141,7 @@ Confidence level (body only): ${stakesGuidance}
 
 Real-world currency check: you have no live internet access — no current listings, prices, schedules, availability, or news. If a selection depends on a fact that changes over time and you can't verify it from general knowledge (e.g. what's currently playing/in stock/in season/on sale), do not describe it as if it were resolved or write around the gap. Say so plainly in the first sentence or two — name the specific thing you can't verify and what the reader should check instead — then continue with everything else that IS resolvable normally.
 ${scopeDirective}${tableDirective}
-Always end the piece with a section headed exactly "Where it can go wrong" (formatted as its own heading, same style as any other section headings you use). ${riskGuidance}
+Always end the piece with a section headed exactly "${riskHeading}" (formatted as its own heading, same style as any other section headings you use). ${riskGuidance}
 
 Formatting: give every section header the exact same markdown treatment — either real "#### Heading" syntax or a standalone "**Heading**" line, never mixed with trailing text like "**Heading** *(note)*" on the same line, and never a "---" divider between sections (headings alone provide the separation). Inconsistent heading formatting renders inconsistently.
 

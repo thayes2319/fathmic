@@ -67,6 +67,7 @@ const el = {
   genreSection: document.getElementById("genre-section"),
   genreButtons: document.getElementById("genre-buttons"),
   blueprintGenreBtn: document.getElementById("blueprint-genre-btn"),
+  codeGenreBtn: document.getElementById("code-genre-btn"),
   outputSection: document.getElementById("output-section"),
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
@@ -553,6 +554,30 @@ function renderMarkdown(text) {
     const line = rawLine.trim();
 
     if (!line) { flushPara(); closeList(); i++; continue; }
+
+    // A fenced code block (```lang ... ```) -- the CODE genre's actual
+    // deliverable lives in one of these. Checked before any other line-type
+    // rule so nothing inside (a comment starting with "#", a line starting
+    // "- ", etc.) gets misread as a heading or bullet. Content is already
+    // HTML-escaped from the escapeHtml() call above, so it's inserted as-is
+    // with no further processing -- no inline bold/italic, no nested
+    // parsing, verbatim through to the closing fence.
+    const fenceOpen = line.match(/^```(\w*)\s*$/);
+    if (fenceOpen) {
+      flushPara();
+      closeList();
+      const lang = fenceOpen[1];
+      const codeLines = [];
+      i++;
+      while (i < lines.length && !/^```\s*$/.test(lines[i].trim())) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // past the closing fence (or end of text, if the model never closed it)
+      const langClass = lang ? ` class="language-${lang}"` : "";
+      html.push(`<pre class="code-block"><code${langClass}>${codeLines.join("\n")}</code></pre>`);
+      continue;
+    }
 
     // A table: a "| a | b |" header row immediately followed by a
     // "|---|---|" separator row. Both have to be present in that exact
@@ -1934,6 +1959,11 @@ function applyExclusions() {
   const hasAnySelection = state.selected.size > 0 || hasAnyOtherText();
   el.genreSection.hidden = !hasAnySelection;
   if (el.blueprintGenreBtn) el.blueprintGenreBtn.hidden = !state.blueprintFit;
+  // Same gating as Blueprint (same population of spec-shaped topics) --
+  // manually selectable only, no auto-run of its own. Blueprint stays the
+  // one that auto-defaults for a fresh blueprint-fit topic; Code is an
+  // additional option, not a second thing competing to run first.
+  if (el.codeGenreBtn) el.codeGenreBtn.hidden = !state.blueprintFit;
   if (state.blueprintFit && hasAnySelection && state.lastGenre === null) scheduleBlueprintAutoRun();
   checkStaleness();
 
@@ -2339,6 +2369,34 @@ function buildResultPdf(topic, genreLabel, markdownText, imageDataUrl) {
   while (i < lines.length) {
     const line = lines[i].trim();
     if (!line) { i++; continue; }
+
+    // A fenced code block -- Courier (jsPDF's built-in monospace, no font
+    // embedding needed) and no stripInlineMarkdown, since */_ are
+    // syntactically meaningful in real code and stripping them would
+    // corrupt it (e.g. Python's **kwargs). sanitizeForPdfFont still runs
+    // for Unicode safety, matching every other line in this document.
+    const fenceOpen = line.match(/^```(\w*)\s*$/);
+    if (fenceOpen) {
+      i++;
+      const codeLines = [];
+      while (i < lines.length && !/^```\s*$/.test(lines[i].trim())) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // past the closing fence
+      doc.setFont("courier", "normal");
+      doc.setFontSize(9);
+      const codeLineHeight = 12;
+      codeLines.forEach(codeLine => {
+        // No word-wrap for code -- wrapping breaks indentation, which
+        // matters more than a long line running to the page edge.
+        ensureRoom(codeLineHeight);
+        doc.text(sanitizeForPdfFont(codeLine), marginX, y);
+        y += codeLineHeight;
+      });
+      y += 10;
+      continue;
+    }
 
     if (line.includes("|") && i + 1 < lines.length && isTableSeparatorRow(lines[i + 1])) {
       const head = [splitTableRow(line)];

@@ -1676,6 +1676,26 @@ button:disabled { opacity: 0.5; cursor: default; }
 #output-text li:last-child { margin-bottom: 0; }
 #output-text strong { color: var(--fg); }
 
+/* Fenced code blocks (CODE genre's actual deliverable) -- horizontal-scroll
+   wrapper like the table styling above, since code lines routinely run
+   wider than the reader column and squeezing/wrapping them breaks
+   indentation, which is the one thing that has to stay intact. */
+#output-text .code-block, .history-detail-text .code-block {
+  margin: 0 0 0.9rem;
+  padding: 0.9rem 1rem;
+  background: rgba(127, 127, 127, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+#output-text .code-block code, .history-detail-text .code-block code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre;
+  color: var(--fg);
+}
+
 /* Schematic sequence: a large wireframe replay of the actual mechanism
    (input -> gate check -> taxonomy branching -> selection -> synthesis),
    emerging from the prompt field. Takes over the space demo-cases/trending
