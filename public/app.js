@@ -76,6 +76,7 @@ const el = {
   demoButtons: document.getElementById("demo-buttons"),
   blueprintSection: document.getElementById("blueprint-section"),
   blueprintChips: document.getElementById("blueprint-chips"),
+  blueprintVerticalFilter: document.getElementById("blueprint-vertical-filter"),
   blueprintScrollLeft: document.getElementById("blueprint-scroll-left"),
   blueprintScrollRight: document.getElementById("blueprint-scroll-right"),
   blueprintCaptionCycle: document.getElementById("blueprint-caption-cycle"),
@@ -2467,26 +2468,111 @@ if (el.resetSelectionsBtn) {
 // general demo/trending rows below it. Unlike a demo case, this only seeds
 // the input text; there's no pre-captured taxonomy, so clicking one runs the
 // real live gate + taxonomy pipeline, same as typing it in by hand.
-const BLUEPRINT_SUBJECTS = [
-  { label: "Tattoo concepts", seed: "Designing a custom tattoo" },
-  { label: "Custom furniture", seed: "Designing a custom furniture piece" },
-  { label: "Engagement rings", seed: "Designing a custom engagement ring" },
-  { label: "Garden design", seed: "Designing a garden and landscape layout" },
-  { label: "Home theater builds", seed: "Planning a home theater build" },
-  { label: "Instrument builds", seed: "Designing a custom guitar build" },
-  { label: "Gaming PC builds", seed: "Designing a custom gaming PC build" },
-  { label: "Window replacement", seed: "Planning a home window replacement" },
-  { label: "Custom sneaker design", seed: "Designing a custom sneaker" },
-  { label: "Wedding theme & decor", seed: "Planning a wedding theme and decor" },
-  { label: "Kitchen remodel", seed: "Planning a custom kitchen remodel" },
-  { label: "Backyard deck & patio", seed: "Designing a backyard deck and patio" },
-  { label: "Custom car build", seed: "Designing a custom car build" },
-  { label: "Cosplay costume design", seed: "Designing a custom cosplay costume" },
-  { label: "Tiny house build", seed: "Designing a custom tiny house build" },
-  { label: "Custom bicycle build", seed: "Designing a custom bicycle build" }
+//
+// Grouped by vertical (same "pick a filter, see a scoped chip row" pattern
+// as Most Searched's #trending-filter) rather than one flat scroll -- a flat
+// list tops out being usable around 15-20 items; this covers every TR-pure
+// vertical from the source prompt library, not just physical builds.
+const BLUEPRINT_VERTICALS = [
+  {
+    key: "physical-builds",
+    label: "Physical Builds & Designs",
+    topics: [
+      { label: "Tattoo concepts", seed: "Designing a custom tattoo" },
+      { label: "Custom furniture", seed: "Designing a custom furniture piece" },
+      { label: "Engagement rings", seed: "Designing a custom engagement ring" },
+      { label: "Garden design", seed: "Designing a garden and landscape layout" },
+      { label: "Home theater builds", seed: "Planning a home theater build" },
+      { label: "Instrument builds", seed: "Designing a custom guitar build" },
+      { label: "Gaming PC builds", seed: "Designing a custom gaming PC build" },
+      { label: "Window replacement", seed: "Planning a home window replacement" },
+      { label: "Custom sneaker design", seed: "Designing a custom sneaker" },
+      { label: "Wedding theme & decor", seed: "Planning a wedding theme and decor" },
+      { label: "Kitchen remodel", seed: "Planning a custom kitchen remodel" },
+      { label: "Backyard deck & patio", seed: "Designing a backyard deck and patio" },
+      { label: "Custom car build", seed: "Designing a custom car build" },
+      { label: "Cosplay costume design", seed: "Designing a custom cosplay costume" },
+      { label: "Tiny house build", seed: "Designing a custom tiny house build" },
+      { label: "Custom bicycle build", seed: "Designing a custom bicycle build" }
+    ]
+  },
+  {
+    key: "spaces-environments",
+    label: "Spaces & Environments",
+    topics: [
+      { label: "Wallcovering patterns", seed: "Creating a complete wallcovering pattern specification" },
+      { label: "Lobby feature walls", seed: "Generating an environmental graphics package for a lobby feature wall" },
+      { label: "Window film", seed: "Defining a window film specification including opacity and motif rules" },
+      { label: "Ceiling murals", seed: "Creating a ceiling mural specification with orientation and panel sequencing" },
+      { label: "Gallery wall systems", seed: "Producing a gallery wall specification with spacing and sizing" },
+      { label: "Signage systems", seed: "Defining a wayfinding signage system specification for a multi-floor building" },
+      { label: "Retail graphics", seed: "Producing a retail graphics specification with brand rules and materials" },
+      { label: "Museum exhibit graphics", seed: "Generating a museum exhibit graphics specification" },
+      { label: "Facade wraps", seed: "Generating a facade wrap specification with anchor points and material constraints" },
+      { label: "Furniture surface graphics", seed: "Creating a furniture surface specification with edge wraps and CNC cutlines" },
+      { label: "Scenic backdrops", seed: "Producing a scenic backdrop specification with rigging and quick-change sequencing" },
+      { label: "Kid's room murals", seed: "Generating a kid's room mural specification with safety and color rules" }
+    ]
+  },
+  {
+    key: "branding-identity",
+    label: "Branding & Visual Identity",
+    topics: [
+      { label: "Brand identity systems", seed: "Creating a brand identity specification with tokens and usage rules" },
+      { label: "Logo systems", seed: "Generating a logo system specification with variants and constraints" },
+      { label: "Color token systems", seed: "Producing a color token specification with accessibility rules" },
+      { label: "Typography systems", seed: "Defining a typography system specification with hierarchy" },
+      { label: "Brand kits", seed: "Creating a brand kit specification with asset rules" }
+    ]
+  },
+  {
+    key: "digital-product-ui",
+    label: "Digital Product & UI",
+    topics: [
+      { label: "UI design tokens", seed: "Producing a UI design token specification for a multi-platform app" },
+      { label: "Component libraries", seed: "Creating a component library specification with states" },
+      { label: "App theme systems", seed: "Generating a theme specification with color and spacing rules" },
+      { label: "Accessibility specs", seed: "Producing an accessibility specification with contrast rules" },
+      { label: "Responsive layouts", seed: "Creating a responsive layout specification" },
+      { label: "AR overlays", seed: "Producing an AR overlay specification with anchors and behaviors" },
+      { label: "VR environments", seed: "Creating a VR environment interaction specification" }
+    ]
+  },
+  {
+    key: "technical-engineering",
+    label: "Technical & Engineering",
+    topics: [
+      { label: "Wiring harnesses", seed: "Generating a wiring harness specification with pinouts and BOM" },
+      { label: "Signal routing", seed: "Creating a signal routing specification with connector rules" },
+      { label: "PCB wiring", seed: "Producing a PCB wiring specification with trace constraints" },
+      { label: "Textile patterns", seed: "Generating a textile pattern specification including repeat and dye process metadata" },
+      { label: "Drapery patterns", seed: "Creating a drapery pattern specification with seam rules" },
+      { label: "Upholstery patterns", seed: "Producing an upholstery pattern specification with durability rules" }
+    ]
+  },
+  {
+    key: "business-operations",
+    label: "Business & Operations",
+    topics: [
+      { label: "Workflow automations", seed: "Creating a workflow automation specification with triggers and actions" },
+      { label: "SaaS integrations", seed: "Producing an integration specification for two SaaS tools" },
+      { label: "Data pipelines", seed: "Defining a data pipeline specification" },
+      { label: "Business models", seed: "Producing a business model specification with cost structure" },
+      { label: "Compliance policies", seed: "Creating a compliance policy specification with clauses and triggers" },
+      { label: "Training modules", seed: "Producing a training module specification with objectives and assessments" },
+      { label: "Research summaries", seed: "Creating a research summary specification framework -- categories, methodology, and structure for organizing findings on any topic" }
+    ]
+  }
 ];
-if (el.blueprintChips) {
-  BLUEPRINT_SUBJECTS.forEach(subject => {
+
+// Every topic across every vertical, flattened -- used by the caption cycle
+// below so it actually samples the full breadth instead of a small
+// hand-picked list.
+const BLUEPRINT_ALL_TOPICS = BLUEPRINT_VERTICALS.flatMap(v => v.topics);
+
+function renderBlueprintChips(topics) {
+  el.blueprintChips.innerHTML = "";
+  (topics || []).forEach(subject => {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "blueprint-chip";
@@ -2497,16 +2583,40 @@ if (el.blueprintChips) {
     });
     el.blueprintChips.appendChild(chip);
   });
+}
+
+if (el.blueprintChips && el.blueprintVerticalFilter) {
+  el.blueprintVerticalFilter.innerHTML = "";
+  BLUEPRINT_VERTICALS.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v.key;
+    opt.textContent = v.label;
+    el.blueprintVerticalFilter.appendChild(opt);
+  });
+  el.blueprintVerticalFilter.addEventListener("change", () => {
+    const chosen = BLUEPRINT_VERTICALS.find(v => v.key === el.blueprintVerticalFilter.value);
+    renderBlueprintChips(chosen ? chosen.topics : []);
+  });
+  renderBlueprintChips(BLUEPRINT_VERTICALS[0].topics);
   wireHScroll(el.blueprintChips, el.blueprintScrollLeft, el.blueprintScrollRight);
 }
 
 // Caption word-swap: same mechanic as the Distill button's own label cycle
 // (fade, swap text, fade back in) at the page's existing ~4.2s ambient pace,
 // naming a few of the actual verticals the showcase below draws from.
-const BLUEPRINT_CAPTION_EXAMPLES = [
-  "custom tattoos", "wiring harnesses", "engagement rings", "wallcovering patterns",
-  "scenic backdrops", "textile patterns", "custom furniture", "window film specs"
-];
+// Sampled from every vertical/topic (BLUEPRINT_ALL_TOPICS), not a small
+// hand-picked list -- shuffled once per page load so different visitors
+// land on a different slice of the full breadth rather than always seeing
+// the same starting handful.
+function shuffle(arr) {
+  const copy = arr.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+const BLUEPRINT_CAPTION_EXAMPLES = shuffle(BLUEPRINT_ALL_TOPICS.map(t => t.label.toLowerCase()));
 if (el.blueprintCaptionCycle) {
   let captionIndex = 0;
   setInterval(() => {

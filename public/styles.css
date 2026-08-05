@@ -578,6 +578,20 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .trending-btn { font-size: 0.8rem; }
 
+/* Same filter-dropdown pattern as #trending-header -- picks which vertical's
+   chip set shows below, instead of one giant flat scroll of everything. */
+#blueprint-vertical-row { display: flex; align-items: center; gap: 0.6rem; margin: 0.5rem 0; }
+#blueprint-vertical-row .demo-label { margin-bottom: 0; }
+#blueprint-vertical-filter {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
 .skip-btn:hover { color: var(--fg); border-color: var(--muted); }
 
 .status { color: var(--muted); font-size: 0.9rem; }

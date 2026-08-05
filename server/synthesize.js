@@ -51,7 +51,14 @@ const GENRE_PRESETS = {
   // hand to a person building the thing. This one is.
   blueprint: {
     mode: "spec",
-    modeGuidance: "Organize as a build brief, not prose, by the actual components/parts the selections break down into (e.g. body/neck/electronics for an instrument, not abstract information-type buckets), covering each part's materials and design choices together within its own section — the way a real build sheet organizes by part.",
+    // Deliberately not anchored to "physical parts" -- BLUEPRINT now covers
+    // subjects far beyond physical builds (brand systems, UI design tokens,
+    // workflow automations, wiring harnesses, compliance policies). What
+    // stays constant across all of them is organizing by the subject's own
+    // real constituent pieces, not a generic information-type outline --
+    // the model has to identify what those pieces actually are for THIS
+    // subject rather than defaulting to "parts and materials" out of habit.
+    modeGuidance: "Organize as a build brief, not prose, by the subject's own actual constituent pieces -- the way a real build sheet, spec sheet, or schema for THIS kind of subject would actually break it down. For a physical build that's parts/materials (body/neck/electronics for an instrument). For a brand system it's tokens and usage rules (color/type/spacing, each with its values and where it applies). For a UI system it's components and states. For a workflow automation it's triggers/conditions/actions. For a wiring harness it's connectors/pinouts/gauge. For a compliance policy it's clauses and the conditions that trigger them. Identify what the real pieces are for the specific subject at hand, then cover each one's concrete choices together within its own section -- never fall back to abstract information-type buckets (\"Overview,\" \"Considerations,\" \"Details\") when the subject has real constituent pieces to organize by instead.",
     voiceGuidance: "Precise, structured voice — the way a professional hands a brief to whoever is building this, not an essay. Short declarative lines grouped under headers, not narrative sentences."
   }
 };

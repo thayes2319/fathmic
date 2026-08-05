@@ -20,28 +20,35 @@ const DOMAIN_LABELS = {
 
 // BLUEPRINT: the taxonomy-to-full-spec pattern's native use case (see
 // Muralizer) — subjects precise enough, and expert-dense enough, that the
-// output is meant to be handed off and built/fabricated/produced rather than
-// just read. Keep this in sync by hand with BLUEPRINT_SUBJECTS in
-// public/app.js whenever that chip list changes — the gate uses it to judge
-// whether a new inquiry is a genuinely distinct subject worth surfacing as a
-// candidate, or just a rephrasing of one already covered.
+// output is meant to be handed off and built/produced/implemented rather
+// than just read. No longer physical-build-only (see the updated
+// blueprintFit criterion below: specification is the anchor, not physical
+// geometry or visual output). Keep this in sync by hand with
+// BLUEPRINT_ALL_TOPICS in public/app.js whenever that vertical/topic list
+// changes — the gate uses it to judge whether a new inquiry is a genuinely
+// distinct subject worth surfacing as a candidate, or just a rephrasing of
+// one already covered.
 const KNOWN_BLUEPRINT_SUBJECTS = [
-  "Tattoo concepts",
-  "Custom furniture",
-  "Engagement rings",
-  "Garden design",
-  "Home theater builds",
-  "Instrument builds",
-  "Gaming PC builds",
-  "Window replacement",
-  "Custom sneaker design",
-  "Wedding theme & decor",
-  "Kitchen remodel",
-  "Backyard deck & patio",
-  "Custom car build",
-  "Cosplay costume design",
-  "Tiny house build",
-  "Custom bicycle build"
+  // Physical Builds & Designs
+  "Tattoo concepts", "Custom furniture", "Engagement rings", "Garden design",
+  "Home theater builds", "Instrument builds", "Gaming PC builds", "Window replacement",
+  "Custom sneaker design", "Wedding theme & decor", "Kitchen remodel", "Backyard deck & patio",
+  "Custom car build", "Cosplay costume design", "Tiny house build", "Custom bicycle build",
+  // Spaces & Environments
+  "Wallcovering patterns", "Lobby feature walls", "Window film", "Ceiling murals",
+  "Gallery wall systems", "Signage systems", "Retail graphics", "Museum exhibit graphics",
+  "Facade wraps", "Furniture surface graphics", "Scenic backdrops", "Kid's room murals",
+  // Branding & Visual Identity
+  "Brand identity systems", "Logo systems", "Color token systems", "Typography systems", "Brand kits",
+  // Digital Product & UI
+  "UI design tokens", "Component libraries", "App theme systems", "Accessibility specs",
+  "Responsive layouts", "AR overlays", "VR environments",
+  // Technical & Engineering
+  "Wiring harnesses", "Signal routing", "PCB wiring", "Textile patterns",
+  "Drapery patterns", "Upholstery patterns",
+  // Business & Operations
+  "Workflow automations", "SaaS integrations", "Data pipelines", "Business models",
+  "Compliance policies", "Training modules", "Research summaries"
 ];
 
 const GATE_TOOL = {
@@ -88,7 +95,7 @@ const GATE_TOOL = {
       },
       blueprintFit: {
         type: "boolean",
-        description: "True if this input describes something meant to be specified precisely enough to hand off and build, fabricate, generate, or produce — not just explained or understood. Domains with real expert-level unknown-unknowns where the exact combination chosen materially changes a concrete deliverable (e.g. a custom tattoo, a furniture piece, an engagement ring, a garden layout, a renovation, an instrument build). False for anything that ends at understanding or writing (trip planning, career advice, a story, general research)."
+        description: "True if this input can be taxonomized into a bounded set of attributes, specified in a structured, high-specificity format, and realized by deterministic rules — physical, digital, procedural, or analytical. Physical geometry is NOT required and visual output is optional; the specification itself is the anchor, not a picture or a physical object. Covers physical builds/fabrication (a custom tattoo, a furniture piece, an engagement ring, a garden layout), spatial/environmental design (a wallcovering pattern, a signage system, a mural), brand/digital systems (a brand identity spec, a UI design token set, an AR overlay spec), technical/engineering specs (a wiring harness, a textile pattern), and operational/analytical specs (a workflow automation, a compliance policy, a research summary that itself has a real bounded taxonomy to specify — not just a topic to explain). False for anything that just needs explaining, discussing, or narrating rather than being specified into a structured, buildable form — a trip plan, career advice, a story, a general question."
       },
       blueprintNewSubject: {
         type: "string",
@@ -115,7 +122,7 @@ Also estimate "stakes" on the 3-point scale — how much is actually riding on g
 
 Also classify "domain" — the single closest-fitting bucket from: ${Object.keys(DOMAIN_LABELS).join(", ")}. Pick the nearest fit even when imperfect; use "other" only when nothing else is close.
 
-Also classify "blueprintFit" and "blueprintNewSubject" per their schema descriptions — most inputs are not blueprint-fit, so default to false/empty unless the input genuinely describes something meant to be built, fabricated, generated, or produced from a precise spec.`;
+Also classify "blueprintFit" and "blueprintNewSubject" per their schema descriptions — most inputs are not blueprint-fit, so default to false/empty unless the input genuinely asks for something to be specified into a bounded, structured, deterministically-realizable form (a build, a design spec, a system definition) rather than just explained, planned, or discussed.`;
 
 async function runGate(input) {
   const result = await callStructured({
