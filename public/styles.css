@@ -1019,17 +1019,36 @@ button:disabled { opacity: 0.5; cursor: default; }
   0%   { transform: scale(1); opacity: 1; }
   100% { transform: scale(0.92); opacity: 0; }
 }
-#question-spotlight-category { font-weight: 700; font-size: 1.3rem; line-height: 1.4; }
-#question-spotlight-subcategory {
+/* Subcategory is the actual question being asked right now -- category is
+   just the surrounding context, so the emphasis is inverted from a plain
+   heading/subheading: subcategory reads larger and bolder, category smaller
+   and muted above it. */
+#question-spotlight-category {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.4;
   color: var(--muted);
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+#question-spotlight-subcategory {
+  font-weight: 700;
+  font-size: 1.3rem;
+  line-height: 1.4;
 }
 #question-spotlight-subcategory:empty { display: none; }
+/* Zero-subcategory category (nothing to show below it) -- category becomes
+   the only line, so it needs the prominent treatment back rather than
+   staying small and muted with nothing to anchor against. */
+#question-spotlight-text:has(#question-spotlight-subcategory:empty) #question-spotlight-category {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--fg);
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
 #question-spotlight-continue {
   display: block;
   margin: 1.1rem auto 0;

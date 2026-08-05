@@ -1072,7 +1072,7 @@ let lastSpotlightKey = null;
 let questionSpotlightShowTimer = null; // the ~0.5s delay before it appears
 let questionSpotlightSafetyTimer = null; // auto-dismiss if nobody interacts at all
 const QUESTION_SPOTLIGHT_DELAY_MS = 500;
-const QUESTION_SPOTLIGHT_SAFETY_MS = 20000;
+const QUESTION_SPOTLIGHT_SAFETY_MS = 10000;
 const QUESTION_SPOTLIGHT_EXIT_MS = 250; // must match the CSS exit animation duration
 
 function hideQuestionSpotlight() {
@@ -1509,6 +1509,7 @@ function renderTaxonomyImpl() {
     // a redundant spotlight announcing the same category again with nothing
     // to show. The subs.length===0 check below is what still allows the
     // legitimate zero-subcategory case through while excluding this one.
+    let justEnteredSubFocus = false;
     if (isInterviewFocus) {
       const subs = category.subcategories || [];
       const candidate = interviewSubRevealCount > 0 && interviewSubRevealCount <= subs.length
@@ -1519,6 +1520,7 @@ function renderTaxonomyImpl() {
         const spotlightKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
         if (spotlightKey !== lastSpotlightKey) {
           lastSpotlightKey = spotlightKey;
+          justEnteredSubFocus = !!focusedSub;
           showQuestionSpotlight(
             `Tell me about ${category.questionPhrase || category.name}`,
             focusedSub ? focusedSub.name : ""
@@ -1535,6 +1537,14 @@ function renderTaxonomyImpl() {
       const isSubInFocus = isInterviewFocus && subIndex === interviewSubRevealCount - 1 && !subcategoryHasSelection(sub);
       subEl.className = isSubInFocus ? "subcategory subcategory-in-focus" : "subcategory";
       subEl.open = isSubInFocus || state.expandedSubcategories.has(subKey);
+      // Scrolls the newly-focused subcategory into view the moment it
+      // actually becomes the new focus (guarded by the same key check as
+      // the spotlight above) -- previously only the category row scrolled
+      // into view on category change, leaving the subcategory itself
+      // wherever it happened to render, often below the fold.
+      if (isSubInFocus && justEnteredSubFocus) {
+        requestAnimationFrame(() => subEl.scrollIntoView({ behavior: "smooth", block: "center" }));
+      }
       subEl.addEventListener("toggle", () => {
         if (subEl.open) state.expandedSubcategories.add(subKey);
         else state.expandedSubcategories.delete(subKey);
