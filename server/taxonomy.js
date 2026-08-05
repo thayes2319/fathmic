@@ -56,6 +56,10 @@ const TAXONOMY_TOOL = {
             questionPhrase: {
               type: "string",
               description: `Only set on 'category' nodes. This category's label rephrased as the natural continuation of the sentence "Tell me about ___" — a UI feature shows categories one at a time as a spoken-style question, and needs this to read grammatically. Include whatever article/possessive/preposition a fluent English speaker would actually use so the full sentence sounds natural (e.g. label "Tattoo Style" -> "the tattoo style", label "Budget Range" -> "your budget range", label "Weight & Construction" -> "weight and construction"). Lowercase unless a proper noun. Omit for subcategory/element nodes.`
+            },
+            exclusive: {
+              type: "boolean",
+              description: "Only set on 'subcategory' nodes. True if this subcategory's elements are mutually exclusive alternatives — a user should pick only ONE (e.g. 'primary material' where the elements are Oak/Walnut/Maple). False or omit if multiple elements are genuinely compatible and often chosen together (e.g. 'accent colors' where picking two or three is normal). This is a LOCAL rule scoped to this subcategory's own elements — separate from axis/direction, which only tags conflicts across different subcategories."
             }
           },
           required: ["id", "type", "label"]
@@ -76,7 +80,7 @@ Structure:
 - Each subcategory should have 3-8 "element" nodes (parentId = the subcategory's id).
 - Assign ids sequentially as you emit nodes (n1, n2, n3, ...) and reference an earlier node's id as parentId. Emit each category's own subcategories and their elements before moving to the next category.
 
-Four rules for the content itself:
+Rules for the content itself:
 
 1. Names carry the orienting facts — this applies to elements too, not just categories/subcategories. If a category, subcategory, or element has a defining characteristic the reader needs to know just to make sense of it (a zone number, a scale, a boundary condition) OR uses genuine trade/technical jargon a layperson outside that field wouldn't know, fold a brief clarification into its "label" itself — e.g. "North Georgia Mountains (Zone 6b–7b, cooler microclimate)" or "Concrete footers (below-frost-line concrete bases the posts sit on)". Use this selectively: most names need nothing added. Only add a clarification when the term would genuinely be unclear to someone outside the trade — not for common words, and not just to pad every label with extra detail.
 
@@ -89,6 +93,8 @@ Four rules for the content itself:
 5. Score every category's fixedness. Set "fixedness" (0-1) on every category node: near 0 means the category is mostly a given condition or constraint the user already has and isn't really choosing (e.g. their climate zone, their existing assignment rubric) — near 1 means it's a genuine space of options worth exploring, where the user benefits from seeing what's possible (e.g. crop varieties, narrative approaches). Most subjects have a mix — be honest about where each category actually falls rather than defaulting to the middle.
 
 6. Set "questionPhrase" on every category node — see its schema description. This is read aloud as "Tell me about {questionPhrase}", so it must actually sound like natural spoken English with that prefix, not just the label with words removed.
+
+7. Set "exclusive" on a subcategory when its OWN elements are mutually exclusive alternatives of each other — a user should pick only one (e.g. a "Primary Material" subcategory whose elements are Oak / Walnut / Maple: picking one makes the others wrong for the same purpose, the same way axis/direction conflicts work, just scoped to one subcategory's own elements instead of spanning the tree). Leave it false/omitted when multiple elements are genuinely meant to be combined (e.g. "Accent Colors," where picking two or three is normal, or a subcategory whose elements aren't alternatives to each other at all). Most subcategories are NOT exclusive — only set this when the elements really are alternatives for the same slot, don't default to true.
 
 If a first branch is suggested below (from the specificity gate), make it the first category, since it represents a real gap the user needs to resolve before anything else matters.
 
@@ -167,6 +173,7 @@ function buildTreeFromNodes(nodes) {
         name: sub.label,
         axis: sub.axis,
         direction: sub.direction,
+        exclusive: sub.exclusive === true,
         elements: (sub.children || [])
           .filter(e => e.type === "element")
           .map(e => ({ text: e.label, axis: e.axis, direction: e.direction }))

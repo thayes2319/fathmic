@@ -1614,6 +1614,19 @@ function renderTaxonomyImpl() {
         checkbox.addEventListener("change", () => {
           if (checkbox.checked) {
             state.selected.add(text);
+            // Subcategory-local exclusivity -- independent of the cross-tree
+            // axis/direction system, which only catches conflicts the model
+            // explicitly tagged. sub.exclusive means "pick one of these,"
+            // stated by the model per-subcategory, so it applies even when
+            // there's no axis tag to hang a conflict off of.
+            if (sub.exclusive) {
+              specificCheckboxes.forEach(({ checkbox: otherCheckbox, text: otherText }) => {
+                if (otherCheckbox !== checkbox && otherCheckbox.checked) {
+                  otherCheckbox.checked = false;
+                  state.selected.delete(otherText);
+                }
+              });
+            }
             if (generalCheckbox.checked) {
               generalCheckbox.checked = false;
               state.selected.delete(sub.name);
