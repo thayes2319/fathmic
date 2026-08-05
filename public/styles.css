@@ -315,7 +315,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 #stale-banner button { margin-top: 0; padding: 0.35rem 0.8rem; font-size: 0.85rem; }
 #stale-banner[hidden] { display: none; }
 
-#action-row { display: flex; align-items: center; flex-wrap: wrap; gap: 1.1rem; margin-top: 0.6rem; }
+/* flex-end, not center: persona-row is a label-above-select stack, taller
+   than the plain buttons either side of it. This aligns the select's own
+   bottom edge with the buttons' bottom edge; the label just sticks up above
+   that shared line instead of pushing the select down to stay centered. */
+#action-row { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 1.1rem; margin-top: 0.6rem; }
 /* Fixed width sized to the longest word in the cycle ("Concentrate") so the
    button doesn't visibly resize as DISTILL_LABELS rotates through it. */
 #action-row #distill-btn { margin-top: 0; width: 108px; text-align: center; }
