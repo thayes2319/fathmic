@@ -316,9 +316,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 #stale-banner[hidden] { display: none; }
 
 #action-row { display: flex; align-items: center; flex-wrap: wrap; gap: 1.1rem; margin-top: 0.6rem; }
-#action-row #distill-btn { margin-top: 0; }
-#persona-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0; }
-#persona-row label { margin-bottom: 0; font-weight: normal; font-size: 0.85rem; color: var(--muted); }
+/* Fixed width sized to the longest word in the cycle ("Concentrate") so the
+   button doesn't visibly resize as DISTILL_LABELS rotates through it. */
+#action-row #distill-btn { margin-top: 0; width: 108px; text-align: center; }
+#persona-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; margin-top: 0; }
+#persona-row label { margin-bottom: 0; font-weight: normal; font-size: 0.8rem; color: var(--muted); }
 #persona-row select {
   padding: 0.3rem 0.5rem;
   border: 1px solid var(--border);
@@ -402,6 +404,19 @@ button:disabled { opacity: 0.5; cursor: default; }
   transition: transform 0.15s ease;
 }
 #demos-trending-details[open] summary::after { transform: rotate(90deg); }
+
+/* Keeps Distill / Searching as / Demos & Trending on one row down to a
+   350px-wide viewport -- narrower gap and a more compact Demos & Trending
+   button free up the room the fixed-width Distill button and capped persona
+   select still need. Placed after the base rules above so it actually wins
+   the cascade at matching specificity. */
+@media (max-width: 480px) {
+  #action-row { gap: 0.35rem; }
+  #action-row #distill-btn { width: 84px; padding: 0.45rem 0.35rem; font-size: 0.78rem; }
+  #demos-trending-details summary { padding: 0.3rem 0.35rem; font-size: 0.68rem; }
+  #persona-row select { max-width: 72px; overflow: hidden; text-overflow: ellipsis; }
+  #persona-row label { max-width: 72px; white-space: normal; line-height: 1.15; font-size: 0.68rem; }
+}
 #demo-cases { margin-top: 0.75rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
 
