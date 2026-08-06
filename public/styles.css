@@ -817,6 +817,19 @@ button:disabled { opacity: 0.5; cursor: default; }
   border-bottom: 1px solid var(--border);
 }
 #subcategory-focus-slot .subcategory { margin: 0; border-left: none; padding-left: 0; }
+/* Same layout as the category-level .interview-nav-row -- Previous only
+   shows once there's somewhere to go back to within this category; Next's
+   own label (set in app.js) says whether it's skipping an unanswered
+   question or stepping forward through a review. */
+#subcategory-focus-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+}
 
 .drag-handle {
   cursor: grab;

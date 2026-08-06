@@ -12,6 +12,11 @@ const state = {
   otherTextSnapshot: null,
   expandedCategories: new Set(),
   expandedSubcategories: new Set(),
+  // Interview mode's explicit "skip this one, I don't want to answer it"
+  // signal (the modal's Next button) -- distinct from state.selected, so a
+  // skip never gets sent to synthesis or shows up as a real answer. Keyed
+  // "Category::Sub", same convention as expandedSubcategories.
+  skippedSubcategories: new Set(),
   lastResultText: "",
   lastGenre: null,
   lastGenreLabel: null,
@@ -120,7 +125,9 @@ const el = {
   subcategoryFocusModal: document.getElementById("subcategory-focus-modal"),
   subcategoryFocusBackdrop: document.getElementById("subcategory-focus-backdrop"),
   subcategoryFocusCategory: document.getElementById("subcategory-focus-category"),
-  subcategoryFocusSlot: document.getElementById("subcategory-focus-slot")
+  subcategoryFocusSlot: document.getElementById("subcategory-focus-slot"),
+  subcategoryFocusPrevBtn: document.getElementById("subcategory-focus-prev-btn"),
+  subcategoryFocusNextBtn: document.getElementById("subcategory-focus-next-btn")
 };
 
 // A ?share=<id> URL loads someone else's shared result instead of the normal
@@ -678,6 +685,8 @@ function resetDownstream() {
   state.otherTextSnapshot = null;
   state.expandedCategories.clear();
   state.expandedSubcategories.clear();
+  state.skippedSubcategories.clear();
+  interviewReviewOverride = null;
   state.resultSelectionsSnapshot = null;
   state.lastGenre = null;
   state.lastStakesUsed = null;
@@ -1126,6 +1135,21 @@ let interviewIndex = -1;
 // collide with whatever the previous session ended on.
 let lastFocusKey = null;
 
+// The modal's Previous button lets someone step back to review/re-edit an
+// earlier-in-this-category subcategory even though it's already resolved
+// -- overrides the normal "always show the true forward-most unresolved
+// one" derivation until Next steps forward past it or a new category is
+// entered. { categoryName, subName } | null. Category-scoped (checked
+// against the category actually being rendered), so it naturally stops
+// applying once interview focus moves to a different category.
+let interviewReviewOverride = null;
+
+// Set during renderTaxonomyImpl (see isInterviewFocus block below) to
+// whichever subcategory actually ended up in the focus modal this render --
+// null when nothing's focused. Read by the modal's static Next/Previous
+// button handlers, which live outside the per-category render loop.
+let currentSubcategoryModalNav = null;
+
 function categoryHasSelection(category) {
   if (state.selected.has(category.name)) return true; // category-level "General" pick
   return (category.subcategories || []).some(subcategoryHasSelection);
@@ -1135,6 +1159,15 @@ function subcategoryHasSelection(sub) {
   return state.selected.has(sub.name) ||
     (sub.elements || []).some(e => state.selected.has(typeof e === "string" ? e : e.text)) ||
     !!(state.otherText[sub.name] && state.otherText[sub.name].trim());
+}
+
+// Interview-progression-only concept: a skip counts as "move past this"
+// for the modal's own advancement, but NOT for categoryHasSelection,
+// synthesis payload, the stale banner, etc. -- those all still key off
+// subcategoryHasSelection/state.selected alone, unchanged, so a skip never
+// masquerades as a real answer anywhere outside the interview flow.
+function subcategoryIsInterviewResolved(category, sub) {
+  return subcategoryHasSelection(sub) || state.skippedSubcategories.has(`${category.name}::${sub.name}`);
 }
 
 function hasAnyOtherText() {
@@ -1292,6 +1325,7 @@ function renderTaxonomyImpl() {
     if (el.subcategoryFocusBackdrop) el.subcategoryFocusBackdrop.hidden = true;
     el.subcategoryFocusSlot.innerHTML = "";
   }
+  currentSubcategoryModalNav = null;
 
   // Kept in sync here rather than at each call site that changes interview
   // state — one place that can't drift out of sync with reality.
@@ -1493,46 +1527,68 @@ function renderTaxonomyImpl() {
     }
 
     // Interview focus, one level deeper: within the floated category, reveal
-    // subcategories progressively -- the first unanswered one plus everything
-    // already answered above it, not the whole flat list at once. Purely
-    // derived from state.selected at render time (no separate tracked index),
-    // so it advances "for free" the moment applyExclusions() re-renders after
-    // a selection changes (see the interview-mode hook there). Earlier
-    // answered subcategories stay visible and editable rather than being
-    // hidden once passed -- that's how "go back" works here, not a separate
-    // back button: the answer is still right there to change.
+    // subcategories progressively -- the first unresolved one plus everything
+    // already resolved above it, not the whole flat list at once. "Resolved"
+    // includes an explicit skip (state.skippedSubcategories, set by the
+    // modal's Next button), not just a real answer -- see
+    // subcategoryIsInterviewResolved. The forward edge (interviewSubRevealCount)
+    // is purely derived from state at render time, so it advances "for free"
+    // the moment applyExclusions() re-renders after a selection/skip changes.
+    // Earlier resolved subcategories stay visible and editable in the flat
+    // category rather than being hidden once passed.
+    //
+    // modalSubIndex is a SEPARATE concept: which one subcategory (if any) is
+    // actually in the focus modal right now. Normally that's the forward
+    // edge itself, but the modal's Previous button can point it at an
+    // earlier, already-resolved subcategory for review (interviewReviewOverride)
+    // -- only honored if it's within this category and within what's
+    // already been revealed, so it can never jump ahead of the real
+    // progress or into a different category.
     let interviewSubRevealCount = Infinity;
+    let modalSubIndex = null;
     if (isInterviewFocus) {
-      interviewSubRevealCount = 0;
-      for (const sub of (category.subcategories || [])) {
-        interviewSubRevealCount++;
-        if (!subcategoryHasSelection(sub)) break;
+      const subs = category.subcategories || [];
+      let trueRevealCount = 0;
+      for (const sub of subs) {
+        trueRevealCount++;
+        if (!subcategoryIsInterviewResolved(category, sub)) break;
       }
+      interviewSubRevealCount = trueRevealCount;
+
+      if (interviewReviewOverride && interviewReviewOverride.categoryName === category.name) {
+        const idx = subs.findIndex(s => s.name === interviewReviewOverride.subName);
+        if (idx !== -1 && idx < trueRevealCount) modalSubIndex = idx;
+      }
+      if (modalSubIndex === null) {
+        const edgeIndex = trueRevealCount - 1;
+        if (edgeIndex >= 0 && edgeIndex < subs.length && !subcategoryIsInterviewResolved(category, subs[edgeIndex])) {
+          modalSubIndex = edgeIndex;
+        }
+      }
+
+      // Exposed for the modal's static Next/Previous buttons, wired once
+      // outside this per-category loop -- only one category is ever
+      // isInterviewFocus at a time, so this always ends up holding the
+      // right one by the time the full render pass finishes.
+      currentSubcategoryModalNav = modalSubIndex === null ? null : {
+        categoryName: category.name,
+        subName: subs[modalSubIndex].name,
+        subIndex: modalSubIndex,
+        canGoPrevious: modalSubIndex > 0,
+        isAlreadyResolved: subcategoryIsInterviewResolved(category, subs[modalSubIndex])
+      };
     }
 
     // Tracks whether interview focus genuinely landed on a NEW (category,
     // subcategory) pair this render -- lastFocusKey guards against
-    // re-triggering the entrance flash + scroll below on every incidental
-    // re-render (this whole function runs on every selection change, not
-    // just ones that actually advance the focus). Also covers a category
-    // with zero subcategories (a fully "Given" one).
-    //
-    // Deliberately does NOT re-fire once every subcategory is answered.
-    // Real bug caught live: interviewSubRevealCount still points at the
-    // last subcategory after it's answered (the reveal-count math doesn't
-    // change), so focusedSub correctly resolves to null there too -- but
-    // that produces a DIFFERENT key ("Category::lastSub" -> "Category::")
-    // than the one already shown, which read as "genuinely new" and
-    // re-triggered the entrance treatment with nothing new to show. The
-    // subs.length===0 check below is what still allows the legitimate
-    // zero-subcategory case through while excluding this one.
+    // re-triggering the entrance flash below on every incidental re-render
+    // (this whole function runs on every selection change, not just ones
+    // that actually advance the focus). Also covers a category with zero
+    // subcategories (a fully "Given" one) and jumping to a reviewed subcategory.
     let justEnteredSubFocus = false;
     if (isInterviewFocus) {
       const subs = category.subcategories || [];
-      const candidate = interviewSubRevealCount > 0 && interviewSubRevealCount <= subs.length
-        ? subs[interviewSubRevealCount - 1]
-        : null;
-      const focusedSub = candidate && !subcategoryHasSelection(candidate) ? candidate : null;
+      const focusedSub = modalSubIndex !== null ? subs[modalSubIndex] : null;
       if (focusedSub || subs.length === 0) {
         const focusKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
         if (focusKey !== lastFocusKey) {
@@ -1547,7 +1603,7 @@ function renderTaxonomyImpl() {
 
       const subKey = `${category.name}::${sub.name}`;
       const subEl = document.createElement("details");
-      const isSubInFocus = isInterviewFocus && subIndex === interviewSubRevealCount - 1 && !subcategoryHasSelection(sub);
+      const isSubInFocus = isInterviewFocus && subIndex === modalSubIndex;
       subEl.className = isSubInFocus ? "subcategory subcategory-in-focus" : "subcategory";
       subEl.open = isSubInFocus || state.expandedSubcategories.has(subKey);
       // Brief entrance flash the moment this subcategory actually becomes
@@ -1830,8 +1886,65 @@ function renderTaxonomyImpl() {
     el.taxonomyTree.appendChild(row);
   });
 
+  // Sync the focus modal's static Next/Previous buttons against whatever
+  // the category loop above found (or didn't). Previous only makes sense
+  // once there's an earlier subcategory in this category to step back to;
+  // Next's label reflects what it's actually about to do -- skip an
+  // unanswered question, or step forward through a review.
+  if (el.subcategoryFocusPrevBtn) {
+    el.subcategoryFocusPrevBtn.hidden = !currentSubcategoryModalNav || !currentSubcategoryModalNav.canGoPrevious;
+  }
+  if (el.subcategoryFocusNextBtn) {
+    el.subcategoryFocusNextBtn.hidden = !currentSubcategoryModalNav;
+    if (currentSubcategoryModalNav) {
+      el.subcategoryFocusNextBtn.textContent = currentSubcategoryModalNav.isAlreadyResolved ? "Next →" : "Skip →";
+    }
+  }
+
   el.taxonomySection.hidden = false;
   applyExclusions();
+}
+
+if (el.subcategoryFocusPrevBtn) {
+  el.subcategoryFocusPrevBtn.addEventListener("click", () => {
+    if (!currentSubcategoryModalNav || !currentSubcategoryModalNav.canGoPrevious) return;
+    const { categoryName, subIndex } = currentSubcategoryModalNav;
+    const category = state.categories.find(c => c.name === categoryName);
+    const prevSub = category && (category.subcategories || [])[subIndex - 1];
+    if (!prevSub) return;
+    interviewReviewOverride = { categoryName, subName: prevSub.name };
+    renderTaxonomy();
+  });
+}
+
+if (el.subcategoryFocusNextBtn) {
+  el.subcategoryFocusNextBtn.addEventListener("click", () => {
+    if (!currentSubcategoryModalNav) return;
+    const { categoryName, subName, subIndex, isAlreadyResolved } = currentSubcategoryModalNav;
+    if (!isAlreadyResolved) {
+      // The true unresolved edge -- Next here means "skip, don't make me
+      // answer this one." Never touches state.selected, so it can't ever
+      // masquerade as a real answer in the synthesis payload.
+      state.skippedSubcategories.add(`${categoryName}::${subName}`);
+      interviewReviewOverride = null;
+    } else {
+      // Reviewing an earlier answer -- step forward one, but only if that
+      // next one is ALSO already resolved. Checking "does a next array
+      // slot exist" isn't enough (real bug, caught live): the slot right
+      // past a fully-reviewed run is exactly the true unresolved edge, and
+      // pinning the override there stops it from ever handing back to
+      // normal derivation, even after that edge later gets a real answer
+      // via a direct checkbox click -- the override just keeps "reviewing"
+      // it forever. Resolved-ness, not existence, is what actually means
+      // "still within the reviewable run."
+      const category = state.categories.find(c => c.name === categoryName);
+      const nextSub = category && (category.subcategories || [])[subIndex + 1];
+      interviewReviewOverride = (nextSub && subcategoryIsInterviewResolved(category, nextSub))
+        ? { categoryName, subName: nextSub.name }
+        : null;
+    }
+    renderTaxonomy();
+  });
 }
 
 // Scans the data model (not the DOM) for anything currently selected that
