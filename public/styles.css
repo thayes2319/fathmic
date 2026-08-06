@@ -663,7 +663,7 @@ button:disabled { opacity: 0.5; cursor: default; }
      just because it wasn't in this row when this breakpoint was written. */
   #action-row #distill-btn { width: 84px; padding: 0.45rem 0.35rem; font-size: 0.78rem; height: 30px; }
   #demos-trending-toggle { height: 30px; padding: 0 0.35rem; font-size: 0.68rem; }
-  #show-blueprint-btn { height: 30px; padding: 0 0.5rem; font-size: 0.68rem; }
+  #show-blueprint-btn { height: 30px; }
 }
 @media (max-width: 480px) {
   /* 182px was sized to the widest optgroup entry, not "Prefer not to say"
