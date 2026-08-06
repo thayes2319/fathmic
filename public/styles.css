@@ -371,8 +371,13 @@ button:disabled { opacity: 0.5; cursor: default; }
    that shared line instead of pushing the select down to stay centered. */
 #action-row { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 1.1rem; margin-top: 0.6rem; }
 /* Fixed width sized to the longest word in the cycle ("Concentrate") so the
-   button doesn't visibly resize as DISTILL_LABELS rotates through it. */
-#action-row #distill-btn { margin-top: 0; width: 108px; text-align: center; }
+   button doesn't visibly resize as DISTILL_LABELS rotates through it.
+   Explicit height on all three #action-row buttons -- <summary> and
+   <button> render at slightly different heights even with identical
+   padding/font-size (measured: 38.6px vs 35.6px), so without this they
+   drift out of alignment despite otherwise-matching styles. */
+#action-row #distill-btn { margin-top: 0; width: 108px; text-align: center; height: 36px; }
+#demos-trending-details summary, #show-blueprint-btn { height: 36px; }
 #persona-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; margin: 0 auto; }
 #persona-row label { margin-bottom: 0; font-weight: normal; font-size: 0.8rem; color: var(--muted); }
 #persona-row select {
@@ -531,22 +536,33 @@ button:disabled { opacity: 0.5; cursor: default; }
 #demos-trending-details[open] summary::after { transform: rotate(90deg); }
 
 /* Same pill treatment as the Demos & Trending summary right beside it --
-   reads as a parallel, equally-weighted action, not an afterthought link. */
+   reads as a parallel, equally-weighted action, not an afterthought link.
+   Always the Blueprint brand cyan (not just while active) so it reads as
+   "the Blueprint one" at a glance, matching the BLUEPRINT badge/demo-chip
+   color used everywhere else in the app. Chevron mirrors the Demos &
+   Trending summary's own open/closed indicator -- same rotate-on-expand
+   convention, toggled via .active since this isn't a native <details>. */
 #show-blueprint-btn {
   display: inline-flex;
   align-items: center;
   margin-top: 0;
   padding: 0.55rem 1.1rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 70%, white);
+  border: 1px solid var(--logo-dot);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--accent) 70%, white);
+  background: var(--logo-dot);
   color: #fff;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
 }
 #show-blueprint-btn:hover { opacity: 0.88; }
-#show-blueprint-btn.active { background: var(--logo-dot); border-color: var(--logo-dot); }
+#show-blueprint-btn::after {
+  content: "▸";
+  display: inline-block;
+  margin-left: 0.5rem;
+  transition: transform 0.15s ease;
+}
+#show-blueprint-btn.active::after { transform: rotate(90deg); }
 
 /* Keeps Distill / Searching as / Demos & Trending on one row down to a
    350px-wide viewport -- narrower gap and a more compact Demos & Trending
