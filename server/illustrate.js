@@ -53,6 +53,34 @@ Pick whichever treatment actually fits the subject, then write ONE concise, vivi
 
 Critical constraint: image models cannot render legible text, numbers, or labels reliably — they produce garbled gibberish when asked to. NEVER include dimension labels, measurement callouts, material tags, or any readable text in the description, even though a literal technical blueprint would normally have them. Show the design itself; leave annotation out entirely.`;
 
+// The "technical" companion view (showcase carousel's final-frame split) --
+// deliberately a DIFFERENT treatment from object_sketch above (white-line
+// blueprint-blue rendering, not a concept-sketch marker rendering), so the
+// two images actually read as two distinct views of the same thing rather
+// than two random re-rolls of the same style.
+const BLUEPRINT_TECHNICAL_PROMPT_SYSTEM = `You are composing a visual generation prompt for FATHmic's BLUEPRINT mode — specifically the "technical" companion view: a genuine engineering/architectural blueprint-style rendering of the same thing being specified, NOT the concept-sketch treatment used elsewhere in this app.
+
+Render the SPECIFIC thing described by the distilled selections as a classic blueprint: white or light-cyan linework on a solid blueprint-blue background, orthographic or cross-section framing (front/side/plan view, or an exploded/cutaway view where it suits the subject), thin precise contour lines, construction-drawing sensibility — the way an architect's or engineer's blueprint sheet actually looks, not a photograph, not a concept-art sketch, not a color rendering.
+
+Write ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly, naming the blueprint treatment explicitly (e.g. "rendered as a white-line architectural blueprint on a deep blue ground") so the output doesn't default to a photorealistic or concept-sketch style instead.
+
+Critical constraint: image models cannot render legible text, numbers, or labels reliably — they produce garbled gibberish when asked to. NEVER include dimension labels, measurement callouts, material tags, title blocks, or any readable text in the description, even though a real blueprint sheet would normally have them. Show the linework and framing only; leave all annotation out entirely.`;
+
+const BLUEPRINT_TECHNICAL_PROMPT_TOOL = {
+  name: "compose_blueprint_technical_prompt",
+  description: "Compose the image generation prompt for a Blueprint topic's technical/schematic companion view.",
+  input_schema: {
+    type: "object",
+    properties: {
+      prompt: {
+        type: "string",
+        description: "ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly, describing a genuine blueprint/schematic rendering."
+      }
+    },
+    required: ["prompt"]
+  }
+};
+
 const BLUEPRINT_PROMPT_TOOL = {
   name: "compose_blueprint_image_prompt",
   description: "Classify which visual treatment a Blueprint-mode topic needs and compose its image generation prompt.",
@@ -91,6 +119,19 @@ const BLUEPRINT_PATTERN_NEGATIVE_PROMPT =
   "no perspective, no depth, no room scene, no furniture, no isolated object, " +
   "no line art, no sketch lines, no white background, no vignette, no framing border";
 
+// Actively pushes away from object_sketch's own defaults (white background,
+// marker-rendering color, concept-art shading) on top of the usual realism
+// exclusions -- same reasoning as the pattern negative prompt above: without
+// this, the model's strong prior toward "clean sketch on white" wins over
+// the blueprint-blue framing the positive prompt asked for.
+const BLUEPRINT_TECHNICAL_NEGATIVE_PROMPT =
+  GENERAL_NEGATIVE_PROMPT +
+  ", no photorealism, no photograph, no glossy render, no 3D render, no CGI, " +
+  "no color illustration, no marker rendering, no concept sketch, no white background, " +
+  "no watercolor, no painterly texture, no warm tones, " +
+  "no numbers, no digits, no dimension lines, no measurement arrows, no ruler marks, " +
+  "no title block, no callouts, no annotations";
+
 async function composeImagePrompt(topic, resultExcerpt) {
   return callText({
     system: PROMPT_SYSTEM,
@@ -110,6 +151,16 @@ async function composeBlueprintImagePrompt(topic, resultExcerpt) {
     prompt: String(result.prompt || ""),
     style: result.style === "pattern_swatch" ? "pattern_swatch" : "object_sketch"
   };
+}
+
+async function composeBlueprintTechnicalPrompt(topic, resultExcerpt) {
+  const result = await callStructured({
+    system: BLUEPRINT_TECHNICAL_PROMPT_SYSTEM,
+    prompt: `Topic: ${topic}\n\nDistilled content (excerpt):\n${resultExcerpt}`,
+    tool: BLUEPRINT_TECHNICAL_PROMPT_TOOL,
+    label: "illustration-prompt-blueprint-technical"
+  });
+  return String(result.prompt || "");
 }
 
 async function runStabilityIllustration(imagePrompt, negativePrompt, model) {
@@ -195,13 +246,25 @@ async function runGeminiIllustration(imagePrompt) {
   return imageBase64;
 }
 
-async function runIllustration({ topic, resultText, isBlueprint }) {
+async function runIllustration({ topic, resultText, isBlueprint, variant }) {
   const blueprint = isBlueprint === true;
   const excerpt = (resultText || "").slice(0, 600);
 
   if (!blueprint) {
     const imagePrompt = await composeImagePrompt(topic, excerpt);
     const imageBase64 = await runStabilityIllustration(imagePrompt, GENERAL_NEGATIVE_PROMPT, "sd3.5-large-turbo");
+    return { image: imageBase64, prompt: imagePrompt };
+  }
+
+  // The showcase carousel's "technical" companion view -- a distinct
+  // blueprint-style rendering, not another roll of object_sketch/
+  // pattern_swatch. Bypasses that classification entirely (always the same
+  // treatment) and always goes through Stability -- this is a batch/offline
+  // asset-generation path, not a live per-user request, so there's no case
+  // where the Gemini-if-configured branch below should apply to it.
+  if (variant === "technical") {
+    const imagePrompt = await composeBlueprintTechnicalPrompt(topic, excerpt);
+    const imageBase64 = await runStabilityIllustration(imagePrompt, BLUEPRINT_TECHNICAL_NEGATIVE_PROMPT, "sd3.5-large");
     return { image: imageBase64, prompt: imagePrompt };
   }
 

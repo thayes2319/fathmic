@@ -327,9 +327,32 @@
         <div id="blueprint-showcase" aria-hidden="true">
           <div id="blueprint-showcase-topic"></div>
           <div id="blueprint-showcase-stage">
-            <div id="blueprint-showcase-spec" class="bp-showcase-panel"></div>
-            <img id="blueprint-showcase-image" class="bp-showcase-panel" alt="" />
+            <!-- Scope frame: spec text (left) + a live view of the actual
+                 generated image (right), simultaneously -- not a crossfade
+                 from one to the other. Their widths animate narrow -> wide
+                 via bp-image-expanded (see app.js/styles.css); the spec
+                 text itself never disappears, just gets a narrower column. -->
+            <div id="bp-stage-scope" class="bp-showcase-panel">
+              <div id="blueprint-showcase-spec" class="bp-split-pane"></div>
+              <div id="bp-scope-image-pane" class="bp-split-pane">
+                <img id="blueprint-showcase-image" alt="" />
+              </div>
+            </div>
+            <!-- Technical frame: a second, distinctly-styled generated
+                 image (see server/illustrate.js's "technical" variant),
+                 shown twice side by side -- zoom-to-fit (whole image) on
+                 the left, a tighter detail crop on the right. -->
+            <div id="bp-stage-technical" class="bp-showcase-panel">
+              <div class="bp-split-pane">
+                <img id="bp-showcase-technical-fit" alt="" />
+              </div>
+              <div class="bp-split-pane">
+                <img id="bp-showcase-technical-detail" alt="" />
+              </div>
+            </div>
           </div>
+          <button id="bp-showcase-prev" class="scroll-arrow bp-showcase-arrow bp-showcase-arrow-left" aria-label="Previous example" type="button">&#8249;</button>
+          <button id="bp-showcase-next" class="scroll-arrow bp-showcase-arrow bp-showcase-arrow-right" aria-label="Next example" type="button">&#8250;</button>
         </div>
       </div>
     </section>

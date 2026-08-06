@@ -91,8 +91,14 @@ const el = {
   blueprintShowcase: document.getElementById("blueprint-showcase"),
   blueprintShowcaseTopic: document.getElementById("blueprint-showcase-topic"),
   blueprintShowcaseStage: document.getElementById("blueprint-showcase-stage"),
+  bpStageScope: document.getElementById("bp-stage-scope"),
+  bpStageTechnical: document.getElementById("bp-stage-technical"),
   blueprintShowcaseSpec: document.getElementById("blueprint-showcase-spec"),
   blueprintShowcaseImage: document.getElementById("blueprint-showcase-image"),
+  bpShowcaseTechnicalFit: document.getElementById("bp-showcase-technical-fit"),
+  bpShowcaseTechnicalDetail: document.getElementById("bp-showcase-technical-detail"),
+  bpShowcasePrev: document.getElementById("bp-showcase-prev"),
+  bpShowcaseNext: document.getElementById("bp-showcase-next"),
   demoScrollLeft: document.getElementById("demo-scroll-left"),
   demoScrollRight: document.getElementById("demo-scroll-right"),
   promptIcon: document.getElementById("prompt-icon"),
@@ -2680,6 +2686,7 @@ const BLUEPRINT_VERTICALS = [
     label: "Spaces & Environments",
     topics: [
       { label: "Wallcovering patterns", seed: "Creating a complete wallcovering pattern specification" },
+      { label: "Wall murals", seed: "Planning a wall mural design and placement for a room" },
       { label: "Lobby feature walls", seed: "Generating an environmental graphics package for a lobby feature wall" },
       { label: "Window film", seed: "Defining a window film specification including opacity and motif rules" },
       { label: "Ceiling murals", seed: "Creating a ceiling mural specification with orientation and panel sequencing" },
@@ -2690,7 +2697,9 @@ const BLUEPRINT_VERTICALS = [
       { label: "Facade wraps", seed: "Generating a facade wrap specification with anchor points and material constraints" },
       { label: "Furniture surface graphics", seed: "Creating a furniture surface specification with edge wraps and CNC cutlines" },
       { label: "Scenic backdrops", seed: "Producing a scenic backdrop specification with rigging and quick-change sequencing" },
-      { label: "Kid's room murals", seed: "Generating a kid's room mural specification with safety and color rules" }
+      { label: "Kid's room murals", seed: "Generating a kid's room mural specification with safety and color rules" },
+      { label: "Medical office graphics", seed: "Generating an environmental graphics package for a medical office lobby and corridors" },
+      { label: "Medical wayfinding", seed: "Defining a wayfinding signage system specification for a multi-department medical facility" }
     ]
   },
   {
@@ -2734,6 +2743,7 @@ const BLUEPRINT_VERTICALS = [
     label: "Business & Operations",
     topics: [
       { label: "Workflow automations", seed: "Creating a workflow automation specification with triggers and actions" },
+      { label: "Medical intake workflows", seed: "Creating a medical office patient intake and scheduling workflow specification (administrative process only, no clinical or diagnostic content)" },
       { label: "SaaS integrations", seed: "Producing an integration specification for two SaaS tools" },
       { label: "Data pipelines", seed: "Defining a data pipeline specification" },
       { label: "Business models", seed: "Producing a business model specification with cost structure" },
@@ -2843,16 +2853,20 @@ if (el.blueprintCaptionCycle) {
 }
 
 // Showcase carousel: real pre-captured pipeline output (see
-// showcase-fixtures.js -- topic, a synthesized Blueprint spec excerpt, and
-// an actual generated illustration per entry), not live generation -- a
-// real taxonomy+synthesis+illustration run takes real seconds, far too slow
-// for a carousel meant to feel fast. Topic stays anchored through both
-// stages of its own example; the stage beneath it crossfades spec text ->
-// illustration, then the whole thing advances to the next example.
-// Deliberately faster than the caption cycle above -- this is the actual
-// "look how much range this has" moment, not connective tissue.
-const BLUEPRINT_SHOWCASE_SPEC_MS = 1700;
-const BLUEPRINT_SHOWCASE_IMAGE_MS = 1900;
+// showcase-fixtures.js -- topic, a synthesized Blueprint spec excerpt, a
+// real generated illustration, and a real generated "technical" companion
+// image per entry), not live generation -- a real taxonomy+synthesis+
+// illustration run takes real seconds, far too slow for a carousel meant to
+// feel fast. Topic stays anchored through all 3 phases of its own example:
+// (A) spec text + a live view of the illustration, side by side, narrow;
+// (B) same split, image pane grown wide (spec never disappears, just gets
+// squeezed); (C) crossfades to the technical image shown twice -- zoom-to-
+// fit + a tighter detail crop. Deliberately faster than the caption cycle
+// above -- this is the actual "look how much range this has" moment, not
+// connective tissue.
+const BLUEPRINT_SHOWCASE_PHASE_A_MS = 1100;
+const BLUEPRINT_SHOWCASE_PHASE_B_MS = 1500;
+const BLUEPRINT_SHOWCASE_PHASE_C_MS = 1600;
 const BLUEPRINT_SHOWCASE_FADE_MS = 350;
 
 // Interleaves the first/second half of an array (A1,B1,A2,B2,...) -- a
@@ -2881,26 +2895,85 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
   // One of the 3 orders, picked fresh per page load.
   const showcaseOrder = BLUEPRINT_SHOWCASE_ORDERS[Math.floor(Math.random() * BLUEPRINT_SHOWCASE_ORDERS.length)](SHOWCASE_FIXTURES);
   let showcaseIndex = 0;
+  let showcasePaused = false;
+  let showcaseTimeoutId = null;
 
-  function runShowcaseExample() {
+  function scheduleShowcase(fn, ms) {
+    showcaseTimeoutId = setTimeout(fn, ms);
+  }
+
+  // Renders phase A (spec + narrow image split) for the current index and
+  // resets the technical frame's images -- pure render, no scheduling, so
+  // pause/resume/step can all call this to land on a consistent frame
+  // without also (re)starting the auto-advance chain.
+  function renderShowcasePhaseA() {
     const item = showcaseOrder[showcaseIndex];
     el.blueprintShowcaseTopic.textContent = item.topic;
     el.blueprintShowcaseTopic.classList.remove("bp-fading");
     el.blueprintShowcaseSpec.textContent = item.specSnippet;
     el.blueprintShowcaseImage.src = item.image;
-    stage.classList.remove("showing-image");
-    stage.classList.add("showing-spec");
-
-    setTimeout(() => {
-      stage.classList.remove("showing-spec");
-      stage.classList.add("showing-image");
-      setTimeout(() => {
-        showcaseIndex = (showcaseIndex + 1) % showcaseOrder.length;
-        el.blueprintShowcaseTopic.classList.add("bp-fading");
-        setTimeout(runShowcaseExample, BLUEPRINT_SHOWCASE_FADE_MS);
-      }, BLUEPRINT_SHOWCASE_IMAGE_MS);
-    }, BLUEPRINT_SHOWCASE_SPEC_MS);
+    const technical = item.technicalImage || item.image;
+    el.bpShowcaseTechnicalFit.src = technical;
+    el.bpShowcaseTechnicalDetail.src = technical;
+    el.bpStageScope.classList.remove("bp-image-expanded");
+    stage.classList.remove("showing-technical");
+    stage.classList.add("showing-scope");
   }
+
+  // Renders phase A, then -- unless paused -- chains through phases B and C
+  // and on to the next topic. Pausing mid-chain just means this function
+  // won't get called again until resumeShowcase calls it; there's no
+  // separate "frozen mid-transition" state to manage, everything always
+  // settles back on phase A first.
+  function runShowcaseExample() {
+    renderShowcasePhaseA();
+    if (showcasePaused) return;
+    scheduleShowcase(() => {
+      el.bpStageScope.classList.add("bp-image-expanded");
+      scheduleShowcase(() => {
+        stage.classList.remove("showing-scope");
+        stage.classList.add("showing-technical");
+        scheduleShowcase(() => {
+          showcaseIndex = (showcaseIndex + 1) % showcaseOrder.length;
+          el.blueprintShowcaseTopic.classList.add("bp-fading");
+          scheduleShowcase(runShowcaseExample, BLUEPRINT_SHOWCASE_FADE_MS);
+        }, BLUEPRINT_SHOWCASE_PHASE_C_MS);
+      }, BLUEPRINT_SHOWCASE_PHASE_B_MS);
+    }, BLUEPRINT_SHOWCASE_PHASE_A_MS);
+  }
+
+  function pauseShowcase() {
+    if (showcasePaused) return;
+    showcasePaused = true;
+    if (showcaseTimeoutId) clearTimeout(showcaseTimeoutId);
+    el.blueprintShowcase.classList.add("bp-paused");
+  }
+
+  function resumeShowcase() {
+    if (!showcasePaused) return;
+    showcasePaused = false;
+    el.blueprintShowcase.classList.remove("bp-paused");
+    runShowcaseExample();
+  }
+
+  stage.addEventListener("click", () => {
+    if (showcasePaused) resumeShowcase(); else pauseShowcase();
+  });
+
+  // Manual step also pauses -- landing on a topic via the arrows and then
+  // having it immediately auto-advance out from under you would defeat the
+  // point of stepping there deliberately. Resume (click the stage) to let
+  // it keep playing from here.
+  function stepShowcase(direction) {
+    if (showcaseTimeoutId) clearTimeout(showcaseTimeoutId);
+    showcaseIndex = (showcaseIndex + direction + showcaseOrder.length) % showcaseOrder.length;
+    showcasePaused = true;
+    el.blueprintShowcase.classList.add("bp-paused");
+    renderShowcasePhaseA();
+  }
+  if (el.bpShowcasePrev) el.bpShowcasePrev.addEventListener("click", () => stepShowcase(-1));
+  if (el.bpShowcaseNext) el.bpShowcaseNext.addEventListener("click", () => stepShowcase(1));
+
   runShowcaseExample();
 }
 

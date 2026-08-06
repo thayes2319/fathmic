@@ -35,9 +35,10 @@ const KNOWN_BLUEPRINT_SUBJECTS = [
   "Custom sneaker design", "Wedding theme & decor", "Kitchen remodel", "Backyard deck & patio",
   "Custom car build", "Cosplay costume design", "Tiny house build", "Custom bicycle build",
   // Spaces & Environments
-  "Wallcovering patterns", "Lobby feature walls", "Window film", "Ceiling murals",
+  "Wallcovering patterns", "Wall murals", "Lobby feature walls", "Window film", "Ceiling murals",
   "Gallery wall systems", "Signage systems", "Retail graphics", "Museum exhibit graphics",
   "Facade wraps", "Furniture surface graphics", "Scenic backdrops", "Kid's room murals",
+  "Medical office graphics", "Medical wayfinding",
   // Branding & Visual Identity
   "Brand identity systems", "Logo systems", "Color token systems", "Typography systems", "Brand kits",
   // Digital Product & UI
@@ -47,7 +48,7 @@ const KNOWN_BLUEPRINT_SUBJECTS = [
   "Wiring harnesses", "Signal routing", "PCB wiring", "Textile patterns",
   "Drapery patterns", "Upholstery patterns",
   // Business & Operations
-  "Workflow automations", "SaaS integrations", "Data pipelines", "Business models",
+  "Workflow automations", "Medical intake workflows", "SaaS integrations", "Data pipelines", "Business models",
   "Compliance policies", "Training modules", "Research summaries"
 ];
 

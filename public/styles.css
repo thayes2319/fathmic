@@ -474,16 +474,19 @@ button:disabled { opacity: 0.5; cursor: default; }
 .blueprint-chip:hover { opacity: 0.85; }
 
 /* The showcase carousel: topic stays anchored/visible for the whole example
-   while the stage beneath it crossfades between a spec-text excerpt and the
-   real generated illustration -- deliberately faster-paced than the caption
-   cycle above (this is the actual "look how much range this has" moment,
-   the caption is just connective tissue). Hidden via JS (not just empty
-   content) when SHOWCASE_FIXTURES isn't loaded/populated. */
-#blueprint-showcase {
-  margin-top: 0.9rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid var(--border);
-}
+   while the stage beneath it runs through 3 phases -- see app.js's
+   runShowcaseExample: (1) spec text + a small live view of the real
+   generated image, side by side, (2) the same split with the image pane
+   grown wide, spec squeezed narrower (never removed), (3) a second, purely
+   technical/blueprint-style generated image shown twice -- zoom-to-fit +
+   a tighter detail crop. Deliberately faster-paced than the caption cycle
+   above (this is the actual "look how much range this has" moment, the
+   caption is just connective tissue). Hidden via JS (not just empty
+   content) when SHOWCASE_FIXTURES isn't loaded/populated. Position:relative
+   so the prev/next arrows below can anchor to it, not just the stage --
+   they need to sit at the stage's vertical center but that's the only
+   thing sizing this wrapper differently from the stage itself. */
+#blueprint-showcase { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--border); position: relative; }
 #blueprint-showcase-topic {
   font-weight: 700;
   font-size: 0.95rem;
@@ -493,20 +496,33 @@ button:disabled { opacity: 0.5; cursor: default; }
   transition: opacity 0.35s ease;
 }
 #blueprint-showcase-topic.bp-fading { opacity: 0; }
+/* cursor:pointer -- the whole stage is a click-to-pause/resume toggle
+   (see app.js), on top of the explicit prev/next arrows. */
 #blueprint-showcase-stage {
   position: relative;
-  height: 150px;
+  height: 190px;
   border-radius: 8px;
   overflow: hidden;
   background: rgba(127, 127, 127, 0.08);
+  cursor: pointer;
 }
 .bp-showcase-panel {
   position: absolute;
   inset: 0;
+  display: flex;
   opacity: 0;
   transition: opacity 0.35s ease;
 }
+#blueprint-showcase-stage.showing-scope #bp-stage-scope { opacity: 1; }
+#blueprint-showcase-stage.showing-technical #bp-stage-technical { opacity: 1; }
+
+/* Both frames are a 2-pane row; width (not flex-basis -- more predictable
+   to transition) is what actually animates between phases 1 and 2, driven
+   by toggling .bp-image-expanded on #bp-stage-scope. flex-shrink:0 keeps
+   flexbox from fighting the explicit widths. */
+.bp-split-pane { height: 100%; flex-shrink: 0; overflow: hidden; transition: width 0.7s ease; }
 #blueprint-showcase-spec {
+  width: 62%;
   display: flex;
   align-items: center;
   padding: 0.85rem 1rem;
@@ -514,13 +530,66 @@ button:disabled { opacity: 0.5; cursor: default; }
   line-height: 1.45;
   color: var(--fg);
 }
-#blueprint-showcase-image {
+#bp-scope-image-pane { width: 38%; }
+/* Phase 2: image pane grows, spec shrinks -- text stays fully rendered
+   (never removed, per the "keep the scope" requirement), just reflows
+   into a narrower column at a slightly smaller size so more of it stays
+   legible in less width. */
+#bp-stage-scope.bp-image-expanded #blueprint-showcase-spec { width: 26%; font-size: 0.74rem; }
+#bp-stage-scope.bp-image-expanded #bp-scope-image-pane { width: 74%; }
+
+#blueprint-showcase-image, #bp-showcase-technical-fit, #bp-showcase-technical-detail {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  display: block;
 }
-#blueprint-showcase-stage.showing-spec #blueprint-showcase-spec { opacity: 1; }
-#blueprint-showcase-stage.showing-image #blueprint-showcase-image { opacity: 1; }
+#blueprint-showcase-image { object-fit: cover; }
+#bp-stage-technical .bp-split-pane { width: 50%; }
+/* contain (not cover) so the whole technical image is visible uncropped --
+   "zoom to fit". Background matches the technical images' own blueprint-
+   blue ground so the inevitable top/bottom letterbox strip (these are
+   square images in a wider-than-tall pane) reads as part of the image
+   instead of an empty gap. */
+#bp-showcase-technical-fit { object-fit: contain; background: #163f7a; }
+/* cover -- crops to whichever dimension needs less scaling to fill the
+   pane, i.e. the tightest possible zoom that still fills it edge to edge.
+   That's the "detail view" the pairing calls for, with zero extra logic:
+   object-fit:cover already picks the more-zoomed-in axis by definition. */
+#bp-showcase-technical-detail { object-fit: cover; }
+
+/* Dark, not light -- these overlay both the spec-text pane (pale gray) and
+   the image panes (anything), so a light circle read fine against images
+   but nearly vanished against the pale text background. Dark reads clearly
+   against both. */
+.bp-showcase-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  background: rgba(20, 20, 20, 0.6);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+.bp-showcase-arrow:hover { background: rgba(20, 20, 20, 0.85); color: #fff; }
+.bp-showcase-arrow-left { left: 0.5rem; }
+.bp-showcase-arrow-right { right: 0.5rem; }
+/* A paused showcase gets a visible cue beyond just "stopped moving" --
+   easy to miss otherwise, especially mid-transition. */
+#blueprint-showcase.bp-paused #blueprint-showcase-stage { box-shadow: inset 0 0 0 2px var(--logo-dot); }
+#blueprint-showcase.bp-paused::after {
+  content: "Paused — click to resume";
+  position: absolute;
+  top: calc(1.3em + 0.5rem + 0.4rem);
+  left: 0.5rem;
+  font-size: 0.68rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 5;
+}
 
 #demos-trending-toggle {
   display: inline-flex;
