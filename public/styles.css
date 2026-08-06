@@ -591,6 +591,67 @@ button:disabled { opacity: 0.5; cursor: default; }
   z-index: 5;
 }
 
+/* Locked top-right, same dark-glass treatment as the prev/next arrows so
+   it reads as part of the same overlay control family regardless of what
+   phase/image is behind it. Glowing cyan thumb -- the one place this
+   showcase gets an explicit "control panel" moment. */
+#bp-showcase-speed {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  background: rgba(20, 20, 20, 0.6);
+  border-radius: 999px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+#bp-showcase-speed-icon {
+  font-size: 0.7rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 3px var(--logo-dot));
+}
+#bp-showcase-speed-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 56px;
+  height: 3px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+#bp-showcase-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--logo-dot);
+  box-shadow: 0 0 6px var(--logo-dot), 0 0 1px #fff;
+  cursor: pointer;
+}
+#bp-showcase-speed-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: var(--logo-dot);
+  box-shadow: 0 0 6px var(--logo-dot), 0 0 1px #fff;
+  cursor: pointer;
+}
+#bp-showcase-speed-slider::-moz-range-track { background: rgba(255, 255, 255, 0.35); height: 3px; border-radius: 999px; }
+#bp-showcase-speed-value {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  min-width: 1.7em;
+  text-align: right;
+}
+
 #demos-trending-toggle {
   display: inline-flex;
   align-items: center;

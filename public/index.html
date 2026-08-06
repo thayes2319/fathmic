@@ -350,9 +350,24 @@
                 <img id="bp-showcase-technical-detail" alt="" />
               </div>
             </div>
+            <!-- Overlay controls live inside the stage itself, not
+                 #blueprint-showcase -- that wrapper also contains the
+                 topic label above the stage, so top/right percentages
+                 anchored to it landed short of (arrows) or squarely on
+                 top of (the speed slider) the topic text instead of the
+                 stage's own corners/center. -->
+            <button id="bp-showcase-prev" class="scroll-arrow bp-showcase-arrow bp-showcase-arrow-left" aria-label="Previous example" type="button">&#8249;</button>
+            <button id="bp-showcase-next" class="scroll-arrow bp-showcase-arrow bp-showcase-arrow-right" aria-label="Next example" type="button">&#8250;</button>
+            <!-- Locked top-right -- see app.js's showcaseSpeedMultiplier,
+                 applied at each scheduleShowcase call so it takes effect
+                 starting the next phase transition rather than needing to
+                 rewrite in-flight timers. -->
+            <div id="bp-showcase-speed">
+              <span id="bp-showcase-speed-icon">&#9889;</span>
+              <input type="range" id="bp-showcase-speed-slider" min="0.5" max="2" step="0.25" value="1" aria-label="Showcase playback speed" />
+              <span id="bp-showcase-speed-value">1&times;</span>
+            </div>
           </div>
-          <button id="bp-showcase-prev" class="scroll-arrow bp-showcase-arrow bp-showcase-arrow-left" aria-label="Previous example" type="button">&#8249;</button>
-          <button id="bp-showcase-next" class="scroll-arrow bp-showcase-arrow bp-showcase-arrow-right" aria-label="Next example" type="button">&#8250;</button>
         </div>
       </div>
     </section>

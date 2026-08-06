@@ -99,6 +99,8 @@ const el = {
   bpShowcaseTechnicalDetail: document.getElementById("bp-showcase-technical-detail"),
   bpShowcasePrev: document.getElementById("bp-showcase-prev"),
   bpShowcaseNext: document.getElementById("bp-showcase-next"),
+  bpShowcaseSpeedSlider: document.getElementById("bp-showcase-speed-slider"),
+  bpShowcaseSpeedValue: document.getElementById("bp-showcase-speed-value"),
   demoScrollLeft: document.getElementById("demo-scroll-left"),
   demoScrollRight: document.getElementById("demo-scroll-right"),
   promptIcon: document.getElementById("prompt-icon"),
@@ -2908,9 +2910,14 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
   let showcaseIndex = 0;
   let showcasePaused = false;
   let showcaseTimeoutId = null;
+  // Locked top-right slider (see index.html/styles.css) -- read fresh at
+  // each scheduling call, not baked in once, so dragging it mid-phase
+  // changes the pace starting with the NEXT transition rather than
+  // needing to reach into an already-running timer.
+  let showcaseSpeedMultiplier = 1;
 
   function scheduleShowcase(fn, ms) {
-    showcaseTimeoutId = setTimeout(fn, ms);
+    showcaseTimeoutId = setTimeout(fn, ms / showcaseSpeedMultiplier);
   }
 
   // Renders phase A (spec + narrow image split) for the current index and
@@ -2982,8 +2989,27 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     el.blueprintShowcase.classList.add("bp-paused");
     renderShowcasePhaseA();
   }
-  if (el.bpShowcasePrev) el.bpShowcasePrev.addEventListener("click", () => stepShowcase(-1));
-  if (el.bpShowcaseNext) el.bpShowcaseNext.addEventListener("click", () => stepShowcase(1));
+  // stopPropagation on both -- the arrows and the speed control live
+  // inside #blueprint-showcase-stage now (so top/right positioning
+  // resolves against the stage's own box, not the topic label above it),
+  // which means their clicks would otherwise bubble into the stage's own
+  // click-to-pause-toggle handler right above and immediately undo
+  // whatever they just did (e.g. stepShowcase sets paused=true, then the
+  // bubbled click sees that and calls resumeShowcase, setting it right
+  // back to false).
+  if (el.bpShowcasePrev) el.bpShowcasePrev.addEventListener("click", e => { e.stopPropagation(); stepShowcase(-1); });
+  if (el.bpShowcaseNext) el.bpShowcaseNext.addEventListener("click", e => { e.stopPropagation(); stepShowcase(1); });
+
+  if (el.bpShowcaseSpeedSlider) {
+    el.bpShowcaseSpeedSlider.addEventListener("input", () => {
+      showcaseSpeedMultiplier = parseFloat(el.bpShowcaseSpeedSlider.value) || 1;
+      if (el.bpShowcaseSpeedValue) el.bpShowcaseSpeedValue.textContent = `${showcaseSpeedMultiplier.toFixed(2).replace(/\.?0+$/, "")}×`;
+    });
+    // Same reasoning as the arrows above -- dragging the slider fires a
+    // real click/pointerdown on an element now nested inside the stage,
+    // which would otherwise also toggle pause via the bubbled stage click.
+    ["click", "pointerdown"].forEach(evt => el.bpShowcaseSpeedSlider.addEventListener(evt, e => e.stopPropagation()));
+  }
 
   runShowcaseExample();
 }
