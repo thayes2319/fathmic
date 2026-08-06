@@ -114,7 +114,7 @@ const SHOWCASE_FIXTURES = [
   {
     "label": "Scenic Backdrop",
     "topic": "Producing a scenic backdrop specification with rigging and quick-change sequencing",
-    "specSnippet": "Scope Spec covers one soft-good scenic backdrop (muslin drop), painted, rigged for fly operation via manual counterweight system. Includes: drop construction, top/bottom pocket treatment, rigging hang plot, quick-change sequencing (flying and blackout).…",
+    "specSnippet": "Scope Spec covers one seamless muslin sky cyc, curved cove format, rigged on a single counterweight line set, integrated into a multi-drop quick-change sequence for a production run. Includes: goods construction, top/bottom hardware, batten attachment, trim height calculation, fly cue,…",
     "image": "images/showcase/scenic-backdrop.jpg",
     "technicalImage": "images/showcase/scenic-backdrop-technical.jpg"
   },
