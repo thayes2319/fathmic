@@ -2532,7 +2532,6 @@ const BLUEPRINT_VERTICALS = [
     key: "physical-builds",
     label: "Physical Builds & Designs",
     topics: [
-      { label: "Tattoo concepts", seed: "Designing a custom tattoo" },
       { label: "Custom furniture", seed: "Designing a custom furniture piece" },
       { label: "Engagement rings", seed: "Designing a custom engagement ring" },
       { label: "Garden design", seed: "Designing a garden and landscape layout" },
@@ -2540,6 +2539,7 @@ const BLUEPRINT_VERTICALS = [
       { label: "Instrument builds", seed: "Designing a custom guitar build" },
       { label: "Gaming PC builds", seed: "Designing a custom gaming PC build" },
       { label: "Window replacement", seed: "Planning a home window replacement" },
+      { label: "Tattoo concepts", seed: "Designing a custom tattoo" },
       { label: "Custom sneaker design", seed: "Designing a custom sneaker" },
       { label: "Wedding theme & decor", seed: "Planning a wedding theme and decor" },
       { label: "Kitchen remodel", seed: "Planning a custom kitchen remodel" },
