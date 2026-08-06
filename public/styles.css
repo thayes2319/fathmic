@@ -530,6 +530,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 #demos-trending-details[open] summary::after { transform: rotate(90deg); }
 
+/* Same pill treatment as the Demos & Trending summary right beside it --
+   reads as a parallel, equally-weighted action, not an afterthought link. */
+#show-blueprint-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, white);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 70%, white);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+#show-blueprint-btn:hover { opacity: 0.88; }
+#show-blueprint-btn.active { background: var(--logo-dot); border-color: var(--logo-dot); }
+
 /* Keeps Distill / Searching as / Demos & Trending on one row down to a
    350px-wide viewport -- narrower gap and a more compact Demos & Trending
    button free up the room the fixed-width Distill button and capped persona

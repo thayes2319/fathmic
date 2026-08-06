@@ -291,6 +291,13 @@
             </div>
           </div>
         </details>
+
+        <!-- Only shown once a session is active (see enterActiveSession) --
+             #blueprint-section is already visible by default before that,
+             so this would just be a redundant no-op button there. Toggles
+             the same section back into view without touching state/
+             resetDownstream, so the current taxonomy/result is untouched. -->
+        <button id="show-blueprint-btn" type="button" hidden>Spec &amp; Blueprint</button>
       </div>
       <p id="gate-status" class="status"></p>
 

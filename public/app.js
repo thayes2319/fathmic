@@ -75,6 +75,7 @@ const el = {
   demosTrendingDetails: document.getElementById("demos-trending-details"),
   demoCases: document.getElementById("demo-cases"),
   demoButtons: document.getElementById("demo-buttons"),
+  showBlueprintBtn: document.getElementById("show-blueprint-btn"),
   blueprintSection: document.getElementById("blueprint-section"),
   blueprintChips: document.getElementById("blueprint-chips"),
   blueprintVerticalFilter: document.getElementById("blueprint-vertical-filter"),
@@ -698,6 +699,7 @@ function resetDownstream() {
 // a session starts or ends, in case the user had it open while browsing.
 function setBrowseVisibility(visible) {
   el.blueprintSection.hidden = !visible;
+  if (el.showBlueprintBtn) el.showBlueprintBtn.classList.toggle("active", visible);
 }
 
 function collapseDemosTrending() {
@@ -707,11 +709,24 @@ function collapseDemosTrending() {
 function enterActiveSession() {
   setBrowseVisibility(false);
   collapseDemosTrending();
+  // Blueprint is hidden by default once a session starts (see above) --
+  // this is the only way back to it without abandoning the current
+  // taxonomy/result (previously none existed short of a refresh).
+  if (el.showBlueprintBtn) el.showBlueprintBtn.hidden = false;
 }
 
 function exitActiveSession() {
   setBrowseVisibility(true);
   collapseDemosTrending();
+  // Blueprint is already visible by default pre-session -- the toggle
+  // would just be a redundant no-op button sitting there.
+  if (el.showBlueprintBtn) el.showBlueprintBtn.hidden = true;
+}
+
+if (el.showBlueprintBtn) {
+  el.showBlueprintBtn.addEventListener("click", () => {
+    setBrowseVisibility(el.blueprintSection.hidden);
+  });
 }
 
 // Process modal: one real, trackable step ("gate") plus a timed-release
