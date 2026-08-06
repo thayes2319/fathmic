@@ -16,9 +16,11 @@
   --logo-dot: #34d1f8;
   /* Sampled directly from the "FATH" wordmark stroke in the same image. */
   --logo-indigo: #14146e;
-  /* Shared low/high stakes colors -- used by both stakes controls
-     (.stakes-quick-btn and .stakes-regen-btn) so they never drift apart. */
+  /* Shared low/medium/high stakes colors (blue/green/red) -- used by both
+     stakes controls (.stakes-quick-btn and .stakes-regen-btn) so they
+     never drift apart. */
   --stakes-low: #5b8dd6;
+  --stakes-medium: #4caf50;
   --stakes-high: #d64545;
 }
 
@@ -178,20 +180,22 @@ textarea, input[type="text"] {
    input, same as a native placeholder disappearing once you start typing. */
 #input-wrap { position: relative; }
 
-/* Compact, non-radial stakes control surfaced at input time -- the full
-   dial (in #taxonomy-section) is the considered/correctable version once a
-   map exists; this is just "set it now if you already know," so a real
-   button row, not the ornate knob graphic. Same state.stakes, same
-   renderStakesDial() sync -- see app.js. */
+/* Compact stakes button row -- one shared style for both the pre-Distill
+   quick row (set it now if you already know) and the post-generation regen
+   row (#stakes-control, "change my mind" once a map exists). Same
+   state.stakes, same renderStakesControls() sync -- see app.js. Styled
+   together (not two near-identical rules that can drift) so they're
+   guaranteed to look identical. */
 #stakes-quick-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.5rem;
   font-size: 0.82rem;
 }
 #stakes-quick-label { color: var(--muted); }
-.stakes-quick-btn {
+.stakes-quick-btn, .stakes-regen-btn {
   margin-top: 0;
   padding: 0.3rem 0.7rem;
   background: transparent;
@@ -201,17 +205,16 @@ textarea, input[type="text"] {
   font-size: 0.8rem;
   border-radius: 999px;
 }
-.stakes-quick-btn:hover { border-color: var(--accent); color: var(--fg); }
-.stakes-quick-btn.active {
+.stakes-quick-btn:hover, .stakes-regen-btn:hover { border-color: var(--accent); color: var(--fg); }
+.stakes-quick-btn.active, .stakes-regen-btn.active {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
-/* Low/High pick up the dial's own blue/red instead of the generic accent
-   every other active button on the page uses -- Medium stays on --accent
-   (the dial's own middle color), covered by the rule above already. */
-.stakes-quick-btn[data-stakes="low"].active { background: var(--stakes-low); border-color: var(--stakes-low); }
-.stakes-quick-btn[data-stakes="high"].active { background: var(--stakes-high); border-color: var(--stakes-high); }
+/* Blue -> green -> red across low/medium/high, same on both button sets. */
+.stakes-quick-btn[data-stakes="low"].active, .stakes-regen-btn[data-stakes="low"].active { background: var(--stakes-low); border-color: var(--stakes-low); }
+.stakes-quick-btn[data-stakes="medium"].active, .stakes-regen-btn[data-stakes="medium"].active { background: var(--stakes-medium); border-color: var(--stakes-medium); }
+.stakes-quick-btn[data-stakes="high"].active, .stakes-regen-btn[data-stakes="high"].active { background: var(--stakes-high); border-color: var(--stakes-high); }
 #placeholder-cycle {
   position: absolute;
   top: 0.6rem;
@@ -757,7 +760,7 @@ button:disabled { opacity: 0.5; cursor: default; }
    used, just living inline in this card instead of a separate popup. */
 #subcategory-focus-category {
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.98rem;
   color: var(--muted);
   margin-bottom: 0.7rem;
   padding-bottom: 0.6rem;
@@ -886,37 +889,18 @@ button:disabled { opacity: 0.5; cursor: default; }
    but the pre-Distill quick row (#stakes-quick-row) now handles the common
    case (setting stakes before ever generating), leaving this one
    specifically for the rarer "change my mind after seeing the categories"
-   case -- reuses the exact same compact pill-button treatment as the quick
-   row (see .stakes-quick-btn) instead of separate dial mechanics, plus a
-   brief label explaining why a second stakes control shows up at all. */
+   case. Deliberately the exact same row layout as #stakes-quick-row (label
+   then buttons, all inline) -- not just similar styling, so the two never
+   read as two different controls. */
 #stakes-control {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  text-align: center;
+  font-size: 0.82rem;
 }
-#stakes-regen-label { font-size: 0.85rem; color: var(--muted); max-width: 420px; }
-#stakes-regen-row { display: flex; gap: 0.5rem; }
-.stakes-regen-btn {
-  margin-top: 0;
-  padding: 0.35rem 0.9rem;
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  font-weight: 600;
-  font-size: 0.85rem;
-  border-radius: 999px;
-}
-.stakes-regen-btn:hover { border-color: var(--accent); color: var(--fg); }
-.stakes-regen-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-.stakes-regen-btn[data-stakes="low"].active { background: var(--stakes-low); border-color: var(--stakes-low); }
-.stakes-regen-btn[data-stakes="high"].active { background: var(--stakes-high); border-color: var(--stakes-high); }
+#stakes-regen-label { color: var(--muted); }
 
 .info-tooltip { position: relative; display: inline-block; }
 .info-icon-btn {
