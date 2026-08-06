@@ -1002,11 +1002,17 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 
 .info-icon-btn:hover, .info-icon-btn:focus-visible { color: var(--accent); border-color: var(--accent); }
+/* Opens downward, not upward -- only two of these exist (the pre-Distill
+   quick row and the post-Distill regen row), and the quick row's own
+   trigger sits close to the top of the page, where opening upward pushed
+   its tall content off the top of the viewport. Both use this one rule
+   now instead of one being the default and the other a scoped override,
+   so they can't drift apart again. */
 .info-tooltip-text {
   position: absolute;
-  bottom: 135%;
+  top: 135%;
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(-4px);
   width: 320px;
   max-width: 80vw;
   background: var(--fg);
@@ -1033,20 +1039,6 @@ button:disabled { opacity: 0.5; cursor: default; }
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   pointer-events: auto;
-}
-
-/* This tooltip trigger sits right under the prompt box, close to the top
-   of the page -- opening upward (the default, tuned for the stakes dial
-   further down the page) pushed its tall content off the top of the
-   viewport. Opens downward here instead. */
-#stakes-quick-label .info-tooltip-text {
-  bottom: auto;
-  top: 135%;
-  transform: translateX(-50%) translateY(-4px);
-}
-#stakes-quick-label .info-tooltip:hover .info-tooltip-text,
-#stakes-quick-label .info-icon-btn:focus + .info-tooltip-text {
-  transform: translateX(-50%) translateY(0);
 }
 
 #genre-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
