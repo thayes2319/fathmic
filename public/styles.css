@@ -1798,16 +1798,17 @@ button:disabled { opacity: 0.5; cursor: default; }
    scaling the whole button as one rigid group guarantees the rect and text
    stay correctly aligned to each other regardless: growing 1.5x scales the
    font size and corner radius right along with it, no separate overrides
-   needed, and translating +56 along the way shifts it clear of the output-
-   card icon (which ends at x=356) the same way the direct-override attempt
-   intended, just via a mechanism that actually renders correctly. */
+   needed. The button now sits centered below the output card (no neighbor
+   to its side anymore), so scaling from its own center needs no
+   compensating translate the way it did when it sat squeezed beside a
+   narrow card. */
 #schematic-dismiss-inner {
   transform-box: fill-box;
   transform-origin: center;
 }
 @media (max-width: 480px) {
   #schematic-dismiss-inner {
-    transform: translate(56px, 0) scale(1.5);
+    transform: scale(1.5);
   }
 }
 

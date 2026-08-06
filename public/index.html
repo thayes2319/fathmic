@@ -107,7 +107,7 @@
       </div>
 
       <div id="schematic-sequence" hidden>
-        <svg id="schematic-svg" viewBox="0 0 640 350" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+        <svg id="schematic-svg" viewBox="0 0 640 380" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
           <!-- Stage 1: input node -->
           <circle class="sq-input" cx="320" cy="18" r="7" />
 
@@ -173,22 +173,30 @@
             <line class="sq-converge" pathLength="1" style="--d:6.7s" x1="286" y1="228" x2="320" y2="260" />
             <line class="sq-converge" pathLength="1" style="--d:6.9s" x1="360" y1="228" x2="320" y2="260" />
             <line class="sq-converge" pathLength="1" style="--d:7.1s" x1="560" y1="228" x2="320" y2="260" />
-            <rect class="sq-output" style="--d:7.5s" x="284" y="258" width="72" height="46" rx="4" />
-            <line class="sq-output-line" style="--d:7.95s" x1="296" y1="272" x2="344" y2="272" />
-            <line class="sq-output-line" style="--d:8.07s" x1="296" y1="282" x2="344" y2="282" />
-            <line class="sq-output-line" style="--d:8.19s" x1="296" y1="292" x2="330" y2="292" />
+            <!-- Card spans the same 80-560 width as the branch tree above it
+                 (was a cramped 72px-wide sliver centered on the convergence
+                 point) -- confirmed live that the narrow card, not the tree,
+                 was what made the whole diagram read as "doesn't fill the
+                 width," on desktop as much as mobile, since it's the stage
+                 that stays on screen longest. -->
+            <rect class="sq-output" style="--d:7.5s" x="80" y="258" width="480" height="46" rx="4" />
+            <line class="sq-output-line" style="--d:7.95s" x1="92" y1="272" x2="548" y2="272" />
+            <line class="sq-output-line" style="--d:8.07s" x1="92" y1="282" x2="548" y2="282" />
+            <line class="sq-output-line" style="--d:8.19s" x1="92" y1="292" x2="416" y2="292" />
 
-            <g class="sq-label-group" style="--d:8.35s"><rect class="sq-label-bg" /><text class="sq-label" x="320" y="326" text-anchor="middle">→ synthesized into your answer</text></g>
-
-            <!-- Dismiss button lives right next to the answer card itself,
-                 not off in a corner — appears once there's actually an
-                 answer to look at, and stays put (no fade-out). -->
+            <!-- Dismiss button moved below the (now much wider) card instead
+                 of squeezed beside it -- there's no longer room to its right
+                 at this width, and stacking reads cleanly at any size. Extra
+                 viewBox height (350 -> 380) makes room for the stack without
+                 affecting the width-fill fix above. -->
             <g id="schematic-dismiss" class="sq-dismiss-btn" style="--d:8.45s">
               <g id="schematic-dismiss-inner">
-                <rect x="372" y="266" width="104" height="32" rx="7" />
-                <text x="424" y="286" text-anchor="middle">I'm ready</text>
+                <rect x="268" y="316" width="104" height="32" rx="7" />
+                <text x="320" y="336" text-anchor="middle">I'm ready</text>
               </g>
             </g>
+
+            <g class="sq-label-group" style="--d:8.35s"><rect class="sq-label-bg" /><text class="sq-label" x="320" y="362" text-anchor="middle">→ synthesized into your answer</text></g>
           </g>
         </svg>
       </div>
