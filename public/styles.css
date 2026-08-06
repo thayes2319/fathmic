@@ -528,23 +528,34 @@ button:disabled { opacity: 0.5; cursor: default; }
   display: flex;
   align-items: center;
   padding: 0.85rem 1rem;
-  font-size: 0.85rem;
-  line-height: 1.45;
-  color: var(--fg);
   /* Overrides the shared 0.7s above -- a smooth width change means every
      line re-wraps continuously for the whole 700ms, which reads as the
      paragraph visibly shuffling itself rather than a clean transition (an
      image pane growing doesn't have this problem, so it keeps the smooth
      version). Snapping fast instead avoids the live reflow being
      something you actually watch happen. */
-  transition: width 0.12s ease, font-size 0.12s ease;
+  transition: width 0.12s ease;
+}
+/* The actual text lives here, not directly on #blueprint-showcase-spec --
+   fitShowcaseSpecText (app.js) applies transform:scale to THIS element to
+   shrink the whole paragraph down until it fits the pane's fixed height in
+   phase 2, instead of letting the pane's overflow:hidden just clip
+   whatever doesn't fit. Scaling around the left edge (not center) matches
+   where the text already sits in the pane -- shrinking toward a point it's
+   already anchored to, not jumping. */
+#bp-showcase-spec-inner {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--fg);
+  transform-origin: left center;
+  transition: transform 0.12s ease;
 }
 #bp-scope-image-pane { width: 38%; }
 /* Phase 2: image pane grows, spec shrinks -- text stays fully rendered
-   (never removed, per the "keep the scope" requirement), just reflows
-   into a narrower column at a slightly smaller size so more of it stays
-   legible in less width. */
-#bp-stage-scope.bp-image-expanded #blueprint-showcase-spec { width: 26%; font-size: 0.74rem; }
+   (never removed, per the "keep the scope" requirement) and zoomed to fit
+   the smaller column via fitShowcaseSpecText's transform:scale on
+   #bp-showcase-spec-inner, not a hardcoded font-size guess. */
+#bp-stage-scope.bp-image-expanded #blueprint-showcase-spec { width: 26%; }
 #bp-stage-scope.bp-image-expanded #bp-scope-image-pane { width: 74%; }
 
 #blueprint-showcase-image, #bp-showcase-technical-fit, #bp-showcase-technical-detail {
@@ -584,12 +595,16 @@ button:disabled { opacity: 0.5; cursor: default; }
 .bp-showcase-arrow-left { left: 0.5rem; }
 .bp-showcase-arrow-right { right: 0.5rem; }
 /* A paused showcase gets a visible cue beyond just "stopped moving" --
-   easy to miss otherwise, especially mid-transition. */
+   easy to miss otherwise, especially mid-transition. Anchored to the stage
+   itself now (it has its own position:relative, like the arrows/etc.) --
+   #blueprint-showcase lost its position:relative when the speed slider
+   moved out into the header row above, which left this ::after with no
+   positioned ancestor at all and put it at the top-left of the whole page. */
 #blueprint-showcase.bp-paused #blueprint-showcase-stage { box-shadow: inset 0 0 0 2px var(--logo-dot); }
-#blueprint-showcase.bp-paused::after {
+#blueprint-showcase.bp-paused #blueprint-showcase-stage::after {
   content: "Paused — click to resume";
   position: absolute;
-  top: calc(1.3em + 0.5rem + 0.4rem);
+  top: 0.5rem;
   left: 0.5rem;
   font-size: 0.68rem;
   color: #fff;
@@ -910,6 +925,20 @@ button:disabled { opacity: 0.5; cursor: default; }
   0% { transform: scale(0.9); opacity: 0; }
   60% { transform: scale(1.04); opacity: 1; }
   100% { transform: scale(1); }
+}
+
+/* Answering the focused subcategory no longer auto-advances the modal (see
+   pinInterviewFocusAfterSelection in app.js) -- this is the replacement
+   cue, a pulse on an ALREADY-visible button rather than nextBtnFlash's
+   entrance animation above, prompting a deliberate click instead of
+   letting the reveal silently slide forward on its own. Finite iteration
+   count -- draws the eye a couple of times, then settles, doesn't nag. */
+.interview-next-btn.bp-flash-next {
+  animation: interviewNextPulse 0.55s ease-in-out 3;
+}
+@keyframes interviewNextPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent); }
 }
 
 /* The category currently being interviewed stays flat, in its normal place

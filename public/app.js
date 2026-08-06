@@ -94,6 +94,7 @@ const el = {
   bpStageScope: document.getElementById("bp-stage-scope"),
   bpStageTechnical: document.getElementById("bp-stage-technical"),
   blueprintShowcaseSpec: document.getElementById("blueprint-showcase-spec"),
+  bpShowcaseSpecInner: document.getElementById("bp-showcase-spec-inner"),
   blueprintShowcaseImage: document.getElementById("blueprint-showcase-image"),
   bpShowcaseTechnicalFit: document.getElementById("bp-showcase-technical-fit"),
   bpShowcaseTechnicalDetail: document.getElementById("bp-showcase-technical-detail"),
@@ -1170,6 +1171,26 @@ let interviewReviewOverride = null;
 // button handlers, which live outside the per-category render loop.
 let currentSubcategoryModalNav = null;
 
+// Answering the focused subcategory would otherwise jump the modal straight
+// to the next one -- interviewSubRevealCount is re-derived fresh on every
+// render, and a fresh selection just moved its edge forward, so the modal
+// would silently slide to whatever's next with no chance to notice the
+// current one is done. Pin it here instead (reusing interviewReviewOverride,
+// which already knows how to hold modalSubIndex at a specific index within
+// what's been revealed) and flash the Next button so continuing is a
+// deliberate click, not something that happens out from under the user.
+function pinInterviewFocusAfterSelection(category, sub) {
+  if (!interviewModeActive || !currentSubcategoryModalNav) return;
+  if (currentSubcategoryModalNav.categoryName !== category.name || currentSubcategoryModalNav.subName !== sub.name) return;
+  const justBecameResolved = !currentSubcategoryModalNav.isAlreadyResolved;
+  interviewReviewOverride = { categoryName: category.name, subName: sub.name };
+  if (justBecameResolved && el.subcategoryFocusNextBtn) {
+    el.subcategoryFocusNextBtn.classList.remove("bp-flash-next");
+    void el.subcategoryFocusNextBtn.offsetWidth; // restart the animation if it's still mid-flash from a rapid prior click
+    el.subcategoryFocusNextBtn.classList.add("bp-flash-next");
+  }
+}
+
 function categoryHasSelection(category) {
   if (state.selected.has(category.name)) return true; // category-level "General" pick
   return (category.subcategories || []).some(subcategoryHasSelection);
@@ -1683,6 +1704,7 @@ function renderTaxonomyImpl() {
           state.selected.delete(sub.name);
           specificsList.classList.remove("collapsed-by-general");
         }
+        pinInterviewFocusAfterSelection(category, sub);
         applyExclusions();
       });
       generalLabel.appendChild(generalCheckbox);
@@ -1740,6 +1762,7 @@ function renderTaxonomyImpl() {
           } else {
             state.selected.delete(text);
           }
+          pinInterviewFocusAfterSelection(category, sub);
           applyExclusions();
         });
         label.appendChild(checkbox);
@@ -2928,7 +2951,8 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     const item = showcaseOrder[showcaseIndex];
     el.blueprintShowcaseTopic.textContent = item.topic;
     el.blueprintShowcaseTopic.classList.remove("bp-fading");
-    el.blueprintShowcaseSpec.textContent = item.specSnippet;
+    el.bpShowcaseSpecInner.textContent = item.specSnippet;
+    el.bpShowcaseSpecInner.style.transform = ""; // full size again for the new topic's phase A -- fitShowcaseSpecText re-shrinks it once phase B triggers
     el.blueprintShowcaseImage.src = item.image;
     const technical = item.technicalImage || item.image;
     el.bpShowcaseTechnicalFit.src = technical;
@@ -2936,6 +2960,37 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     el.bpStageScope.classList.remove("bp-image-expanded");
     stage.classList.remove("showing-technical");
     stage.classList.add("showing-scope");
+  }
+
+  // Phase B shrinks the spec pane to 26% width -- rather than guess a
+  // font-size that "usually" fits (specSnippet lengths vary a lot across
+  // fixtures), measure how tall the text actually renders at that width and
+  // scale it down just enough to fit the pane's height, so it's fully
+  // visible (shrunk) instead of getting cut off by overflow:hidden.
+  // Forces a synchronous layout at the target width first (rather than
+  // waiting for the CSS width transition to finish) so this can run
+  // immediately when phase B starts, not ~120ms later.
+  function fitShowcaseSpecText() {
+    const pane = el.blueprintShowcaseSpec;
+    const inner = el.bpShowcaseSpecInner;
+    if (!pane || !inner) return;
+    const targetWidth = stage.clientWidth * 0.26;
+    const prevInlineWidth = pane.style.width;
+    const prevTransition = pane.style.transition;
+    pane.style.transition = "none";
+    pane.style.width = `${targetWidth}px`;
+    inner.style.transform = "none";
+    const cs = getComputedStyle(pane);
+    const usableHeight = pane.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const naturalHeight = inner.scrollHeight;
+    pane.style.width = prevInlineWidth;
+    // Force the reset to actually apply before restoring the transition,
+    // or the browser can coalesce it with the next change and animate from
+    // the wrong starting point.
+    void pane.offsetWidth;
+    pane.style.transition = prevTransition;
+    const scale = naturalHeight > usableHeight ? Math.max(0.55, usableHeight / naturalHeight) : 1;
+    inner.style.transform = scale < 1 ? `scale(${scale})` : "";
   }
 
   // Renders phase A, then -- unless paused -- chains through phases B and C
@@ -2948,6 +3003,7 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     if (showcasePaused) return;
     scheduleShowcase(() => {
       el.bpStageScope.classList.add("bp-image-expanded");
+      fitShowcaseSpecText();
       scheduleShowcase(() => {
         stage.classList.remove("showing-scope");
         stage.classList.add("showing-technical");

@@ -347,7 +347,13 @@
                  via bp-image-expanded (see app.js/styles.css); the spec
                  text itself never disappears, just gets a narrower column. -->
             <div id="bp-stage-scope" class="bp-showcase-panel">
-              <div id="blueprint-showcase-spec" class="bp-split-pane"></div>
+              <!-- #blueprint-showcase-spec is the fixed-size, clipped box;
+                   the inner div is what actually holds the text and gets
+                   scaled down to fit it in phase 2 (see fitShowcaseSpecText
+                   in app.js) instead of letting it just clip. -->
+              <div id="blueprint-showcase-spec" class="bp-split-pane">
+                <div id="bp-showcase-spec-inner"></div>
+              </div>
               <div id="bp-scope-image-pane" class="bp-split-pane">
                 <img id="blueprint-showcase-image" alt="" />
               </div>
