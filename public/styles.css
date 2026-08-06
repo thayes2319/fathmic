@@ -281,9 +281,15 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .link-btn:hover { opacity: 0.7; }
 
-#topic-header-row { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
-#topic-header-row h2 { margin: 0; }
-#topic-header-row .link-btn { margin-top: 0; }
+/* Revise stays pinned at the front, vertically centered against the
+   heading -- never drops to its own line (flex-wrap:nowrap), even when
+   the topic title itself is long. The heading is what wraps in that case
+   (flex:1 1 auto + min-width:0, so it actually shrinks/wraps text instead
+   of forcing the row wider than its container -- same flexbox min-width
+   fix as the demo-scroll-arrow and stakes-row overflow bugs earlier). */
+#topic-header-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: nowrap; }
+#topic-header-row h2 { margin: 0; flex: 1 1 auto; min-width: 0; }
+#topic-header-row .link-btn { margin-top: 0; flex: 0 0 auto; }
 
 #revise-topic-panel { margin: 0.5rem 0 1rem; }
 #revise-topic-panel textarea { margin-bottom: 0.5rem; }
