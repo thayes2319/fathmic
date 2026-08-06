@@ -2634,6 +2634,11 @@ if (el.blueprintChips && el.blueprintVerticalFilter) {
     el.blueprintVerticalFilter.appendChild(opt);
   });
   let blueprintVerticalAutoCycle = true;
+  // Set while the auto-cycle itself is replacing the chip row -- content
+  // replacement resets scrollLeft to 0, which fires a real "scroll" event
+  // in most browsers, and without this guard that self-triggered event
+  // would immediately disable the very auto-cycle that caused it.
+  let blueprintChipsProgrammaticScroll = false;
   el.blueprintVerticalFilter.addEventListener("change", () => {
     blueprintVerticalAutoCycle = false; // manual pick -- stop auto-rotating
     const chosen = BLUEPRINT_VERTICALS.find(v => v.key === el.blueprintVerticalFilter.value);
@@ -2642,13 +2647,26 @@ if (el.blueprintChips && el.blueprintVerticalFilter) {
   renderBlueprintChips(BLUEPRINT_VERTICALS[0].topics);
   wireHScroll(el.blueprintChips, el.blueprintScrollLeft, el.blueprintScrollRight);
 
+  // Manually scrolling the chip row -- dragging, a trackpad/wheel gesture,
+  // or the arrow buttons (wireHScroll's scrollBy also fires "scroll") -- is
+  // the same "I'm actively browsing this" signal as picking a vertical
+  // directly, so it stops the auto-cycle the same way. Previously only the
+  // dropdown's own change event did this, so the row could get rebuilt out
+  // from under someone mid-scroll (confirmed reported live).
+  el.blueprintChips.addEventListener("scroll", () => {
+    if (blueprintChipsProgrammaticScroll) return;
+    blueprintVerticalAutoCycle = false;
+  });
+
   let blueprintVerticalIndex = 0;
   setInterval(() => {
     if (!blueprintVerticalAutoCycle) return;
     blueprintVerticalIndex = (blueprintVerticalIndex + 1) % BLUEPRINT_VERTICALS.length;
     const next = BLUEPRINT_VERTICALS[blueprintVerticalIndex];
     el.blueprintVerticalFilter.value = next.key;
+    blueprintChipsProgrammaticScroll = true;
     renderBlueprintChips(next.topics);
+    requestAnimationFrame(() => { blueprintChipsProgrammaticScroll = false; });
   }, 4000);
 }
 
