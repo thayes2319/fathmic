@@ -2632,6 +2632,7 @@ function renderBlueprintChips(topics) {
     chip.className = "blueprint-chip";
     chip.textContent = subject.label;
     chip.addEventListener("click", () => {
+      animatePillDrop(chip);
       el.subjectInput.value = subject.seed;
       el.subjectInput.focus();
     });
@@ -2770,6 +2771,7 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
     btn.className = demo.genre === "blueprint" ? "demo-btn demo-btn-blueprint" : "demo-btn";
     btn.textContent = demo.label;
     btn.addEventListener("click", () => {
+      animatePillDrop(btn);
       resetDownstream();
       stopPlaceholderCycle();
       el.subjectInput.value = demo.input;
@@ -2799,6 +2801,45 @@ function wireHScroll(track, leftBtn, rightBtn) {
   rightBtn.addEventListener("click", () => track.scrollBy({ left: 220, behavior: "smooth" }));
 }
 
+// Picking any topic pill (Blueprint chip, preloaded demo, trending item —
+// any future list included) drops a clone of the exact pill clicked toward
+// the prompt box: a genie-style arc, shrinking and fading as it lands,
+// rather than the pill just vanishing and text appearing with no visual
+// connection between the two. Purely decorative -- fire-and-forget, runs
+// alongside whatever the click's real handler does (fill the textarea,
+// load a demo, call runDistill) rather than blocking or delaying it.
+function animatePillDrop(sourceEl) {
+  if (!sourceEl || !el.subjectInput || typeof sourceEl.animate !== "function") return;
+  const sourceRect = sourceEl.getBoundingClientRect();
+  const targetRect = el.subjectInput.getBoundingClientRect();
+
+  const clone = sourceEl.cloneNode(true);
+  clone.style.position = "fixed";
+  clone.style.left = `${sourceRect.left}px`;
+  clone.style.top = `${sourceRect.top}px`;
+  clone.style.width = `${sourceRect.width}px`;
+  clone.style.height = `${sourceRect.height}px`;
+  clone.style.margin = "0";
+  clone.style.zIndex = "500";
+  clone.style.pointerEvents = "none";
+  document.body.appendChild(clone);
+
+  const dx = (targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2);
+  const dy = (targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2);
+  // Arc lifts partway through before dropping into the target, rather than
+  // a straight line -- the "thrown" feel is what reads as intentional/
+  // physical instead of just a fade-and-teleport.
+  const animation = clone.animate([
+    { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
+    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 36}px) scale(0.7)`, opacity: 0.9, offset: 0.55 },
+    { transform: `translate(${dx}px, ${dy}px) scale(0.12)`, opacity: 0, offset: 1 }
+  ], {
+    duration: 550,
+    easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+  });
+  animation.onfinish = () => clone.remove();
+}
+
 wireHScroll(el.trendingGroups, el.trendingScrollLeft, el.trendingScrollRight);
 
 // Trending: real, server-tracked query counts (see server/searchLog.js) plus
@@ -2817,7 +2858,10 @@ function renderTrendingItems(items) {
     const btn = document.createElement("button");
     btn.className = "demo-btn trending-btn";
     btn.textContent = item.count > 1 ? `${item.text} (${item.count})` : item.text;
-    btn.addEventListener("click", () => runDistill(item.text));
+    btn.addEventListener("click", () => {
+      animatePillDrop(btn);
+      runDistill(item.text);
+    });
     el.trendingGroups.appendChild(btn);
   });
 }
