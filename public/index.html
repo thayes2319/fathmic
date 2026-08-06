@@ -100,16 +100,87 @@
       </div>
 
       <div id="stakes-quick-row">
-        <span id="stakes-quick-label">
-          How much is riding on this?
-          <span class="info-tooltip">
-            <button type="button" class="info-icon-btn" aria-label="Why this is here">?</button>
-            <span class="info-tooltip-text" role="tooltip">FATHmic weighs stakes the way a thoughtful person would — it shapes both what gets asked about and how the result is written. Low stakes keeps categories light and exploratory, with a quick, confident write-up; high stakes surfaces the specific factors that actually determine correctness or safety, written with real care and caveats. This sets which one you're getting:<br><br>Low — light, exploratory categories; full confidence, no hedging.<br><br>Medium — normal categories; plain writing, with the point or two that actually matters flagged.<br><br>High — categories drill into the specifics that determine safety/correctness where the subject has them; writing is explicit about what's certain vs. not, with a clear nudge to check with a professional before acting.</span>
+        <div id="stakes-quick-label-row">
+          <span id="stakes-quick-label">
+            How much is riding on this?
+            <span class="info-tooltip">
+              <button type="button" class="info-icon-btn" aria-label="Why this is here">?</button>
+              <span class="info-tooltip-text" role="tooltip">FATHmic weighs stakes the way a thoughtful person would — it shapes both what gets asked about and how the result is written. Low stakes keeps categories light and exploratory, with a quick, confident write-up; high stakes surfaces the specific factors that actually determine correctness or safety, written with real care and caveats. This sets which one you're getting:<br><br>Low — light, exploratory categories; full confidence, no hedging.<br><br>Medium — normal categories; plain writing, with the point or two that actually matters flagged.<br><br>High — categories drill into the specifics that determine safety/correctness where the subject has them; writing is explicit about what's certain vs. not, with a clear nudge to check with a professional before acting.</span>
+            </span>
           </span>
-        </span>
-        <button class="stakes-quick-btn" type="button" data-stakes="low">Low</button>
-        <button class="stakes-quick-btn" type="button" data-stakes="medium">Medium</button>
-        <button class="stakes-quick-btn" type="button" data-stakes="high">High</button>
+          <label for="persona-select" id="persona-label">Searching as:</label>
+        </div>
+        <div id="stakes-quick-control-row">
+          <div id="stakes-quick-buttons">
+            <button class="stakes-quick-btn" type="button" data-stakes="low">Low</button>
+            <button class="stakes-quick-btn" type="button" data-stakes="medium">Medium</button>
+            <button class="stakes-quick-btn" type="button" data-stakes="high">High</button>
+          </div>
+          <div id="persona-row">
+            <select id="persona-select">
+              <option value="">Prefer not to say</option>
+              <option value="parent">Parent</option>
+              <option value="student">Student</option>
+              <option value="professional">Working Professional</option>
+              <option value="hobbyist">Hobbyist</option>
+              <option value="retiree">Retiree</option>
+              <option value="pet_owner">Pet Owner</option>
+              <option value="caregiver">Caregiver</option>
+              <option value="small_business_owner">Small Business Owner</option>
+              <option value="homeowner">Homeowner</option>
+              <option value="creative">Creative</option>
+              <optgroup label="Business &amp; Finance">
+                <option value="accountant">Accountant</option>
+                <option value="financial_advisor">Financial Advisor</option>
+                <option value="marketing_manager">Marketing Manager</option>
+                <option value="sales_representative">Sales Representative</option>
+              </optgroup>
+              <optgroup label="Construction &amp; Trades">
+                <option value="carpenter">Carpenter</option>
+                <option value="electrician">Electrician</option>
+                <option value="general_contractor">General Contractor</option>
+                <option value="plumber">Plumber</option>
+              </optgroup>
+              <optgroup label="Design &amp; Creative Services">
+                <option value="architect">Architect</option>
+                <option value="graphic_designer">Graphic Designer</option>
+                <option value="interior_designer">Interior Designer</option>
+                <option value="photographer">Photographer</option>
+              </optgroup>
+              <optgroup label="Education">
+                <option value="professor">Professor</option>
+                <option value="school_administrator">School Administrator</option>
+                <option value="teacher">Teacher</option>
+                <option value="tutor">Tutor</option>
+              </optgroup>
+              <optgroup label="Food &amp; Hospitality">
+                <option value="chef">Chef</option>
+                <option value="event_planner">Event Planner</option>
+                <option value="hotel_manager">Hotel Manager</option>
+                <option value="restaurant_manager">Restaurant Manager</option>
+              </optgroup>
+              <optgroup label="Healthcare">
+                <option value="nurse">Nurse</option>
+                <option value="pharmacist">Pharmacist</option>
+                <option value="physical_therapist">Physical Therapist</option>
+                <option value="physician">Physician</option>
+              </optgroup>
+              <optgroup label="Legal">
+                <option value="attorney">Attorney</option>
+                <option value="compliance_officer">Compliance Officer</option>
+                <option value="legal_assistant">Legal Assistant</option>
+                <option value="paralegal">Paralegal</option>
+              </optgroup>
+              <optgroup label="Technology">
+                <option value="data_analyst">Data Analyst</option>
+                <option value="it_manager">IT Manager</option>
+                <option value="software_engineer">Software Engineer</option>
+                <option value="ux_designer">UX Designer</option>
+              </optgroup>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div id="schematic-sequence" hidden>
@@ -201,103 +272,41 @@
 
       <div id="action-row">
         <button id="distill-btn">Distill</button>
-        <div id="persona-row">
-          <label for="persona-select">Searching as:</label>
-          <select id="persona-select">
-            <option value="">Prefer not to say</option>
-            <option value="parent">Parent</option>
-            <option value="student">Student</option>
-            <option value="professional">Working Professional</option>
-            <option value="hobbyist">Hobbyist</option>
-            <option value="retiree">Retiree</option>
-            <option value="pet_owner">Pet Owner</option>
-            <option value="caregiver">Caregiver</option>
-            <option value="small_business_owner">Small Business Owner</option>
-            <option value="homeowner">Homeowner</option>
-            <option value="creative">Creative</option>
-            <optgroup label="Business &amp; Finance">
-              <option value="accountant">Accountant</option>
-              <option value="financial_advisor">Financial Advisor</option>
-              <option value="marketing_manager">Marketing Manager</option>
-              <option value="sales_representative">Sales Representative</option>
-            </optgroup>
-            <optgroup label="Construction &amp; Trades">
-              <option value="carpenter">Carpenter</option>
-              <option value="electrician">Electrician</option>
-              <option value="general_contractor">General Contractor</option>
-              <option value="plumber">Plumber</option>
-            </optgroup>
-            <optgroup label="Design &amp; Creative Services">
-              <option value="architect">Architect</option>
-              <option value="graphic_designer">Graphic Designer</option>
-              <option value="interior_designer">Interior Designer</option>
-              <option value="photographer">Photographer</option>
-            </optgroup>
-            <optgroup label="Education">
-              <option value="professor">Professor</option>
-              <option value="school_administrator">School Administrator</option>
-              <option value="teacher">Teacher</option>
-              <option value="tutor">Tutor</option>
-            </optgroup>
-            <optgroup label="Food &amp; Hospitality">
-              <option value="chef">Chef</option>
-              <option value="event_planner">Event Planner</option>
-              <option value="hotel_manager">Hotel Manager</option>
-              <option value="restaurant_manager">Restaurant Manager</option>
-            </optgroup>
-            <optgroup label="Healthcare">
-              <option value="nurse">Nurse</option>
-              <option value="pharmacist">Pharmacist</option>
-              <option value="physical_therapist">Physical Therapist</option>
-              <option value="physician">Physician</option>
-            </optgroup>
-            <optgroup label="Legal">
-              <option value="attorney">Attorney</option>
-              <option value="compliance_officer">Compliance Officer</option>
-              <option value="legal_assistant">Legal Assistant</option>
-              <option value="paralegal">Paralegal</option>
-            </optgroup>
-            <optgroup label="Technology">
-              <option value="data_analyst">Data Analyst</option>
-              <option value="it_manager">IT Manager</option>
-              <option value="software_engineer">Software Engineer</option>
-              <option value="ux_designer">UX Designer</option>
-            </optgroup>
-            <option value="other">Other</option>
-          </select>
+
+        <!-- Always visible (not gated to active sessions) -- toggles
+             #blueprint-section without touching state/resetDownstream, so
+             the current taxonomy/result (if any) is never disturbed. -->
+        <button id="show-blueprint-btn" type="button">Spec &amp; Blueprint</button>
+
+        <!-- A plain button, not <summary>, deliberately -- <details> couples
+             the toggle and its revealed content into one box that grows/
+             moves together when opened. This button stays permanently in
+             #action-row's fixed column 3; #demos-trending-panel (below,
+             outside #action-row entirely) is what reveals, in normal flow,
+             without ever moving this button or its row-1 siblings. -->
+        <button id="demos-trending-toggle" type="button" aria-expanded="false">Demos &amp; Trending</button>
+      </div>
+      <div id="demos-trending-panel" hidden>
+        <div id="demo-cases">
+          <span class="demo-label">Preloaded Fathmic Demos</span>
+          <div class="hscroll-wrap">
+            <button id="demo-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+            <div id="demo-buttons" class="hscroll-track"></div>
+            <button id="demo-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
+          </div>
         </div>
 
-        <details id="demos-trending-details">
-          <summary>Demos &amp; Trending</summary>
-
-          <div id="demo-cases">
-            <span class="demo-label">Preloaded Fathmic Demos</span>
-            <div class="hscroll-wrap">
-              <button id="demo-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
-              <div id="demo-buttons" class="hscroll-track"></div>
-              <button id="demo-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
-            </div>
+        <div id="trending-section" hidden>
+          <div id="trending-header">
+            <span class="demo-label">Most Searched:</span>
+            <select id="trending-filter"></select>
           </div>
-
-          <div id="trending-section" hidden>
-            <div id="trending-header">
-              <span class="demo-label">Most Searched:</span>
-              <select id="trending-filter"></select>
-            </div>
-            <div class="hscroll-wrap">
-              <button id="trending-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
-              <div id="trending-groups" class="hscroll-track"></div>
-              <button id="trending-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
-            </div>
+          <div class="hscroll-wrap">
+            <button id="trending-scroll-left" class="scroll-arrow" aria-label="Scroll left" type="button">&#8249;</button>
+            <div id="trending-groups" class="hscroll-track"></div>
+            <button id="trending-scroll-right" class="scroll-arrow" aria-label="Scroll right" type="button">&#8250;</button>
           </div>
-        </details>
-
-        <!-- Only shown once a session is active (see enterActiveSession) --
-             #blueprint-section is already visible by default before that,
-             so this would just be a redundant no-op button there. Toggles
-             the same section back into view without touching state/
-             resetDownstream, so the current taxonomy/result is untouched. -->
-        <button id="show-blueprint-btn" type="button" hidden>Spec &amp; Blueprint</button>
+        </div>
       </div>
       <p id="gate-status" class="status"></p>
 

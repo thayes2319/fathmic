@@ -154,11 +154,5 @@ const SHOWCASE_FIXTURES = [
     "topic": "Creating a Compliance Policy Specification with Clauses and Triggers",
     "specSnippet": "Scope Spec covers one compliance policy artifact: the clause schema, trigger/condition logic, enforcement behavior, logging, and reporting for a rules engine enforcing obligations on data events. Included: clause structure, evaluation mechanics, action types,…",
     "image": "images/showcase/compliance-policy.jpg"
-  },
-  {
-    "label": "Custom Tattoo",
-    "topic": "Designing a custom tattoo",
-    "specSnippet": "Scope One standalone tattoo. Forearm placement, wrapping the limb rather than sitting flat on one plane. Final size under 3 inches. Full color. No sleeve, no expansion planned — this piece stands alone. Covers design, technique, and aging considerations only.…",
-    "image": "images/showcase/custom-tattoo.jpg"
   }
 ];

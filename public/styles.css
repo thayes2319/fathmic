@@ -188,13 +188,29 @@ textarea, input[type="text"] {
    guaranteed to look identical. */
 #stakes-quick-row {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.15rem;
   margin-top: 0.5rem;
   font-size: 0.82rem;
 }
+/* Two-row grid: labels on top ("How much is riding on this?" left,
+   "Searching as:" right), their actual controls directly below on the
+   next row (Low/Medium/High left, the select right) -- each label sits
+   directly above the control it governs. */
+#stakes-quick-label-row, #stakes-quick-control-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
 #stakes-quick-label { color: var(--muted); }
+#persona-label { font-size: 0.8rem; color: var(--muted); }
+#stakes-quick-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .stakes-quick-btn, .stakes-regen-btn {
   margin-top: 0;
   padding: 0.3rem 0.7rem;
@@ -365,21 +381,26 @@ button:disabled { opacity: 0.5; cursor: default; }
 #stale-banner button { margin-top: 0; padding: 0.35rem 0.8rem; font-size: 0.85rem; }
 #stale-banner[hidden] { display: none; }
 
-/* flex-end, not center: persona-row is a label-above-select stack, taller
-   than the plain buttons either side of it. This aligns the select's own
-   bottom edge with the buttons' bottom edge; the label just sticks up above
-   that shared line instead of pushing the select down to stay centered. */
-#action-row { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 1.1rem; margin-top: 0.6rem; }
+/* Grid, not flex -- spans the row edge-to-edge (matching the textarea/
+   stakes rows above it), and each button keeps a fixed column (1, 2, 3)
+   that's completely independent of anything else's state. Demos &
+   Trending's toggle (col 3) is a plain button, not <summary> -- see its
+   own rule below for why -- so nothing here ever has a reason to move. */
+#action-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1.1rem; margin-top: 0.6rem; }
 /* Fixed width sized to the longest word in the cycle ("Concentrate") so the
    button doesn't visibly resize as DISTILL_LABELS rotates through it.
    Explicit height on all three #action-row buttons -- <summary> and
    <button> render at slightly different heights even with identical
    padding/font-size (measured: 38.6px vs 35.6px), so without this they
    drift out of alignment despite otherwise-matching styles. */
+#distill-btn { grid-column: 1; }
+#show-blueprint-btn { grid-column: 2; justify-self: center; }
+#demos-trending-toggle { grid-column: 3; justify-self: end; }
 #action-row #distill-btn { margin-top: 0; width: 108px; text-align: center; height: 36px; }
-#demos-trending-details summary, #show-blueprint-btn { height: 36px; }
-#persona-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; margin: 0 auto; }
-#persona-row label { margin-bottom: 0; font-weight: normal; font-size: 0.8rem; color: var(--muted); }
+#demos-trending-toggle, #show-blueprint-btn { height: 36px; }
+/* Now lives in #stakes-quick-control-row, sharing a line with the
+   Low/Medium/High buttons -- its own label (#persona-label) sits directly
+   above it in #stakes-quick-label-row instead of stacking here. */
 #persona-row select {
   padding: 0.3rem 0.5rem;
   border: 1px solid var(--border);
@@ -501,16 +522,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 #blueprint-showcase-stage.showing-spec #blueprint-showcase-spec { opacity: 1; }
 #blueprint-showcase-stage.showing-image #blueprint-showcase-image { opacity: 1; }
 
-/* Flush right on the same row as Distill -- persona-row's own margin:0 auto
-   (above) already consumes all the free space on the main axis split evenly
-   around itself, so this lands flush right as a natural consequence rather
-   than needing its own auto margin (that would instead pull free space
-   toward itself specifically, leaving persona-row off-center).
-   Once opened, flex-basis:100% claims the whole row width so the expanded
-   demo/trending panel drops to its own line below (action-row already has
-   flex-wrap:wrap) instead of squeezing in beside the other controls. */
-#demos-trending-details[open] { flex-basis: 100%; margin-top: 1rem; }
-#demos-trending-details summary {
+#demos-trending-toggle {
   display: inline-flex;
   align-items: center;
   margin-top: 0;
@@ -523,25 +535,23 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-weight: 600;
   cursor: pointer;
   user-select: none;
-  list-style: none;
 }
-#demos-trending-details summary::-webkit-details-marker { display: none; }
-#demos-trending-details summary:hover { opacity: 0.88; }
-#demos-trending-details summary::after {
+#demos-trending-toggle:hover { opacity: 0.88; }
+#demos-trending-toggle::after {
   content: "▸";
   display: inline-block;
   margin-left: 0.5rem;
   transition: transform 0.15s ease;
 }
-#demos-trending-details[open] summary::after { transform: rotate(90deg); }
+#demos-trending-toggle.open::after { transform: rotate(90deg); }
 
-/* Same pill treatment as the Demos & Trending summary right beside it --
+/* Same pill treatment as the Demos & Trending toggle right beside it --
    reads as a parallel, equally-weighted action, not an afterthought link.
    Always the Blueprint brand cyan (not just while active) so it reads as
    "the Blueprint one" at a glance, matching the BLUEPRINT badge/demo-chip
    color used everywhere else in the app. Chevron mirrors the Demos &
-   Trending summary's own open/closed indicator -- same rotate-on-expand
-   convention, toggled via .active since this isn't a native <details>. */
+   Trending toggle's own open/closed indicator -- same rotate-on-expand
+   convention (.active here, .open there -- neither is a native <details>). */
 #show-blueprint-btn {
   display: inline-flex;
   align-items: center;
@@ -564,26 +574,32 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 #show-blueprint-btn.active::after { transform: rotate(90deg); }
 
-/* Keeps Distill / Searching as / Demos & Trending on one row down to a
-   350px-wide viewport -- narrower gap and a more compact Demos & Trending
-   button free up the room the fixed-width Distill button and capped persona
-   select still need. Placed after the base rules above so it actually wins
-   the cascade at matching specificity. */
-@media (max-width: 480px) {
+/* Own, wider breakpoint than the general mobile block below -- at full
+   size, Distill/Spec & Blueprint/Demos & Trending naturally wrap anywhere
+   from 481-529px (measured), well before the 480px mobile block kicks in
+   to shrink them. Shrinking starting here instead closes that gap, keeping
+   all three on one row down to ~400px without touching stakes-row/persona
+   sizing (unrelated, still governed by the 480px block below). */
+@media (max-width: 540px) {
   #action-row { gap: 0.25rem; }
-  #action-row #distill-btn { width: 84px; padding: 0.45rem 0.35rem; font-size: 0.78rem; }
-  /* Explicit matching height on both -- their differing font-sizes would
-     otherwise render slightly different box heights even with identical
-     padding. box-sizing:border-box (global) plus flex/native centering
-     keeps each one's text centered within it regardless. */
-  #demos-trending-details summary { height: 30px; padding: 0 0.35rem; font-size: 0.68rem; }
+  /* Explicit matching height on all three -- their differing font-sizes
+     would otherwise render slightly different box heights even with
+     identical padding. box-sizing:border-box (global) plus flex/native
+     centering keeps each one's text centered within it regardless.
+     #show-blueprint-btn needs its own shrink here too -- it isn't exempt
+     just because it wasn't in this row when this breakpoint was written. */
+  #action-row #distill-btn { width: 84px; padding: 0.45rem 0.35rem; font-size: 0.78rem; height: 30px; }
+  #demos-trending-toggle { height: 30px; padding: 0 0.35rem; font-size: 0.68rem; }
+  #show-blueprint-btn { height: 30px; padding: 0 0.5rem; font-size: 0.68rem; }
+}
+@media (max-width: 480px) {
   /* 182px was sized to the widest optgroup entry, not "Prefer not to say"
      itself -- the select's native intrinsic width accounts for every option
      in the list, not just the one currently showing, hence the reported
      daylight. Tighter cap + ellipsis back as a fallback for the rare longer
      selection. */
   #persona-row select { max-width: 132px; height: 30px; padding: 0.2rem 0.35rem; overflow: hidden; text-overflow: ellipsis; }
-  #persona-row label { max-width: 97px; white-space: nowrap; font-size: 0.68rem; }
+  #persona-label { max-width: 97px; white-space: nowrap; font-size: 0.68rem; }
 
   /* Both stakes rows are nowrap/one-line by design (see the base rules) --
      fine down to ~470px, but below that the label + 3 buttons genuinely
@@ -595,21 +611,15 @@ button:disabled { opacity: 0.5; cursor: default; }
   #stakes-quick-row, #stakes-control { font-size: 0.7rem; gap: 0.25rem; }
   .stakes-quick-btn, .stakes-regen-btn { padding: 0.22rem 0.42rem; font-size: 0.7rem; }
 }
+/* A plain block sibling of #action-row now, not a grid/flex item of it --
+   normal block elements respect their container's width on their own, so
+   the min-width:0 trick #demos-trending-details used to need here doesn't
+   apply anymore. .hscroll-track (below) still needs its own min-width:0,
+   since that's the actual overflow-x:auto scroller doing the horizontal
+   layout of demo buttons. */
+#demos-trending-panel { margin-top: 1rem; }
 #demo-cases { margin-top: 0.75rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
-
-/* #demos-trending-details is a flex item of #action-row (flex-wrap:wrap) --
-   without min-width:0, a flex item's default automatic minimum size is its
-   content's intrinsic (unwrapped) width, not 0, so it was growing to fit
-   every demo button laid out in one unbroken row (2300px+ with enough
-   demos) instead of respecting its own container's width. That pushed the
-   trailing scroll-right arrow off past the viewport edge, where html's
-   global overflow-x:hidden clips it entirely -- confirmed live: right
-   arrow's rendered x was >2400px in a 900px viewport. Same fix needed one
-   level deeper on .hscroll-track itself (the actual overflow-x:auto
-   scroller), since nothing else was forcing it to stay within its
-   available width either. */
-#demos-trending-details { min-width: 0; max-width: 100%; }
 
 /* Shared by all three horizontal pill lists (Fathmics to Explore, Most
    Searched Here, Trending out there) — manual arrow-scroll only, no

@@ -77,7 +77,8 @@ const el = {
   outputHeading: document.getElementById("output-heading"),
   outputText: document.getElementById("output-text"),
   copyOutputBtn: document.getElementById("copy-output-btn"),
-  demosTrendingDetails: document.getElementById("demos-trending-details"),
+  demosTrendingToggle: document.getElementById("demos-trending-toggle"),
+  demosTrendingPanel: document.getElementById("demos-trending-panel"),
   demoCases: document.getElementById("demo-cases"),
   demoButtons: document.getElementById("demo-buttons"),
   showBlueprintBtn: document.getElementById("show-blueprint-btn"),
@@ -703,7 +704,7 @@ function resetDownstream() {
 // from a loaded demo case — they're just competing for attention with the
 // task at hand. Hide them at that point, back the moment a new attempt
 // starts (resetDownstream). Demos & Trending lives in its own collapsible
-// <details> now (always reachable, collapsed by default) instead of being
+// panel now (always reachable, collapsed by default) instead of being
 // tied to session state — just make sure it's actually collapsed whenever
 // a session starts or ends, in case the user had it open while browsing.
 function setBrowseVisibility(visible) {
@@ -711,25 +712,32 @@ function setBrowseVisibility(visible) {
   if (el.showBlueprintBtn) el.showBlueprintBtn.classList.toggle("active", visible);
 }
 
+function setDemosTrendingOpen(open) {
+  if (el.demosTrendingPanel) el.demosTrendingPanel.hidden = !open;
+  if (el.demosTrendingToggle) {
+    el.demosTrendingToggle.classList.toggle("open", open);
+    el.demosTrendingToggle.setAttribute("aria-expanded", String(open));
+  }
+}
+
 function collapseDemosTrending() {
-  if (el.demosTrendingDetails) el.demosTrendingDetails.open = false;
+  setDemosTrendingOpen(false);
+}
+
+if (el.demosTrendingToggle) {
+  el.demosTrendingToggle.addEventListener("click", () => {
+    setDemosTrendingOpen(!!(el.demosTrendingPanel && el.demosTrendingPanel.hidden));
+  });
 }
 
 function enterActiveSession() {
   setBrowseVisibility(false);
   collapseDemosTrending();
-  // Blueprint is hidden by default once a session starts (see above) --
-  // this is the only way back to it without abandoning the current
-  // taxonomy/result (previously none existed short of a refresh).
-  if (el.showBlueprintBtn) el.showBlueprintBtn.hidden = false;
 }
 
 function exitActiveSession() {
   setBrowseVisibility(true);
   collapseDemosTrending();
-  // Blueprint is already visible by default pre-session -- the toggle
-  // would just be a redundant no-op button sitting there.
-  if (el.showBlueprintBtn) el.showBlueprintBtn.hidden = true;
 }
 
 if (el.showBlueprintBtn) {
@@ -737,6 +745,10 @@ if (el.showBlueprintBtn) {
     setBrowseVisibility(el.blueprintSection.hidden);
   });
 }
+// Sync the button's .active/chevron state to how the section actually
+// starts (visible, per its markup) -- nothing else runs setBrowseVisibility
+// until a click or a session boundary happens.
+setBrowseVisibility(!el.blueprintSection.hidden);
 
 // Process modal: one real, trackable step ("gate") plus a timed-release
 // simulation of taxonomy generation's internal work, since that's a single
