@@ -107,7 +107,7 @@
       </div>
 
       <div id="schematic-sequence" hidden>
-        <svg id="schematic-svg" viewBox="0 0 640 380" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+        <svg id="schematic-svg" viewBox="0 0 640 405" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
           <!-- Stage 1: input node -->
           <circle class="sq-input" cx="320" cy="18" r="7" />
 
@@ -184,19 +184,21 @@
             <line class="sq-output-line" style="--d:8.07s" x1="92" y1="282" x2="548" y2="282" />
             <line class="sq-output-line" style="--d:8.19s" x1="92" y1="292" x2="416" y2="292" />
 
-            <!-- Dismiss button moved below the (now much wider) card instead
-                 of squeezed beside it -- there's no longer room to its right
-                 at this width, and stacking reads cleanly at any size. Extra
-                 viewBox height (350 -> 380) makes room for the stack without
+            <!-- Label belongs to the card right above it, so it sits first,
+                 close under the card. Dismiss button is a separate, unrelated
+                 action -- sits further below with its own clear gap instead
+                 of the two crowding each other. -->
+            <g class="sq-label-group" style="--d:8.35s"><rect class="sq-label-bg" /><text class="sq-label" x="320" y="326" text-anchor="middle">→ synthesized into your answer</text></g>
+
+            <!-- Dismiss button below the label with a real gap -- viewBox
+                 height (350 -> 400) makes room for the stack without
                  affecting the width-fill fix above. -->
             <g id="schematic-dismiss" class="sq-dismiss-btn" style="--d:8.45s">
               <g id="schematic-dismiss-inner">
-                <rect x="268" y="316" width="104" height="32" rx="7" />
-                <text x="320" y="336" text-anchor="middle">I'm ready</text>
+                <rect x="268" y="358" width="104" height="32" rx="7" />
+                <text x="320" y="378" text-anchor="middle">I'm ready</text>
               </g>
             </g>
-
-            <g class="sq-label-group" style="--d:8.35s"><rect class="sq-label-bg" /><text class="sq-label" x="320" y="362" text-anchor="middle">→ synthesized into your answer</text></g>
           </g>
         </svg>
       </div>
