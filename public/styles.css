@@ -683,37 +683,19 @@ button:disabled { opacity: 0.5; cursor: default; }
   100% { transform: scale(1); }
 }
 
-/* The category currently being interviewed lifts out of the list into a
-   floating card — deliberately no click-blocking backdrop behind it (that
-   would break "still clickable if you're struck"); the existing
-   dim-siblings rule already recedes everything else, so this only needs to
-   handle its own elevation. No entrance keyframe here (opacity/transform
-   are handled by category-row-flash already) — this class only needs to
-   change where and how the row is positioned. */
+/* The category currently being interviewed stays flat, in its normal place
+   in the page -- no floating/fixed card, no backdrop. The existing
+   dim-siblings rule already recedes everything else; this just marks it as
+   never dimmed itself and gives it a light accent border so it's easy to
+   spot at a glance, distinct from a category the user opened manually
+   while browsing. The real focus signal lives one level deeper, on
+   whichever subcategory is actually in focus (see .subcategory-in-focus
+   and .subcategory-flash below) -- the category is just its context. */
 .category-row.interview-float {
-  position: fixed;
-  top: 6vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(600px, 92vw);
-  max-height: 86vh;
-  overflow-y: auto;
-  z-index: 60;
-  margin: 0;
-  padding: 0.6rem;
-  background: var(--bg);
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   opacity: 1 !important; /* never dimmed by the sibling-dim rule, regardless of what else is open */
 }
+.category-row.interview-float .category { border-color: var(--accent); }
 .category-row.interview-float .drag-handle { display: none; }
-.category-row.interview-float .category { border: none; padding: 0; }
-.category-row.interview-float .interview-nav-row {
-  position: sticky;
-  bottom: 0;
-  background: var(--bg);
-  padding-top: 0.4rem;
-}
 
 .drag-handle {
   cursor: grab;
@@ -757,14 +739,23 @@ button:disabled { opacity: 0.5; cursor: default; }
   padding: 0.4rem 0;
 }
 /* The one subcategory interview mode just revealed and is waiting on an
-   answer for -- a lighter, narrower echo of the category-level floating
-   card's own highlight treatment, not competing with it. Steady state only
-   (background tint, border) -- the entrance moment itself now happens via
-   #question-spotlight below, shared with categories. */
+   answer for -- this is the actual focus signal now (no separate popup
+   announcing it), so it needs to carry that on its own: a steady-state
+   accent border/tint plus a brief entrance flash (.subcategory-flash,
+   added/removed in app.js) the moment it becomes the new focus, so
+   advancing to the next question still reads as "something changed here"
+   even without an interrupt to announce it. */
 .subcategory-in-focus {
   border-left-color: var(--accent);
   background: rgba(122, 92, 62, 0.06);
   border-radius: 0 6px 6px 0;
+}
+.subcategory-flash {
+  animation: subcategoryFlash 1.2s ease-out;
+}
+@keyframes subcategoryFlash {
+  0% { box-shadow: 0 0 0 3px var(--accent); }
+  100% { box-shadow: 0 0 0 3px transparent; }
 }
 .subcategory > summary::-webkit-details-marker { display: none; }
 .subcategory > summary::before { content: "\25B8  "; color: var(--muted); }
@@ -1116,105 +1107,6 @@ button:disabled { opacity: 0.5; cursor: default; }
    clicking a card still in its placeholder/error state (nothing generated
    yet) does nothing rather than opening an empty lightbox. */
 .ref-card { cursor: pointer; }
-
-/* Interview mode's question moment (see showQuestionSpotlight in app.js):
-   a category or subcategory heading takes over screen center on its own
-   background panel, layered above the real interview-float modal (shown by
-   JS ~0.5s after that modal is already up, via a dimmed backdrop -- both
-   the delay and the dim reinforce that this is arriving ON TOP of
-   something already there, not appearing simultaneously with it). Stays
-   up until dismissed (click anywhere, or Continue) rather than a fixed
-   timer -- reading time varies by content length and person, so a timed
-   auto-hide either cuts someone off or lingers pointlessly. A generous
-   safety-net timeout in JS dismisses it if nobody interacts at all. */
-#question-spotlight {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.45);
-  cursor: pointer;
-  animation: questionSpotlightBackdropIn 0.3s ease-out both;
-}
-#question-spotlight[hidden] { display: none; }
-@keyframes questionSpotlightBackdropIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-#question-spotlight.spotlight-leaving { animation: questionSpotlightBackdropOut 0.25s ease-in both; }
-@keyframes questionSpotlightBackdropOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-#question-spotlight-text {
-  background: var(--bg);
-  color: var(--fg);
-  border: 1px solid var(--border);
-  padding: 1.4rem 1.8rem;
-  border-radius: 14px;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
-  text-align: center;
-  max-width: min(560px, 88vw);
-  cursor: default;
-  animation: questionSpotlightCardIn 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both;
-}
-#question-spotlight.spotlight-leaving #question-spotlight-text {
-  animation: questionSpotlightCardOut 0.25s ease-in both;
-}
-@keyframes questionSpotlightCardIn {
-  0%   { transform: scale(0.55); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes questionSpotlightCardOut {
-  0%   { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.92); opacity: 0; }
-}
-/* Subcategory is the actual question being asked right now -- category is
-   just the surrounding context, so the emphasis is inverted from a plain
-   heading/subheading: subcategory reads larger and bolder, category smaller
-   and muted above it. */
-#question-spotlight-category {
-  font-weight: 600;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  color: var(--muted);
-  margin-bottom: 0.6rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--border);
-}
-#question-spotlight-subcategory {
-  font-weight: 700;
-  font-size: 1.3rem;
-  line-height: 1.4;
-}
-#question-spotlight-subcategory:empty { display: none; }
-/* Zero-subcategory category (nothing to show below it) -- category becomes
-   the only line, so it needs the prominent treatment back rather than
-   staying small and muted with nothing to anchor against. */
-#question-spotlight-text:has(#question-spotlight-subcategory:empty) #question-spotlight-category {
-  font-weight: 700;
-  font-size: 1.3rem;
-  color: var(--fg);
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-#question-spotlight-continue {
-  display: block;
-  margin: 1.1rem auto 0;
-  padding: 0.5rem 1.4rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-#question-spotlight-continue:hover { opacity: 0.88; }
 
 #card-lightbox-backdrop:not([hidden]) {
   position: fixed;

@@ -117,11 +117,7 @@ const el = {
   referenceCards: document.getElementById("reference-cards"),
   cardLightboxBackdrop: document.getElementById("card-lightbox-backdrop"),
   cardLightboxContent: document.getElementById("card-lightbox-content"),
-  cardLightboxClose: document.getElementById("card-lightbox-close"),
-  questionSpotlight: document.getElementById("question-spotlight"),
-  questionSpotlightCategory: document.getElementById("question-spotlight-category"),
-  questionSpotlightSubcategory: document.getElementById("question-spotlight-subcategory"),
-  questionSpotlightContinue: document.getElementById("question-spotlight-continue")
+  cardLightboxClose: document.getElementById("card-lightbox-close")
 };
 
 // A ?share=<id> URL loads someone else's shared result instead of the normal
@@ -686,13 +682,7 @@ function resetDownstream() {
   state.blueprintFit = false;
   interviewModeActive = false;
   interviewIndex = -1;
-  lastSpotlightKey = null;
-  clearTimeout(questionSpotlightShowTimer);
-  clearTimeout(questionSpotlightSafetyTimer);
-  if (el.questionSpotlight) {
-    el.questionSpotlight.hidden = true;
-    el.questionSpotlight.classList.remove("spotlight-leaving");
-  }
+  lastFocusKey = null;
   exitActiveSession();
 }
 
@@ -1111,59 +1101,13 @@ let subcategoryRegistry = [];
 let interviewModeActive = false;
 let interviewIndex = -1;
 
-// Tracks the last (category, subcategory) pair the question-spotlight fired
-// for, so it only replays on a genuine change, not every re-render (see the
-// spotlightKey check in renderTaxonomyImpl). Reset in resetDownstream() so
-// a brand new topic doesn't skip its own first spotlight just because the
-// key happens to collide with whatever the previous session ended on.
-let lastSpotlightKey = null;
-let questionSpotlightShowTimer = null; // the ~0.5s delay before it appears
-let questionSpotlightSafetyTimer = null; // auto-dismiss if nobody interacts at all
-const QUESTION_SPOTLIGHT_DELAY_MS = 500;
-const QUESTION_SPOTLIGHT_SAFETY_MS = 10000;
-const QUESTION_SPOTLIGHT_EXIT_MS = 250; // must match the CSS exit animation duration
-
-function hideQuestionSpotlight() {
-  if (!el.questionSpotlight || el.questionSpotlight.hidden) return;
-  clearTimeout(questionSpotlightSafetyTimer);
-  el.questionSpotlight.classList.add("spotlight-leaving");
-  setTimeout(() => {
-    el.questionSpotlight.hidden = true;
-    el.questionSpotlight.classList.remove("spotlight-leaving");
-  }, QUESTION_SPOTLIGHT_EXIT_MS);
-}
-
-function showQuestionSpotlight(categoryText, subcategoryText) {
-  if (!el.questionSpotlight) return;
-  // Cancel anything already pending/showing -- a fast answer can trigger a
-  // new spotlight request before the previous one even appeared.
-  clearTimeout(questionSpotlightShowTimer);
-  clearTimeout(questionSpotlightSafetyTimer);
-  el.questionSpotlight.hidden = true;
-  el.questionSpotlight.classList.remove("spotlight-leaving");
-
-  // Deliberately delayed, not simultaneous with the base interview-float
-  // modal appearing -- reads as arriving ON TOP of something already
-  // there, which a same-frame appearance didn't convey.
-  questionSpotlightShowTimer = setTimeout(() => {
-    el.questionSpotlightCategory.textContent = categoryText;
-    el.questionSpotlightSubcategory.textContent = subcategoryText || "";
-    el.questionSpotlight.hidden = false;
-    // No fixed auto-hide -- stays up until dismissed (click anywhere, or
-    // Continue; see the listener below), since reading time genuinely
-    // varies by content length and person. This safety timer is only a
-    // distant fallback for an abandoned tab, same pattern as the
-    // onboarding schematic's own SCHEMATIC_HOLD_MS.
-    questionSpotlightSafetyTimer = setTimeout(hideQuestionSpotlight, QUESTION_SPOTLIGHT_SAFETY_MS);
-  }, QUESTION_SPOTLIGHT_DELAY_MS);
-}
-
-if (el.questionSpotlight) {
-  // Any click inside -- backdrop, card, or the Continue button -- dismisses
-  // it; nothing else to interact with in here, so there's no reason to
-  // distinguish "clicked the button" from "clicked anywhere else."
-  el.questionSpotlight.addEventListener("click", hideQuestionSpotlight);
-}
+// Tracks the last (category, subcategory) pair interview focus landed on,
+// so the entrance flash + scroll-into-view below only fire on a genuine
+// change, not every incidental re-render (see the focusKey check in
+// renderTaxonomyImpl). Reset in resetDownstream() so a brand new topic
+// doesn't skip its own first entrance just because the key happens to
+// collide with whatever the previous session ended on.
+let lastFocusKey = null;
 
 function categoryHasSelection(category) {
   if (state.selected.has(category.name)) return true; // category-level "General" pick
@@ -1282,13 +1226,6 @@ el.interviewToggleBtn.addEventListener("click", () => {
 // afterward.
 document.addEventListener("click", event => {
   if (!interviewModeActive) return;
-  // The question-spotlight overlay (see showQuestionSpotlight) is part of
-  // the interview experience but lives in a completely separate part of
-  // the DOM, not nested inside .interview-float -- without this check,
-  // dismissing it (click anywhere on it, or Continue) looked exactly like
-  // clicking outside the card and exited interview mode entirely instead
-  // of just closing the overlay (confirmed for real).
-  if (el.questionSpotlight && el.questionSpotlight.contains(event.target)) return;
   const floatingCard = document.querySelector(".category-row.interview-float");
   if (floatingCard && !floatingCard.contains(event.target)) {
     exitInterview();
@@ -1540,23 +1477,22 @@ function renderTaxonomyImpl() {
       }
     }
 
-    // The question-spotlight moment: category question as the header line,
-    // whichever subcategory just came into focus beneath it. Fires once per
-    // genuinely NEW (category, subcategory) pair -- lastSpotlightKey guards
-    // against re-firing on every incidental re-render (this whole function
-    // runs on every selection change, not just ones that actually advance
-    // the focus). Also covers a category with zero subcategories (a fully
-    // "Given" one) -- fires once, category line alone.
+    // Tracks whether interview focus genuinely landed on a NEW (category,
+    // subcategory) pair this render -- lastFocusKey guards against
+    // re-triggering the entrance flash + scroll below on every incidental
+    // re-render (this whole function runs on every selection change, not
+    // just ones that actually advance the focus). Also covers a category
+    // with zero subcategories (a fully "Given" one).
     //
-    // Deliberately does NOT fire again once every subcategory is answered.
+    // Deliberately does NOT re-fire once every subcategory is answered.
     // Real bug caught live: interviewSubRevealCount still points at the
     // last subcategory after it's answered (the reveal-count math doesn't
     // change), so focusedSub correctly resolves to null there too -- but
     // that produces a DIFFERENT key ("Category::lastSub" -> "Category::")
-    // than the one already shown, which read as "genuinely new" and fired
-    // a redundant spotlight announcing the same category again with nothing
-    // to show. The subs.length===0 check below is what still allows the
-    // legitimate zero-subcategory case through while excluding this one.
+    // than the one already shown, which read as "genuinely new" and
+    // re-triggered the entrance treatment with nothing new to show. The
+    // subs.length===0 check below is what still allows the legitimate
+    // zero-subcategory case through while excluding this one.
     let justEnteredSubFocus = false;
     if (isInterviewFocus) {
       const subs = category.subcategories || [];
@@ -1565,14 +1501,10 @@ function renderTaxonomyImpl() {
         : null;
       const focusedSub = candidate && !subcategoryHasSelection(candidate) ? candidate : null;
       if (focusedSub || subs.length === 0) {
-        const spotlightKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
-        if (spotlightKey !== lastSpotlightKey) {
-          lastSpotlightKey = spotlightKey;
+        const focusKey = `${category.name}::${focusedSub ? focusedSub.name : ""}`;
+        if (focusKey !== lastFocusKey) {
+          lastFocusKey = focusKey;
           justEnteredSubFocus = !!focusedSub;
-          showQuestionSpotlight(
-            `Tell me about ${category.questionPhrase || category.name}`,
-            focusedSub ? focusedSub.name : ""
-          );
         }
       }
     }
@@ -1585,13 +1517,14 @@ function renderTaxonomyImpl() {
       const isSubInFocus = isInterviewFocus && subIndex === interviewSubRevealCount - 1 && !subcategoryHasSelection(sub);
       subEl.className = isSubInFocus ? "subcategory subcategory-in-focus" : "subcategory";
       subEl.open = isSubInFocus || state.expandedSubcategories.has(subKey);
-      // Scrolls the newly-focused subcategory into view the moment it
-      // actually becomes the new focus (guarded by the same key check as
-      // the spotlight above) -- previously only the category row scrolled
-      // into view on category change, leaving the subcategory itself
-      // wherever it happened to render, often below the fold.
+      // Brief entrance flash + scroll-into-view the moment this subcategory
+      // actually becomes the new focus (guarded by the same key check
+      // above) -- this is the whole "something changed here" signal now
+      // that there's no separate popup announcing it.
       if (isSubInFocus && justEnteredSubFocus) {
+        subEl.classList.add("subcategory-flash");
         requestAnimationFrame(() => subEl.scrollIntoView({ behavior: "smooth", block: "center" }));
+        setTimeout(() => subEl.classList.remove("subcategory-flash"), 1200);
       }
       subEl.addEventListener("toggle", () => {
         if (subEl.open) state.expandedSubcategories.add(subKey);

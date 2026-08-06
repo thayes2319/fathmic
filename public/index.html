@@ -487,22 +487,6 @@
     <a href="mailto:thomas@gohw.net">Contact</a>
   </footer>
 
-  <!-- Interview mode's question moment: a category or subcategory heading
-       takes over screen center, on its own background panel, layered above
-       the real interview-float modal (appears ~0.5s after that modal is
-       already up, not simultaneously). Stays up until dismissed -- click
-       anywhere on it, or the Continue button -- rather than a fixed timer,
-       since reading time genuinely varies by content length and person.
-       JS-driven (see showQuestionSpotlight in app.js) rather than a CSS
-       transform on the real heading itself, since the real heading has to
-       stay in its normal in-flow position the whole time. -->
-  <div id="question-spotlight" hidden aria-hidden="true">
-    <div id="question-spotlight-text">
-      <div id="question-spotlight-category"></div>
-      <div id="question-spotlight-subcategory"></div>
-      <button id="question-spotlight-continue" type="button">Continue</button>
-    </div>
-  </div>
 
   <div id="card-lightbox-backdrop" hidden>
     <div id="card-lightbox">
