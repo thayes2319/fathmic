@@ -1,4 +1,4 @@
-const { callText } = require("./llm");
+const { callText, callStructured } = require("./llm");
 const { recordCost } = require("./costLog");
 const { STABILITY_LARGE_PRICE, STABILITY_TURBO_PRICE } = require("./pricing");
 
@@ -35,13 +35,43 @@ Write ONE concise, vivid, concrete visual description (2-4 sentences) an image g
 // rendered photorealistic product shots regardless, both with this positive
 // instruction and a matching negative-prompt push. Keeping this prompt as-is
 // for the Gemini path below, since the prompt was never the problem.
-const BLUEPRINT_PROMPT_SYSTEM = `You are composing a visual generation prompt for FATHmic's BLUEPRINT mode — a concept SKETCH of the actual physical thing being specified (a tattoo, a piece of furniture, a garden layout, an engagement ring, and similar), not an editorial illustration of an abstract topic and not a photorealistic render.
+// Two distinct treatments live under one system prompt (same conditional-
+// framing pattern PROMPT_SYSTEM already uses above), but unlike that plain
+// prose call, this one also has to tell the server which negative_prompt to
+// pair it with -- style and prompt are composed together via a forced tool
+// call (callStructured) rather than inferred after the fact from the topic
+// string, which would be fragile against the taxonomy's paraphrasing.
+const BLUEPRINT_PROMPT_SYSTEM = `You are composing a visual generation prompt for FATHmic's BLUEPRINT mode — a concept preview of the actual thing being specified, not an editorial illustration of an abstract topic and not a photorealistic render.
 
-Render the SPECIFIC thing described by the distilled selections as concretely and literally as possible — materials, form, style, scale, setting — the way a concept designer's hand-drawn or line-art sketch would show it: clean linework, minimal shading, a drafting/technical sensibility (an architect's concept sketch or a product designer's marker rendering), not a glossy photorealistic image. This should read as a preview of the real, buildable object or space, not a metaphor for it.
+Two distinct visual treatments, depending on what's actually being specified:
 
-Critical constraint: image models cannot render legible text, numbers, or labels reliably — they produce garbled gibberish when asked to. NEVER include dimension labels, measurement callouts, material tags, or any readable text in the description, even though a literal technical blueprint would normally have them. Show the design itself; leave annotation out entirely.
+1. object_sketch — for a discrete physical object, space, or scene (a tattoo, a piece of furniture, a garden layout, an engagement ring, a vehicle, a room, and similar). Render the SPECIFIC thing described by the distilled selections as concretely and literally as possible — materials, form, style, scale, setting — the way a concept designer's hand-drawn or line-art sketch would show it: clean linework, minimal shading, a drafting/technical sensibility (an architect's concept sketch or a product designer's marker rendering), not a glossy photorealistic image. This should read as a preview of the real, buildable object or space, not a metaphor for it.
 
-Write ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly, and explicitly name the sketch/line-art style in it (e.g. "rendered as a clean concept sketch with visible linework" or "loose architectural line-drawing style") so the output doesn't default to photorealism. Output only the description, nothing else.`;
+2. pattern_swatch — for a repeating, tileable surface design (a wallcovering, window film, textile/drapery/upholstery pattern, furniture surface graphic, and similar). Render the actual motif, colorway, and repeat as a flat, painterly PATTERN SWATCH filling the entire frame edge to edge, as if it were the material sample itself — the same rich, painterly treatment FATHmic's sibling app Muralizer uses for wall murals. NOT a sketch of an object, NOT a photo of a room or furniture the pattern is applied to, NOT line-art, NOT a 3D scene with depth or perspective — just the pattern, flat and tiling.
+
+Pick whichever treatment actually fits the subject, then write ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly, and explicitly name the treatment in it (e.g. "rendered as a clean concept sketch with visible linework" for object_sketch, or "rendered as a flat, seamless painterly pattern swatch filling the frame" for pattern_swatch) so the output doesn't default to the wrong style.
+
+Critical constraint: image models cannot render legible text, numbers, or labels reliably — they produce garbled gibberish when asked to. NEVER include dimension labels, measurement callouts, material tags, or any readable text in the description, even though a literal technical blueprint would normally have them. Show the design itself; leave annotation out entirely.`;
+
+const BLUEPRINT_PROMPT_TOOL = {
+  name: "compose_blueprint_image_prompt",
+  description: "Classify which visual treatment a Blueprint-mode topic needs and compose its image generation prompt.",
+  input_schema: {
+    type: "object",
+    properties: {
+      style: {
+        type: "string",
+        enum: ["object_sketch", "pattern_swatch"],
+        description: "object_sketch for a discrete physical object/space/scene; pattern_swatch for a repeating, tileable surface design (wallcovering, window film, textile/drapery/upholstery pattern, furniture surface graphic, or similar)."
+      },
+      prompt: {
+        type: "string",
+        description: "ONE concise, vivid, concrete visual description (2-4 sentences) an image generation model can render directly, matching the chosen style."
+      }
+    },
+    required: ["style", "prompt"]
+  }
+};
 
 const GENERAL_NEGATIVE_PROMPT =
   "no text, no writing, no letters, no captions, no watermarks, no logos, " +
@@ -51,12 +81,35 @@ const BLUEPRINT_NEGATIVE_PROMPT =
   GENERAL_NEGATIVE_PROMPT +
   ", no photorealism, no photograph, no glossy render, no 3D render, no CGI";
 
-async function composeImagePrompt(topic, resultExcerpt, isBlueprint) {
+// Pattern swatches need to actively push away from the object_sketch
+// defaults (depth, isolated subject, linework) on top of the same
+// realism/glossiness exclusions -- otherwise the model's strong prior
+// toward "sketch of a thing on a background" tends to win anyway.
+const BLUEPRINT_PATTERN_NEGATIVE_PROMPT =
+  GENERAL_NEGATIVE_PROMPT +
+  ", no photorealism, no photograph, no glossy render, no 3D render, no CGI, " +
+  "no perspective, no depth, no room scene, no furniture, no isolated object, " +
+  "no line art, no sketch lines, no white background, no vignette, no framing border";
+
+async function composeImagePrompt(topic, resultExcerpt) {
   return callText({
-    system: isBlueprint ? BLUEPRINT_PROMPT_SYSTEM : PROMPT_SYSTEM,
+    system: PROMPT_SYSTEM,
     prompt: `Topic: ${topic}\n\nDistilled content (excerpt):\n${resultExcerpt}`,
     label: "illustration-prompt"
   });
+}
+
+async function composeBlueprintImagePrompt(topic, resultExcerpt) {
+  const result = await callStructured({
+    system: BLUEPRINT_PROMPT_SYSTEM,
+    prompt: `Topic: ${topic}\n\nDistilled content (excerpt):\n${resultExcerpt}`,
+    tool: BLUEPRINT_PROMPT_TOOL,
+    label: "illustration-prompt-blueprint"
+  });
+  return {
+    prompt: String(result.prompt || ""),
+    style: result.style === "pattern_swatch" ? "pattern_swatch" : "object_sketch"
+  };
 }
 
 async function runStabilityIllustration(imagePrompt, negativePrompt, model) {
@@ -145,7 +198,15 @@ async function runGeminiIllustration(imagePrompt) {
 async function runIllustration({ topic, resultText, isBlueprint }) {
   const blueprint = isBlueprint === true;
   const excerpt = (resultText || "").slice(0, 600);
-  const imagePrompt = await composeImagePrompt(topic, excerpt, blueprint);
+
+  if (!blueprint) {
+    const imagePrompt = await composeImagePrompt(topic, excerpt);
+    const imageBase64 = await runStabilityIllustration(imagePrompt, GENERAL_NEGATIVE_PROMPT, "sd3.5-large-turbo");
+    return { image: imageBase64, prompt: imagePrompt };
+  }
+
+  const { prompt: imagePrompt, style } = await composeBlueprintImagePrompt(topic, excerpt);
+  const negativePrompt = style === "pattern_swatch" ? BLUEPRINT_PATTERN_NEGATIVE_PROMPT : BLUEPRINT_NEGATIVE_PROMPT;
 
   // Gemini only for BLUEPRINT, and only if a key is actually configured —
   // otherwise falls through to the existing Stability path unchanged, same
@@ -154,7 +215,7 @@ async function runIllustration({ topic, resultText, isBlueprint }) {
   // Stability here — a real failure should surface as a real error while
   // this is still unverified, not get masked by a different-looking result
   // that could be mistaken for Gemini having worked.
-  if (blueprint && process.env.GEMINI_API_KEY) {
+  if (process.env.GEMINI_API_KEY) {
     const imageBase64 = await runGeminiIllustration(imagePrompt);
     return { image: imageBase64, prompt: imagePrompt };
   }
@@ -164,8 +225,7 @@ async function runIllustration({ topic, resultText, isBlueprint }) {
   // steerability for speed, which is the leading suspect for why the sketch
   // framing got ignored in the first real test. Cheapest possible next
   // experiment: same model family, same account, one string changed.
-  const model = blueprint ? "sd3.5-large" : "sd3.5-large-turbo";
-  const imageBase64 = await runStabilityIllustration(imagePrompt, blueprint ? BLUEPRINT_NEGATIVE_PROMPT : GENERAL_NEGATIVE_PROMPT, model);
+  const imageBase64 = await runStabilityIllustration(imagePrompt, negativePrompt, "sd3.5-large");
   return { image: imageBase64, prompt: imagePrompt };
 }
 
