@@ -3005,10 +3005,6 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
       showcaseSpeedMultiplier = parseFloat(el.bpShowcaseSpeedSlider.value) || 1;
       if (el.bpShowcaseSpeedValue) el.bpShowcaseSpeedValue.textContent = `${showcaseSpeedMultiplier.toFixed(2).replace(/\.?0+$/, "")}×`;
     });
-    // Same reasoning as the arrows above -- dragging the slider fires a
-    // real click/pointerdown on an element now nested inside the stage,
-    // which would otherwise also toggle pause via the bubbled stage click.
-    ["click", "pointerdown"].forEach(evt => el.bpShowcaseSpeedSlider.addEventListener(evt, e => e.stopPropagation()));
   }
 
   runShowcaseExample();

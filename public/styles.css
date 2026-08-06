@@ -482,17 +482,19 @@ button:disabled { opacity: 0.5; cursor: default; }
    a tighter detail crop. Deliberately faster-paced than the caption cycle
    above (this is the actual "look how much range this has" moment, the
    caption is just connective tissue). Hidden via JS (not just empty
-   content) when SHOWCASE_FIXTURES isn't loaded/populated. Position:relative
-   so the prev/next arrows below can anchor to it, not just the stage --
-   they need to sit at the stage's vertical center but that's the only
-   thing sizing this wrapper differently from the stage itself. */
-#blueprint-showcase { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--border); position: relative; }
+   content) when SHOWCASE_FIXTURES isn't loaded/populated. */
+#blueprint-showcase { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+/* Topic + speed slider share a row -- locked far right next to the title,
+   not overlaid on the stage/image below (where it used to compete with
+   whatever's currently showing). min-width:0 lets the topic text truncate/
+   wrap under the slider's fixed width instead of pushing it off-row. */
+#blueprint-showcase-header { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-bottom: 0.5rem; }
 #blueprint-showcase-topic {
   font-weight: 700;
   font-size: 0.95rem;
   color: var(--fg);
-  margin-bottom: 0.5rem;
   min-height: 1.3em;
+  min-width: 0;
   transition: opacity 0.35s ease;
 }
 #blueprint-showcase-topic.bp-fading { opacity: 0; }
@@ -529,6 +531,13 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-size: 0.85rem;
   line-height: 1.45;
   color: var(--fg);
+  /* Overrides the shared 0.7s above -- a smooth width change means every
+     line re-wraps continuously for the whole 700ms, which reads as the
+     paragraph visibly shuffling itself rather than a clean transition (an
+     image pane growing doesn't have this problem, so it keeps the smooth
+     version). Snapping fast instead avoids the live reflow being
+     something you actually watch happen. */
+  transition: width 0.12s ease, font-size 0.12s ease;
 }
 #bp-scope-image-pane { width: 38%; }
 /* Phase 2: image pane grows, spec shrinks -- text stays fully rendered
@@ -591,15 +600,15 @@ button:disabled { opacity: 0.5; cursor: default; }
   z-index: 5;
 }
 
-/* Locked top-right, same dark-glass treatment as the prev/next arrows so
-   it reads as part of the same overlay control family regardless of what
-   phase/image is behind it. Glowing cyan thumb -- the one place this
+/* Locked far right of the header row, next to the topic title -- not an
+   overlay on the stage/image anymore (moved out after it read as visual
+   clutter competing with whatever was currently showing there). Same
+   dark-glass pill treatment as the prev/next arrows for a consistent
+   "control" look. flex-shrink:0 so the topic title truncates/wraps around
+   it instead of squeezing it. Glowing cyan thumb -- the one place this
    showcase gets an explicit "control panel" moment. */
 #bp-showcase-speed {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 6;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 0.35rem;
