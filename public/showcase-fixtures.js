@@ -1,5 +1,12 @@
 const SHOWCASE_FIXTURES = [
   {
+    "label": "Medical Office Graphics",
+    "topic": "Generating an environmental graphics package for a medical office lobby and corridors",
+    "specSnippet": "Scope Full environmental graphics package for a medical office lobby and connecting corridors. Covers wayfinding logic, overhead and wall-mounted sign types, ADA/Braille room ID plaques, custom pictograms, lobby feature wall, and biophilic art program. Excludes exterior monument/pylon signage,…",
+    "image": "images/showcase/medical-office-graphics.jpg",
+    "technicalImage": "images/showcase/medical-office-graphics-technical.jpg"
+  },
+  {
     "label": "Custom Furniture (Chair)",
     "topic": "Designing a custom furniture piece",
     "specSnippet": "Scope: One lounge chair, statement piece for occasional use. Frame: solid black walnut throughout, mortise-and-tenon joinery. Legs: tapered, splayed 5-10 degrees, continuous walnut grain. Cane Panels: hand-woven cane seat and back webbing set into a routed groove. Finish: hand-rubbed oil, matte, grain fully visible.…",

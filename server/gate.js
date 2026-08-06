@@ -38,7 +38,6 @@ const KNOWN_BLUEPRINT_SUBJECTS = [
   "Wallcovering patterns", "Wall murals", "Lobby feature walls", "Window film", "Ceiling murals",
   "Gallery wall systems", "Signage systems", "Retail graphics", "Museum exhibit graphics",
   "Facade wraps", "Furniture surface graphics", "Scenic backdrops", "Kid's room murals",
-  "Medical office graphics", "Medical wayfinding",
   // Branding & Visual Identity
   "Brand identity systems", "Logo systems", "Color token systems", "Typography systems", "Brand kits",
   // Digital Product & UI
@@ -48,8 +47,10 @@ const KNOWN_BLUEPRINT_SUBJECTS = [
   "Wiring harnesses", "Signal routing", "PCB wiring", "Textile patterns",
   "Drapery patterns", "Upholstery patterns",
   // Business & Operations
-  "Workflow automations", "Medical intake workflows", "SaaS integrations", "Data pipelines", "Business models",
-  "Compliance policies", "Training modules", "Research summaries"
+  "Workflow automations", "SaaS integrations", "Data pipelines", "Business models",
+  "Compliance policies", "Training modules", "Research summaries",
+  // Medical (Non-Clinical)
+  "Medical office graphics", "Medical wayfinding", "Medical intake workflows"
 ];
 
 const GATE_TOOL = {

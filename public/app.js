@@ -2697,9 +2697,7 @@ const BLUEPRINT_VERTICALS = [
       { label: "Facade wraps", seed: "Generating a facade wrap specification with anchor points and material constraints" },
       { label: "Furniture surface graphics", seed: "Creating a furniture surface specification with edge wraps and CNC cutlines" },
       { label: "Scenic backdrops", seed: "Producing a scenic backdrop specification with rigging and quick-change sequencing" },
-      { label: "Kid's room murals", seed: "Generating a kid's room mural specification with safety and color rules" },
-      { label: "Medical office graphics", seed: "Generating an environmental graphics package for a medical office lobby and corridors" },
-      { label: "Medical wayfinding", seed: "Defining a wayfinding signage system specification for a multi-department medical facility" }
+      { label: "Kid's room murals", seed: "Generating a kid's room mural specification with safety and color rules" }
     ]
   },
   {
@@ -2743,13 +2741,21 @@ const BLUEPRINT_VERTICALS = [
     label: "Business & Operations",
     topics: [
       { label: "Workflow automations", seed: "Creating a workflow automation specification with triggers and actions" },
-      { label: "Medical intake workflows", seed: "Creating a medical office patient intake and scheduling workflow specification (administrative process only, no clinical or diagnostic content)" },
       { label: "SaaS integrations", seed: "Producing an integration specification for two SaaS tools" },
       { label: "Data pipelines", seed: "Defining a data pipeline specification" },
       { label: "Business models", seed: "Producing a business model specification with cost structure" },
       { label: "Compliance policies", seed: "Creating a compliance policy specification with clauses and triggers" },
       { label: "Training modules", seed: "Producing a training module specification with objectives and assessments" },
       { label: "Research summaries", seed: "Creating a research summary specification framework -- categories, methodology, and structure for organizing findings on any topic" }
+    ]
+  },
+  {
+    key: "medical-non-clinical",
+    label: "Medical (Non-Clinical)",
+    topics: [
+      { label: "Medical office graphics", seed: "Generating an environmental graphics package for a medical office lobby and corridors" },
+      { label: "Medical wayfinding", seed: "Defining a wayfinding signage system specification for a multi-department medical facility" },
+      { label: "Medical intake workflows", seed: "Creating a medical office patient intake and scheduling workflow specification (administrative process only, no clinical or diagnostic content)" }
     ]
   }
 ];
@@ -2861,12 +2867,17 @@ if (el.blueprintCaptionCycle) {
 // (A) spec text + a live view of the illustration, side by side, narrow;
 // (B) same split, image pane grown wide (spec never disappears, just gets
 // squeezed); (C) crossfades to the technical image shown twice -- zoom-to-
-// fit + a tighter detail crop. Deliberately faster than the caption cycle
-// above -- this is the actual "look how much range this has" moment, not
-// connective tissue.
-const BLUEPRINT_SHOWCASE_PHASE_A_MS = 1100;
-const BLUEPRINT_SHOWCASE_PHASE_B_MS = 1500;
-const BLUEPRINT_SHOWCASE_PHASE_C_MS = 1600;
+// fit + a tighter detail crop. This is the actual "look how much range this
+// has" moment, not connective tissue like the caption cycle above -- paced
+// slower than that cycle now (each phase gets real dwell time), not faster.
+// Slower than the first pass -- verified live that borders on too fast even
+// to skim, per direct feedback. Still not aiming for fully readable start to
+// finish (that's what actually using the tool is for); just slow enough
+// that the shape of it registers. Phase C gets the biggest bump specifically
+// -- the technical image is the "wow" moment and deserves the longest look.
+const BLUEPRINT_SHOWCASE_PHASE_A_MS = 1600;
+const BLUEPRINT_SHOWCASE_PHASE_B_MS = 2200;
+const BLUEPRINT_SHOWCASE_PHASE_C_MS = 2400;
 const BLUEPRINT_SHOWCASE_FADE_MS = 350;
 
 // Interleaves the first/second half of an array (A1,B1,A2,B2,...) -- a
