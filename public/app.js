@@ -2685,12 +2685,23 @@ if (el.blueprintChips && el.blueprintVerticalFilter) {
     opt.textContent = v.label;
     el.blueprintVerticalFilter.appendChild(opt);
   });
+  let blueprintVerticalAutoCycle = true;
   el.blueprintVerticalFilter.addEventListener("change", () => {
+    blueprintVerticalAutoCycle = false; // manual pick -- stop auto-rotating
     const chosen = BLUEPRINT_VERTICALS.find(v => v.key === el.blueprintVerticalFilter.value);
     renderBlueprintChips(chosen ? chosen.topics : []);
   });
   renderBlueprintChips(BLUEPRINT_VERTICALS[0].topics);
   wireHScroll(el.blueprintChips, el.blueprintScrollLeft, el.blueprintScrollRight);
+
+  let blueprintVerticalIndex = 0;
+  setInterval(() => {
+    if (!blueprintVerticalAutoCycle) return;
+    blueprintVerticalIndex = (blueprintVerticalIndex + 1) % BLUEPRINT_VERTICALS.length;
+    const next = BLUEPRINT_VERTICALS[blueprintVerticalIndex];
+    el.blueprintVerticalFilter.value = next.key;
+    renderBlueprintChips(next.topics);
+  }, 4000);
 }
 
 // Caption word-swap: same mechanic as the Distill button's own label cycle
