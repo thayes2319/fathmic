@@ -2824,17 +2824,35 @@ function animatePillDrop(sourceEl) {
   clone.style.pointerEvents = "none";
   document.body.appendChild(clone);
 
-  const dx = (targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2);
-  const dy = (targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2);
-  // Arc lifts partway through before dropping into the target, rather than
-  // a straight line -- the "thrown" feel is what reads as intentional/
-  // physical instead of just a fade-and-teleport.
-  const animation = clone.animate([
-    { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
-    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 36}px) scale(0.7)`, opacity: 0.9, offset: 0.55 },
-    { transform: `translate(${dx}px, ${dy}px) scale(0.12)`, opacity: 0, offset: 1 }
-  ], {
-    duration: 550,
+  const startX = sourceRect.left + sourceRect.width / 2;
+  const startY = sourceRect.top + sourceRect.height / 2;
+  // Lands at the BEGINNING of the prompt (top-left, where typed text
+  // actually starts, offset by roughly the textarea's own padding) rather
+  // than the box's visual center.
+  const endX = targetRect.left + 14;
+  const endY = targetRect.top + 16;
+  const dx = endX - startX;
+  const dy = endY - startY;
+  // A true quadratic-bezier curve (sampled into enough keyframes to read as
+  // smooth, not 2 straight segments meeting at an angle), control point
+  // lifted well above the direct line so the arc is clearly visible rather
+  // than just a slight bend.
+  const controlX = dx * 0.5;
+  const controlY = dy * 0.5 - 90;
+  const STEPS = 16;
+  const keyframes = [];
+  for (let i = 0; i <= STEPS; i++) {
+    const t = i / STEPS;
+    const inv = 1 - t;
+    const x = 2 * inv * t * controlX + t * t * dx;
+    const y = 2 * inv * t * controlY + t * t * dy;
+    const scale = 1 - 0.85 * t * t; // eases in, shrinks faster near the end -- reads as "sucked in" rather than a linear shrink
+    const opacity = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4; // stays fully visible through the lift, only fades on the way down
+    keyframes.push({ transform: `translate(${x}px, ${y}px) scale(${scale})`, opacity, offset: t });
+  }
+
+  const animation = clone.animate(keyframes, {
+    duration: 850,
     easing: "cubic-bezier(0.4, 0, 0.2, 1)"
   });
   animation.onfinish = () => clone.remove();
