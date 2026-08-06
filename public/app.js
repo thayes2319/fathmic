@@ -110,15 +110,14 @@ const el = {
   staleBannerText: document.getElementById("stale-banner-text"),
   regenerateBtn: document.getElementById("regenerate-btn"),
   updateCategoriesBtn: document.getElementById("update-categories-btn"),
-  stakesPositions: document.querySelectorAll(".stakes-marker"),
+  stakesRegenBtns: document.querySelectorAll(".stakes-regen-btn"),
   stakesQuickBtns: document.querySelectorAll(".stakes-quick-btn"),
-  stakesNeedle: document.querySelector(".stakes-knob-needle"),
-  stakesPointer: document.querySelector(".stakes-pointer"),
   referenceCards: document.getElementById("reference-cards"),
   cardLightboxBackdrop: document.getElementById("card-lightbox-backdrop"),
   cardLightboxContent: document.getElementById("card-lightbox-content"),
   cardLightboxClose: document.getElementById("card-lightbox-close"),
   subcategoryFocusModal: document.getElementById("subcategory-focus-modal"),
+  subcategoryFocusBackdrop: document.getElementById("subcategory-focus-backdrop"),
   subcategoryFocusCategory: document.getElementById("subcategory-focus-category"),
   subcategoryFocusSlot: document.getElementById("subcategory-focus-slot")
 };
@@ -302,7 +301,7 @@ function loadHistoryEntry(entry, { scrollToTaxonomy = true } = {}) {
   // this field existed, so this is the best available assumption).
   state.stakesUsedForTaxonomy = state.stakes;
   state.blueprintFit = entry.blueprintFit === true;
-  renderStakesDial();
+  renderStakesControls();
 
   // Land in the normal expanded view (not interview mode) with whatever had
   // a selection already open -- same convention as landing from a revise.
@@ -833,7 +832,7 @@ async function runDistill(input) {
     }
     stakesManuallySet = false;
     state.blueprintFit = gate.blueprintFit === true;
-    renderStakesDial();
+    renderStakesControls();
     setStepState("stakes", "active");
 
     if (gate.status === "block") {
@@ -1275,6 +1274,7 @@ function renderTaxonomyImpl() {
   // category, or the interview-focused category has nothing left unanswered.
   if (el.subcategoryFocusModal) {
     el.subcategoryFocusModal.hidden = true;
+    if (el.subcategoryFocusBackdrop) el.subcategoryFocusBackdrop.hidden = true;
     el.subcategoryFocusSlot.innerHTML = "";
   }
 
@@ -1744,6 +1744,7 @@ function renderTaxonomyImpl() {
         el.subcategoryFocusSlot.innerHTML = "";
         el.subcategoryFocusSlot.appendChild(subEl);
         el.subcategoryFocusModal.hidden = false;
+        if (el.subcategoryFocusBackdrop) el.subcategoryFocusBackdrop.hidden = false;
       } else {
         categorySubsWrapper.appendChild(subEl);
       }
@@ -2010,36 +2011,16 @@ function checkStaleness() {
   if (el.updateCategoriesBtn) el.updateCategoriesBtn.hidden = !stakesChangedSinceTaxonomy;
 }
 
-// Visual-only — tracks the selected position, doesn't itself receive clicks
-// (the three buttons underneath do). Rightward = higher, the same convention
-// as a volume knob or thermostat.
-// 3 positions at 8/12/4 o'clock — -120/0/120deg clockwise-from-top, matching
-// the .stakes-knob-arc gradient stops (blue at -120, accent at 0, red at 120)
-// and the marker left/top percentages in index.html.
-const STAKES_NEEDLE_ANGLE = { low: -120, medium: 0, high: 120 };
-const STAKES_NEEDLE_COLOR = {
-  low: "#5b8dd6",
-  medium: "var(--accent)",
-  high: "#d64545"
-};
-
-function renderStakesDial() {
-  el.stakesPositions.forEach(btn => {
+// Syncs .active across both stakes controls -- the pre-Distill quick row
+// and the post-generation regen row (colors for low/high come from CSS,
+// see .stakes-regen-btn[data-stakes]/.stakes-quick-btn[data-stakes]).
+function renderStakesControls() {
+  el.stakesRegenBtns.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
   });
   el.stakesQuickBtns.forEach(btn => {
     btn.classList.toggle("active", btn.dataset.stakes === state.stakes);
   });
-  const angle = STAKES_NEEDLE_ANGLE[state.stakes] ?? 0;
-  const color = STAKES_NEEDLE_COLOR[state.stakes] || "var(--accent)";
-  if (el.stakesNeedle) {
-    el.stakesNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-    el.stakesNeedle.style.background = color;
-  }
-  if (el.stakesPointer) {
-    el.stakesPointer.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-    el.stakesPointer.style.color = color;
-  }
 }
 
 // Set the instant a user touches either stakes control -- an explicit choice
@@ -2048,11 +2029,15 @@ function renderStakesDial() {
 // so a fresh attempt goes back to auto-inferred by default.
 let stakesManuallySet = false;
 
-el.stakesPositions.forEach(btn => {
+// Only this row calls checkStaleness() -- it's the one that shows up AFTER
+// a taxonomy already exists, so changing it here is what should surface
+// the "regenerate at the new stakes level" banner. The quick row (before
+// Distill) has nothing to go stale yet.
+el.stakesRegenBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     state.stakes = btn.dataset.stakes;
     stakesManuallySet = true;
-    renderStakesDial();
+    renderStakesControls();
     checkStaleness();
   });
 });
@@ -2061,7 +2046,7 @@ el.stakesQuickBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     state.stakes = btn.dataset.stakes;
     stakesManuallySet = true;
-    renderStakesDial();
+    renderStakesControls();
   });
 });
 
@@ -2781,7 +2766,7 @@ if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
       state.selected = new Set(demo.selections || []);
       state.stakes = "medium"; // demo fixtures skip the gate, so no inferred stakes exists
       state.stakesUsedForTaxonomy = "medium"; // fixtures predate stakes-aware generation -- treat as in sync
-      renderStakesDial();
+      renderStakesControls();
 
       startInterview(); // demos arrive pre-selected, so this naturally resolves straight to the flat view
       enterActiveSession();
@@ -3159,7 +3144,7 @@ async function generatePopularity() {
   }
 }
 
-renderStakesDial();
+renderStakesControls();
 
 // Each schematic label is a background chip sized to its own text rather
 // than a guessed fixed box — measure the real rendered width once (getBBox

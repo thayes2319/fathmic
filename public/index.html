@@ -331,45 +331,18 @@
         <button id="revise-topic-btn" class="link-btn" type="button">Revise</button>
       </div>
       <div id="stakes-control">
-        <div class="stakes-knob">
-          <div class="stakes-dial">
-            <div class="stakes-knob-perimeter"></div>
-            <div class="stakes-knob-arc"></div>
-            <div class="stakes-pointer">
-              <svg viewBox="0 0 18 18" width="18" height="18">
-                <path d="M2 11 Q 6 2, 14 3" fill="none" stroke-linecap="round"/>
-                <path d="M10 2 L14 3 L12 7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="stakes-knob-face">
-              <div class="stakes-knob-label">Stakes</div>
-              <div class="stakes-knob-needle"></div>
-              <span class="info-tooltip stakes-knob-hint">
-                <button type="button" class="info-icon-btn" aria-label="Why this is here">?</button>
-                <span class="info-tooltip-text" role="tooltip">FATHmic weighs stakes the way a thoughtful person would — it shapes both what gets asked about and how the result is written. Low stakes keeps categories light and exploratory, with a quick, confident write-up; high stakes surfaces the specific factors that actually determine correctness or safety, written with real care and caveats. This sets which one you're getting:<br><br>Low — light, exploratory categories; full confidence, no hedging.<br><br>Medium — normal categories; plain writing, with the point or two that actually matters flagged.<br><br>High — categories drill into the specifics that determine safety/correctness where the subject has them; writing is explicit about what's certain vs. not, with a clear nudge to check with a professional before acting.</span>
-              </span>
-            </div>
-          </div>
-          <button class="stakes-marker" data-stakes="low" title="Low stakes — 8 o'clock" style="left:17.53%; top:68.75%;">
-            <span class="stakes-marker-dot"></span>
-            <span class="stakes-marker-text">Low</span>
-          </button>
-          <button class="stakes-marker" data-stakes="medium" title="Medium stakes — 12 o'clock" style="left:50%; top:12.5%;">
-            <span class="stakes-marker-dot"></span>
-            <span class="stakes-marker-text">Medium</span>
-          </button>
-          <button class="stakes-marker" data-stakes="high" title="High stakes — 4 o'clock" style="left:82.48%; top:68.75%;">
-            <span class="stakes-marker-dot"></span>
-            <span class="stakes-marker-text">High</span>
-          </button>
-        </div>
-        <span class="stakes-caption">
-          How much is riding on this?
+        <span id="stakes-regen-label">
+          Change your mind? Picking again regenerates the categories at that stakes level.
           <span class="info-tooltip">
             <button type="button" class="info-icon-btn" aria-label="Why this is here">?</button>
             <span class="info-tooltip-text" role="tooltip">FATHmic weighs stakes the way a thoughtful person would — it shapes both what gets asked about and how the result is written. Low stakes keeps categories light and exploratory, with a quick, confident write-up; high stakes surfaces the specific factors that actually determine correctness or safety, written with real care and caveats. This sets which one you're getting:<br><br>Low — light, exploratory categories; full confidence, no hedging.<br><br>Medium — normal categories; plain writing, with the point or two that actually matters flagged.<br><br>High — categories drill into the specifics that determine safety/correctness where the subject has them; writing is explicit about what's certain vs. not, with a clear nudge to check with a professional before acting.</span>
           </span>
         </span>
+        <div id="stakes-regen-row">
+          <button class="stakes-regen-btn" type="button" data-stakes="low">Low</button>
+          <button class="stakes-regen-btn" type="button" data-stakes="medium">Medium</button>
+          <button class="stakes-regen-btn" type="button" data-stakes="high">High</button>
+        </div>
       </div>
       <div id="revise-topic-panel" hidden>
         <textarea id="revise-topic-input" rows="2" aria-label="Revise your topic"></textarea>
@@ -497,6 +470,11 @@
        the parent category's question as reference, deemphasized beneath
        the subcategory itself -- same hierarchy the old question-spotlight
        used (subcategory is the real question; category is just context). -->
+  <!-- Not click-blocking (pointer-events:none) -- purely visual dimming so
+       the flat page behind (in particular the flat category's own bold
+       "Next category" button) stops competing for attention with the
+       modal, while still preserving "clickable if you reach past it." -->
+  <div id="subcategory-focus-backdrop" hidden aria-hidden="true"></div>
   <div id="subcategory-focus-modal" hidden aria-hidden="true">
     <div id="subcategory-focus-category"></div>
     <div id="subcategory-focus-slot"></div>

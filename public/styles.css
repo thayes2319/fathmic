@@ -16,9 +16,8 @@
   --logo-dot: #34d1f8;
   /* Sampled directly from the "FATH" wordmark stroke in the same image. */
   --logo-indigo: #14146e;
-  /* The stakes dial's own blue -> accent -> red gradient (see
-     .stakes-knob-arc) -- named here so the quick stakes row can reuse the
-     same two colors instead of drifting from them over time. */
+  /* Shared low/high stakes colors -- used by both stakes controls
+     (.stakes-quick-btn and .stakes-regen-btn) so they never drift apart. */
   --stakes-low: #5b8dd6;
   --stakes-high: #d64545;
 }
@@ -722,17 +721,19 @@ button:disabled { opacity: 0.5; cursor: default; }
 .category-row.interview-float .drag-handle { display: none; }
 
 /* The one focus point in interview mode: whichever subcategory is actually
-   being answered lifts out into this fixed, centered card (the same visual
-   language the whole category used to get, now scoped one level deeper).
-   No click-blocking backdrop -- same reasoning as before: the dim-siblings
-   rule already recedes everything else, and staying clickable underneath
-   means the rest of the page (revising an earlier answer, scrolling) is
-   never blocked by this. */
+   being answered lifts out into this fixed, TRUE-centered card (vertically
+   centered, not pinned near the top -- pinning near the top overlapped the
+   page's own topic heading and put the modal right next to the flat
+   category's own bold "Next category" button, the two visually fighting
+   for attention; confirmed live via screenshot). The backdrop below adds
+   real dimming behind it for the same reason, but stays pointer-events:none
+   -- not a click-blocking modal, just visual separation; the rest of the
+   page (revising an earlier answer, scrolling) is never blocked by this. */
 #subcategory-focus-modal {
   position: fixed;
-  top: 6vh;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: min(600px, 92vw);
   max-height: 86vh;
   overflow-y: auto;
@@ -743,6 +744,14 @@ button:disabled { opacity: 0.5; cursor: default; }
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 #subcategory-focus-modal[hidden] { display: none; }
+#subcategory-focus-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 59;
+  pointer-events: none;
+}
+#subcategory-focus-backdrop[hidden] { display: none; }
 /* Category is reference, not the question being asked right now -- same
    deemphasized-above/emphasized-below hierarchy the old question-spotlight
    used, just living inline in this card instead of a separate popup. */
@@ -873,159 +882,41 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 
 
+/* Post-generation stakes control: this used to be an elaborate radial dial,
+   but the pre-Distill quick row (#stakes-quick-row) now handles the common
+   case (setting stakes before ever generating), leaving this one
+   specifically for the rarer "change my mind after seeing the categories"
+   case -- reuses the exact same compact pill-button treatment as the quick
+   row (see .stakes-quick-btn) instead of separate dial mechanics, plus a
+   brief label explaining why a second stakes control shows up at all. */
 #stakes-control {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
+  text-align: center;
 }
-.stakes-knob {
-  position: relative;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-}
-
-/* The actual turning-knob body (perimeter + gradient track + face) is
-   deliberately much smaller than the outer .stakes-knob box, leaving an
-   open ring of space around it for the position markers to sit in —
-   clearly outside the dial, the way labels sit outside a real knob. */
-.stakes-dial {
-  position: absolute;
-  inset: 60px;
-  border-radius: 50%;
-}
-
-/* Knurled perimeter — thin ridged ring at the very edge, alternating border
-   and background color every few degrees to fake a grip texture. */
-.stakes-knob-perimeter {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: repeating-conic-gradient(var(--border) 0deg 3deg, var(--bg) 3deg 7deg);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
-}
-
-/* The volume-style track: a 240deg ring from -120deg to 120deg (8 o'clock to
-   4 o'clock, the short way through 12), gradient blue -> accent -> red, a
-   120deg gap centered at the bottom. conic-gradient's `from` angle is
-   clockwise-from-12, the same convention the markers and needle use below. */
-.stakes-knob-arc {
-  position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from -120deg,
-    var(--stakes-low) 0deg,
-    var(--accent) 120deg,
-    var(--stakes-high) 240deg,
-    transparent 240deg,
-    transparent 360deg
-  );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
-}
-
-.stakes-knob-face {
-  position: absolute;
-  inset: 11px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.stakes-knob-label {
-  position: relative;
-  z-index: 1;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+#stakes-regen-label { font-size: 0.85rem; color: var(--muted); max-width: 420px; }
+#stakes-regen-row { display: flex; gap: 0.5rem; }
+.stakes-regen-btn {
+  margin-top: 0;
+  padding: 0.35rem 0.9rem;
+  background: transparent;
   color: var(--muted);
-  /* Engraved-into-the-face look: light shadow below (catching light), dark
-     shadow above (the incised edge) — reads as debossed rather than flat. */
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35),
-    0 -1px 1px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 999px;
 }
-.stakes-knob-needle {
-  position: absolute;
-  bottom: 50%;
-  left: 50%;
-  width: 3px;
-  height: 34%;
+.stakes-regen-btn:hover { border-color: var(--accent); color: var(--fg); }
+.stakes-regen-btn.active {
   background: var(--accent);
-  border-radius: 2px;
-  transform-origin: bottom center;
-  transform: translateX(-50%) rotate(0deg);
-  transition: transform 0.25s ease, background 0.25s ease;
-}
-
-/* Small curved accent sitting right at the needle's tip (needle reaches
-   ~41px from center: 34% of the 118px face) — NOT a long separate arm, just
-   a tiny marker riding just past where the needle already points. Same
-   bottom:50%/transform-origin:bottom-center pattern as the needle so it
-   rotates around the same true center. */
-.stakes-pointer {
-  position: absolute;
-  bottom: 50%;
-  left: 50%;
-  width: 18px;
-  height: 47px;
-  transform-origin: bottom center;
-  transform: translateX(-50%) rotate(0deg);
-  transition: transform 0.25s ease, color 0.25s ease;
-  color: var(--accent);
-  pointer-events: none;
-}
-.stakes-pointer svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-.stakes-pointer svg path { stroke: currentColor; stroke-width: 2; }
-
-/* Markers sit at 5 evenly-spaced points across the 340deg sweep, positioned
-   via the left/top percentages set inline in the HTML. */
-.stakes-marker {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-}
-.stakes-marker-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--muted);
-  background: transparent;
-  transition: all 0.15s ease;
-}
-.stakes-marker.active .stakes-marker-dot {
-  width: 14px;
-  height: 14px;
   border-color: var(--accent);
-  background: var(--accent);
-  box-shadow: 0 0 0 3px rgba(127, 127, 127, 0.18);
+  color: #fff;
 }
-.stakes-marker-text { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
-.stakes-marker.active .stakes-marker-text { color: var(--accent); font-weight: 600; }
-/* The knob's own box is a fixed 260px square, but the Low/High markers sit
-   at ~69% down it (top:68.75%) — everything below their labels (~40-50px)
-   is dead space within that box. Pull the caption up into it rather than
-   sitting after the box's true bottom edge, so it reads as paired with the
-   knob instead of a separate line far below. */
-.stakes-caption { margin-top: -42px; font-size: 0.95rem; color: var(--muted); }
+.stakes-regen-btn[data-stakes="low"].active { background: var(--stakes-low); border-color: var(--stakes-low); }
+.stakes-regen-btn[data-stakes="high"].active { background: var(--stakes-high); border-color: var(--stakes-high); }
 
 .info-tooltip { position: relative; display: inline-block; }
 .info-icon-btn {
@@ -1048,19 +939,6 @@ button:disabled { opacity: 0.5; cursor: default; }
   vertical-align: middle;
 }
 
-/* Second tooltip trigger, same content as the caption's — sits on the dial
-   face itself in the empty gap between the Low (-120deg) and Medium (0deg)
-   markers, i.e. -60deg/10 o'clock, the angular midpoint. Positioned in the
-   face's own coordinate space (118px box, so this is independent of the
-   outer knob's 260px marker-ring math) at a radius comfortably inside the
-   face's 59px edge so it doesn't crowd the perimeter. */
-.stakes-knob-hint {
-  position: absolute;
-  left: 17%;
-  top: 31%;
-  transform: translate(-50%, -50%);
-}
-.stakes-knob-hint .info-icon-btn { margin-left: 0; }
 .info-icon-btn:hover, .info-icon-btn:focus-visible { color: var(--accent); border-color: var(--accent); }
 .info-tooltip-text {
   position: absolute;
