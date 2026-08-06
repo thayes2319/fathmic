@@ -560,6 +560,10 @@ button:disabled { opacity: 0.5; cursor: default; }
   white-space: nowrap;
 }
 .demo-btn:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
+/* Same Blueprint color used for the result badge/border elsewhere -- flags
+   which preloaded demos will show up under the Blueprint genre. */
+.demo-btn-blueprint { color: var(--logo-dot); border-color: var(--logo-dot); }
+.demo-btn-blueprint:hover { color: #fff; background: var(--logo-dot); border-color: var(--logo-dot); }
 
 .scroll-arrow {
   flex: 0 0 auto;

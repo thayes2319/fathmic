@@ -1,5 +1,302 @@
 const DEMO_CASES = [
   {
+    "label": "Custom Tattoo Concept",
+    "input": "I want to design a custom tattoo",
+    "genre": "blueprint",
+    "topic": "Designing a custom tattoo",
+    "categories": [
+      {
+        "name": "Tattoo Style",
+        "fixedness": 0.9,
+        "questionPhrase": "the tattoo style",
+        "subcategories": [
+          {
+            "name": "Linework-Driven Styles",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Fine-line minimalism"
+              },
+              {
+                "text": "Traditional American (bold outlines, limited palette)"
+              },
+              {
+                "text": "Blackwork (solid black fields and heavy line pattern)"
+              },
+              {
+                "text": "Japanese Irezumi (large-scale flowing composition)"
+              },
+              {
+                "text": "Neo-traditional (bold lines with painterly shading)"
+              }
+            ]
+          },
+          {
+            "name": "Rendered/Illustrative Styles",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Realism (photo-like shading)"
+              },
+              {
+                "text": "Watercolor (paint-splash, no hard borders)"
+              },
+              {
+                "text": "Illustrative/sketch style (visible pencil-like linework)"
+              },
+              {
+                "text": "Geometric/sacred geometry"
+              },
+              {
+                "text": "Trash polka (chaotic red/black abstract collage)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Color Approach",
+        "fixedness": 0.8,
+        "questionPhrase": "the color approach",
+        "subcategories": [
+          {
+            "name": "Palette Choice",
+            "axis": "color",
+            "direction": "varies",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Black-and-grey only",
+                "axis": "color",
+                "direction": "monochrome"
+              },
+              {
+                "text": "Full color",
+                "axis": "color",
+                "direction": "full-color"
+              },
+              {
+                "text": "Single accent color on black linework",
+                "axis": "color",
+                "direction": "accent"
+              },
+              {
+                "text": "Pastel/muted tones",
+                "axis": "color",
+                "direction": "pastel"
+              }
+            ]
+          },
+          {
+            "name": "Shading Technique",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Stippling/dotwork shading"
+              },
+              {
+                "text": "Whip shading (smooth gradient fades)"
+              },
+              {
+                "text": "Cross-hatching (etching-style texture)"
+              },
+              {
+                "text": "Negative space shading (skin left bare as highlight)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Subject Matter & Symbolism",
+        "fixedness": 0.95,
+        "questionPhrase": "the subject matter and symbolism",
+        "subcategories": [
+          {
+            "name": "Imagery Themes",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Botanical motifs (florals, vines, trees)"
+              },
+              {
+                "text": "Animal/wildlife imagery"
+              },
+              {
+                "text": "Mythological or folklore figures"
+              },
+              {
+                "text": "Celestial imagery (moons, stars, constellations)"
+              },
+              {
+                "text": "Portraiture (people or pets)"
+              }
+            ]
+          },
+          {
+            "name": "Personal Meaning Devices",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Hidden initials or dates worked into design"
+              },
+              {
+                "text": "Coordinate or map fragment"
+              },
+              {
+                "text": "Handwriting/script reproduction"
+              },
+              {
+                "text": "Symbolic object (heirloom, talisman, etc.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Placement & Body Flow",
+        "fixedness": 0.7,
+        "questionPhrase": "the placement and how it flows with the body",
+        "subcategories": [
+          {
+            "name": "Body Zone",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Forearm (visible, elongated canvas)"
+              },
+              {
+                "text": "Upper arm/sleeve section"
+              },
+              {
+                "text": "Ribcage (curved, sensitive skin)"
+              },
+              {
+                "text": "Thigh (large flat canvas, easily concealed)"
+              },
+              {
+                "text": "Back piece (largest continuous canvas)"
+              }
+            ]
+          },
+          {
+            "name": "Composition Shape",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Wrap-around design (follows limb curvature)"
+              },
+              {
+                "text": "Symmetrical centered composition"
+              },
+              {
+                "text": "Asymmetrical scattered composition"
+              },
+              {
+                "text": "Framed/contained composition (banner, border, or shape outline)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Scale & Longevity",
+        "fixedness": 0.6,
+        "questionPhrase": "the scale and how the design will age",
+        "subcategories": [
+          {
+            "name": "Size Class",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Micro tattoo (under 1 inch)"
+              },
+              {
+                "text": "Small accent piece (1-3 inches)"
+              },
+              {
+                "text": "Medium statement piece (palm-to-forearm scale)"
+              },
+              {
+                "text": "Large-scale piece (multi-session, sleeve/back scale)"
+              }
+            ]
+          },
+          {
+            "name": "Aging Considerations",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Bold outlines that hold up over decades"
+              },
+              {
+                "text": "Fine detail meant to be touched up periodically"
+              },
+              {
+                "text": "Solid fills that resist blurring longer than fine gradients"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Artist Collaboration Style",
+        "fixedness": 0.75,
+        "questionPhrase": "how you want to collaborate with the artist",
+        "subcategories": [
+          {
+            "name": "Design Freedom Level",
+            "axis": "control",
+            "direction": "varies",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Fully custom brief with artist's creative freedom",
+                "axis": "control",
+                "direction": "artist-led"
+              },
+              {
+                "text": "Detailed reference-based design (client-supplied references)",
+                "axis": "control",
+                "direction": "client-led"
+              },
+              {
+                "text": "Flash/pre-drawn design lightly personalized",
+                "axis": "control",
+                "direction": "flash-based"
+              }
+            ]
+          },
+          {
+            "name": "Revision Approach",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Single stencil preview before session"
+              },
+              {
+                "text": "Multiple digital sketch rounds beforehand"
+              },
+              {
+                "text": "In-session freehand adjustments"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Blackwork (solid black fields and heavy line pattern)",
+      "Geometric/sacred geometry",
+      "Black-and-grey only",
+      "Negative space shading (skin left bare as highlight)",
+      "Celestial imagery (moons, stars, constellations)",
+      "Coordinate or map fragment",
+      "Upper arm/sleeve section",
+      "Wrap-around design (follows limb curvature)"
+    ]
+  },
+  {
     "label": "Food Garden (Georgia)",
     "input": "I want to plant a food garden in Georgia",
     "genre": "action_item",
@@ -346,7 +643,343 @@ const DEMO_CASES = [
       "Spring-to-fall succession sowing every 2-3 weeks",
       "Squash vine borer (kills squash/zucchini stems)",
       "Early blight/septoria on tomatoes",
-      "Deer fencing (7ft+) for mountain/rural sites"
+      "Deer fencing (7ft+) for mountain/rural sites",
+      "Blue Ridge/Appalachian foothills growing pockets"
+    ]
+  },
+  {
+    "label": "Custom Engagement Ring",
+    "input": "I want to design a custom engagement ring",
+    "genre": "blueprint",
+    "topic": "Designing a custom engagement ring",
+    "categories": [
+      {
+        "name": "Center Stone",
+        "fixedness": 0.9,
+        "questionPhrase": "the center stone",
+        "subcategories": [
+          {
+            "name": "Stone Type",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Natural mined diamond",
+                "axis": "stoneOrigin",
+                "direction": "natural"
+              },
+              {
+                "text": "Lab-grown diamond (chemically identical, lower cost)",
+                "axis": "stoneOrigin",
+                "direction": "lab"
+              },
+              {
+                "text": "Moissanite (higher fire, not a diamond)",
+                "axis": "stoneOrigin",
+                "direction": "simulant"
+              },
+              {
+                "text": "Sapphire (Ceylon blue or fancy color)",
+                "axis": "stoneOrigin",
+                "direction": "colored-gem"
+              },
+              {
+                "text": "Morganite (soft pink, softer stone needing protective setting)",
+                "axis": "stoneOrigin",
+                "direction": "colored-gem"
+              }
+            ]
+          },
+          {
+            "name": "Diamond Cut Shape",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Round brilliant (max sparkle, most expensive per carat)"
+              },
+              {
+                "text": "Oval (elongating, no bow-tie if well-cut)"
+              },
+              {
+                "text": "Cushion (soft corners, vintage feel)"
+              },
+              {
+                "text": "Emerald cut (step-cut, shows inclusions more)"
+              },
+              {
+                "text": "Pear (elongating, needs symmetrical prongs)"
+              }
+            ]
+          },
+          {
+            "name": "Quality Grading Priorities",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Prioritize cut grade (drives visible sparkle most)"
+              },
+              {
+                "text": "Prioritize carat weight (visible size)"
+              },
+              {
+                "text": "Prioritize clarity above VS2 (eye-clean threshold)"
+              },
+              {
+                "text": "Prioritize color grade (near-colorless D-F range)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Metal & Band",
+        "fixedness": 0.7,
+        "questionPhrase": "the metal and band",
+        "subcategories": [
+          {
+            "name": "Metal Alloy",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Platinum (dense, hypoallergenic, patinas rather than scratches away)"
+              },
+              {
+                "text": "18k white gold (rhodium-plated, needs re-plating over time)"
+              },
+              {
+                "text": "18k yellow gold (warm tone, low maintenance)"
+              },
+              {
+                "text": "18k rose gold (copper alloy, warm pink hue)"
+              }
+            ]
+          },
+          {
+            "name": "Band Profile",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Knife-edge band (thin, tapered ridge)"
+              },
+              {
+                "text": "Comfort-fit band (rounded interior for daily wear)"
+              },
+              {
+                "text": "Cathedral band (arches sweeping up to the stone)"
+              }
+            ]
+          },
+          {
+            "name": "Band Embellishment",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Pave diamond band (small stones set edge-to-edge)"
+              },
+              {
+                "text": "Milgrain edging (tiny beaded texture along edges)"
+              },
+              {
+                "text": "Plain polished band"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Setting Style",
+        "fixedness": 0.85,
+        "questionPhrase": "the setting style",
+        "subcategories": [
+          {
+            "name": "Stone Mounting",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Prong setting (4 or 6-prong, max light exposure)"
+              },
+              {
+                "text": "Bezel setting (metal rim encircling stone, protective)"
+              },
+              {
+                "text": "Halo setting (ring of accent stones around center)"
+              },
+              {
+                "text": "Tension setting (stone appears suspended by band pressure)"
+              }
+            ]
+          },
+          {
+            "name": "Design Era Aesthetic",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Art Deco style (geometric filigree, milgrain, bold lines)"
+              },
+              {
+                "text": "Minimalist/modern solitaire"
+              },
+              {
+                "text": "Vintage-inspired filigree (hand-engraved scrollwork)"
+              },
+              {
+                "text": "Nature-inspired motif (leaf/vine engraving)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Lifestyle & Durability Fit",
+        "fixedness": 0.2,
+        "questionPhrase": "how it needs to hold up to daily life",
+        "subcategories": [
+          {
+            "name": "Wearer's Daily Activity Level",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Hands-on/active lifestyle (favors low-profile, protective settings)",
+                "axis": "activityLevel",
+                "direction": "active"
+              },
+              {
+                "text": "Low-impact/office lifestyle (allows higher, more delicate settings)",
+                "axis": "activityLevel",
+                "direction": "low-impact"
+              }
+            ]
+          },
+          {
+            "name": "Hand & Finger Considerations",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Sizing for petite finger (scaled-down stone/setting proportions)"
+              },
+              {
+                "text": "Sizing for larger/wider finger (adjusted band width proportions)"
+              },
+              {
+                "text": "Sizing allowance for knuckle-to-base ratio (sizing beads/pinch)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Ethical Sourcing & Provenance",
+        "fixedness": 0.5,
+        "questionPhrase": "the ring's ethical sourcing and provenance",
+        "subcategories": [
+          {
+            "name": "Diamond Origin Certification",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Kimberley Process certified natural diamond"
+              },
+              {
+                "text": "Canadamark-tracked Canadian-origin diamond"
+              },
+              {
+                "text": "Recycled/heirloom-sourced stone"
+              }
+            ]
+          },
+          {
+            "name": "Metal Sourcing",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Recycled precious metal (reclaimed from old jewelry/industrial scrap)"
+              },
+              {
+                "text": "Fairmined-certified newly mined metal"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Personalization Details",
+        "fixedness": 0.8,
+        "questionPhrase": "the personalization details",
+        "subcategories": [
+          {
+            "name": "Engraving",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Inner-band text engraving (date, initials, phrase)"
+              },
+              {
+                "text": "Hidden gemstone accent under the setting (birthstone, secret color)"
+              }
+            ]
+          },
+          {
+            "name": "Heritage Incorporation",
+            "exclusive": false,
+            "elements": [
+              {
+                "text": "Repurposed family heirloom stone"
+              },
+              {
+                "text": "Melted-down family gold reforged into new band"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Budget & Sourcing Process",
+        "fixedness": 0.1,
+        "questionPhrase": "your budget and how you'll source it",
+        "subcategories": [
+          {
+            "name": "Acquisition Path",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Custom bench jeweler (fully bespoke CAD design)"
+              },
+              {
+                "text": "Semi-custom setting + loose stone (choose mounting, pick stone separately)"
+              },
+              {
+                "text": "Antique/estate ring remount (existing ring reworked)"
+              }
+            ]
+          },
+          {
+            "name": "Total Budget Tier",
+            "exclusive": true,
+            "elements": [
+              {
+                "text": "Budget-conscious tier (moissanite/lab diamond, gold alloy)"
+              },
+              {
+                "text": "Mid-range tier (lab or smaller natural diamond, platinum accents)"
+              },
+              {
+                "text": "High-end tier (larger natural diamond, platinum, bespoke design)"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "selections": [
+      "Lab-grown diamond (chemically identical, lower cost)",
+      "Oval (elongating, no bow-tie if well-cut)",
+      "Prioritize cut grade (drives visible sparkle most)",
+      "Platinum (dense, hypoallergenic, patinas rather than scratches away)",
+      "Comfort-fit band (rounded interior for daily wear)",
+      "Pave diamond band (small stones set edge-to-edge)",
+      "Halo setting (ring of accent stones around center)",
+      "Vintage-inspired filigree (hand-engraved scrollwork)",
+      "Low-impact/office lifestyle (allows higher, more delicate settings)",
+      "Sizing for petite finger (scaled-down stone/setting proportions)"
     ]
   },
   {
@@ -634,7 +1267,11 @@ const DEMO_CASES = [
       "Coming-of-age school story",
       "Character vs. character",
       "First-person narrator (I/me, inside one head)",
-      "Clear external goal (wins the game, finds the item)"
+      "Clear external goal (wins the game, finds the item)",
+      "Fantasy quest with magic system",
+      "Classic linear five-part arc (setup, rising action, climax, falling action, resolution)",
+      "Reliable, trustworthy narrator",
+      "Best friend/sidekick"
     ],
     "genre": "story"
   },
@@ -1152,7 +1789,9 @@ const DEMO_CASES = [
       "Sunbelt year-round warmth (Phoenix, AZ / Naples, FL)",
       "Hurricane-prone Gulf/Atlantic coast (rising homeowners insurance premiums)",
       "Metro with Level I trauma center & academic medical center (e.g., Nashville, Denver)",
-      "High Medicare Advantage plan density/competition county"
+      "High Medicare Advantage plan density/competition county",
+      "No state income tax states (e.g., Florida, Texas, Nevada)",
+      "Homestead exemption states capping property tax growth (e.g., Florida's Save Our Homes)"
     ]
   },
   {
@@ -1458,7 +2097,10 @@ const DEMO_CASES = [
       "Dynamic warm-up routine before runs",
       "Carbohydrate-focused meal timing around long runs",
       "Energy gels every 45 minutes (e.g. GU, Maurten)",
-      "3-day carb-load before race"
+      "3-day carb-load before race",
+      "Couch-to-5K style run/walk starting point",
+      "12-16 week training plan",
+      "Gait/biomechanics assessment at a running store"
     ]
   },
   {
@@ -1739,7 +2381,9 @@ const DEMO_CASES = [
       "Open with how you met, close with today",
       "Self-deprecating joke about your own toast-giving nerves",
       "How-we-met story with an embarrassing detail",
-      "Light teasing about a harmless quirk (snoring, bad dancing)"
+      "Light teasing about a harmless quirk (snoring, bad dancing)",
+      "A time he showed up for you (loyalty proof point)",
+      "First time you saw him with his now-spouse and noticed the change"
     ],
     "genre": "definition"
   },
@@ -2062,7 +2706,9 @@ const DEMO_CASES = [
       "Full-overlay cabinet doors (concealed hinges, flush look)",
       "Quartz (engineered, non-porous, no sealing needed)",
       "Subway tile",
-      "Luxury vinyl plank (LVP, waterproof, budget-friendly)"
+      "Luxury vinyl plank (LVP, waterproof, budget-friendly)",
+      "Cash savings",
+      "Splurge on cabinetry, save on countertops"
     ]
   },
   {
@@ -2343,7 +2989,11 @@ const DEMO_CASES = [
       "Problem-process-outcome narrative deck (Notion/PDF)",
       "UX researcher (qualitative interviews, usability testing)",
       "Product/interaction designer (screens, flows, prototypes)",
-      "Product designer generalist (research + UI + some front-end)"
+      "Product designer generalist (research + UI + some front-end)",
+      "Reframe portfolio pieces around problem-solving rather than aesthetics",
+      "Lean into UX engineering / design systems roles",
+      "Leverage stakeholder-management and data-analysis skills for UX research",
+      "Complete a structured bootcamp (e.g., General Assembly, Springboard) for credibility signal"
     ]
   },
   {
@@ -2656,7 +3306,10 @@ const DEMO_CASES = [
       "Onboard fresh/greywater tank system (self-contained, required by most health depts)",
       "Licensing, permits, and compliance",
       "Local roaster partnership (buy pre-roasted, house-blend branding)",
-      "Espresso-only minimalist menu (fast service, small footprint)"
+      "Espresso-only minimalist menu (fast service, small footprint)",
+      "Mobile food unit permit (health-dept inspection of the cart itself)",
+      "General business license/registration",
+      "General liability policy"
     ]
   },
   {
@@ -2984,7 +3637,8 @@ const DEMO_CASES = [
       "Fly into Narita/Haneda, out of Kansai (Osaka) — open-jaw itinerary",
       "Ryokan stay with kaiseki dinner (multi-course traditional meal) + onsen",
       "Capsule hotel (bunk-pod rooms, common in stations)",
-      "Shinjuku/Shibuya base in Tokyo (nightlife, transit hub)"
+      "Shinjuku/Shibuya base in Tokyo (nightlife, transit hub)",
+      "Book Kyoto hanami spots (Maruyama Park, Philosopher's Path) 6+ months ahead"
     ]
   },
   {
@@ -3480,7 +4134,12 @@ const DEMO_CASES = [
       "Core domains tested (exam blueprint weightings)",
       "Adrian Cantrill's SAA-C03 course",
       "Tutorials Dojo practice tests (Jon Bonso)",
-      "AWS Well-Architected Framework whitepaper"
+      "AWS Well-Architected Framework whitepaper",
+      "SAA-C03 exam (current version, replaced SAA-C02 in 2022)",
+      "Multi-AZ / Multi-Region failover patterns",
+      "Storage class selection (S3 Standard/IA/Glacier tiers)",
+      "IAM policy design (least privilege, resource-based vs identity-based policies)",
+      "Purchasing options (On-Demand vs Reserved vs Savings Plans vs Spot)"
     ]
   },
   {
@@ -3827,7 +4486,8 @@ const DEMO_CASES = [
       "Compact sedan, e.g. Honda Civic",
       "Subcompact crossover, e.g. Honda HR-V",
       "Subcompact hatchback, e.g. Honda Fit",
-      "Compact/midsize pickup, e.g. Toyota Tacoma"
+      "Compact/midsize pickup, e.g. Toyota Tacoma",
+      "Certified pre-owned (CPO) compact sedan, e.g. Honda Civic"
     ]
   }
 ];

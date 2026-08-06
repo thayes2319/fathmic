@@ -1755,7 +1755,25 @@ function renderTaxonomyImpl() {
       // hides the WHOLE block (summary + General + every element under it),
       // regardless of whether the model also tagged the individual elements.
       // Don't rely on the model tagging redundantly at both levels every time.
-      if (sub.axis && sub.direction) {
+      //
+      // Guard: only register this cascade when the subcategory's own tag
+      // actually agrees with its children. Some taxonomies tag a subcategory
+      // with a placeholder direction (e.g. "varies") to mean "my children
+      // each have their own real direction on this axis" rather than "this
+      // whole block IS one direction" -- registering that as a whole-block
+      // exclusion means the tag can never match the very direction its own
+      // child just activated, so checking ANY option inside immediately
+      // self-excludes and un-checks it (confirmed live: checking "Black-and-
+      // grey only" under a "Palette Choice" subcategory tagged axis=color/
+      // direction=varies instantly un-checked itself). When children carry
+      // their own differing directions, the element-level exclusion pass
+      // already handles them correctly -- skip the coarse cascade here.
+      const childrenDisagreeOnDirection = (sub.elements || []).some(elementObj => {
+        const elAxis = typeof elementObj === "object" ? elementObj.axis : null;
+        const elDirection = typeof elementObj === "object" ? elementObj.direction : null;
+        return elAxis === sub.axis && elDirection && elDirection !== sub.direction;
+      });
+      if (sub.axis && sub.direction && !childrenDisagreeOnDirection) {
         subcategoryRegistry.push({
           subEl,
           subName: sub.name,
@@ -2692,7 +2710,11 @@ function shuffle(arr) {
 }
 const BLUEPRINT_CAPTION_EXAMPLES = shuffle(BLUEPRINT_ALL_TOPICS.map(t => t.label.toLowerCase()));
 if (el.blueprintCaptionCycle) {
-  let captionIndex = 0;
+  // Start on a random topic immediately -- otherwise the shuffle only
+  // affects which topic comes SECOND, since the markup's hardcoded initial
+  // text would otherwise sit on screen for the whole first interval.
+  let captionIndex = Math.floor(Math.random() * BLUEPRINT_CAPTION_EXAMPLES.length);
+  el.blueprintCaptionCycle.textContent = BLUEPRINT_CAPTION_EXAMPLES[captionIndex];
   setInterval(() => {
     el.blueprintCaptionCycle.classList.add("caption-fading");
     setTimeout(() => {
@@ -2772,7 +2794,7 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
 if (typeof DEMO_CASES !== "undefined" && el.demoButtons) {
   DEMO_CASES.forEach(demo => {
     const btn = document.createElement("button");
-    btn.className = "demo-btn";
+    btn.className = demo.genre === "blueprint" ? "demo-btn demo-btn-blueprint" : "demo-btn";
     btn.textContent = demo.label;
     btn.addEventListener("click", () => {
       resetDownstream();
