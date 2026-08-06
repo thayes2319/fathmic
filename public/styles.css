@@ -148,12 +148,12 @@ h1 { margin-bottom: 0.25rem; }
 
 #brand-mark {
   position: absolute;
-  top: 156%;
+  top: 125%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 850px;
   max-width: none;
-  filter: sepia(1) saturate(1.4) opacity(0.066);
+  filter: sepia(1) saturate(1.4) opacity(0.0528);
   pointer-events: none;
   z-index: 0;
 }
