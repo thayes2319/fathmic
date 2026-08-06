@@ -487,6 +487,20 @@
     <a href="mailto:thomas@gohw.net">Contact</a>
   </footer>
 
+  <!-- Interview mode's one focus point: everything else stays flat, in the
+       page's normal scroll flow (see .category-row.interview-float, which
+       is flat too now, just accent-bordered) -- only the single subcategory
+       actually being answered right now lifts out into this fixed, centered
+       card. Its <details> element (built normally in app.js, same as any
+       other subcategory) gets appended into #subcategory-focus-slot rather
+       than into the flat category, and #subcategory-focus-category shows
+       the parent category's question as reference, deemphasized beneath
+       the subcategory itself -- same hierarchy the old question-spotlight
+       used (subcategory is the real question; category is just context). -->
+  <div id="subcategory-focus-modal" hidden aria-hidden="true">
+    <div id="subcategory-focus-category"></div>
+    <div id="subcategory-focus-slot"></div>
+  </div>
 
   <div id="card-lightbox-backdrop" hidden>
     <div id="card-lightbox">

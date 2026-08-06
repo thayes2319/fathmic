@@ -721,6 +721,41 @@ button:disabled { opacity: 0.5; cursor: default; }
 .category-row.interview-float .category { border-color: var(--accent); }
 .category-row.interview-float .drag-handle { display: none; }
 
+/* The one focus point in interview mode: whichever subcategory is actually
+   being answered lifts out into this fixed, centered card (the same visual
+   language the whole category used to get, now scoped one level deeper).
+   No click-blocking backdrop -- same reasoning as before: the dim-siblings
+   rule already recedes everything else, and staying clickable underneath
+   means the rest of the page (revising an earlier answer, scrolling) is
+   never blocked by this. */
+#subcategory-focus-modal {
+  position: fixed;
+  top: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  z-index: 60;
+  padding: 1rem 1.1rem;
+  background: var(--bg);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+#subcategory-focus-modal[hidden] { display: none; }
+/* Category is reference, not the question being asked right now -- same
+   deemphasized-above/emphasized-below hierarchy the old question-spotlight
+   used, just living inline in this card instead of a separate popup. */
+#subcategory-focus-category {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+#subcategory-focus-slot .subcategory { margin: 0; border-left: none; padding-left: 0; }
+
 .drag-handle {
   cursor: grab;
   color: var(--muted);

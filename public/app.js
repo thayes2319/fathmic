@@ -117,7 +117,10 @@ const el = {
   referenceCards: document.getElementById("reference-cards"),
   cardLightboxBackdrop: document.getElementById("card-lightbox-backdrop"),
   cardLightboxContent: document.getElementById("card-lightbox-content"),
-  cardLightboxClose: document.getElementById("card-lightbox-close")
+  cardLightboxClose: document.getElementById("card-lightbox-close"),
+  subcategoryFocusModal: document.getElementById("subcategory-focus-modal"),
+  subcategoryFocusCategory: document.getElementById("subcategory-focus-category"),
+  subcategoryFocusSlot: document.getElementById("subcategory-focus-slot")
 };
 
 // A ?share=<id> URL loads someone else's shared result instead of the normal
@@ -1202,32 +1205,38 @@ el.interviewToggleBtn.addEventListener("click", () => {
   else startInterview();
 });
 
-// Interview mode's floating card isn't a true modal (no backdrop element to
-// click) -- opening a DIFFERENT category already exits it (see the toggle
-// listener above), but that left every other click on the page (blank
-// space, header, other buttons) doing nothing to it. This makes any click
-// outside the floating card a valid way to dismiss it, matching how people
-// expect a modal-like overlay to behave. Deliberately passive: it doesn't
-// prevent the click's own effect, so clicking, say, the History button
-// exits interview mode AND opens history, rather than swallowing the click.
+// Neither the flat interview-focused category nor the subcategory focus
+// modal is a true modal (no backdrop element to click) -- opening a
+// DIFFERENT category already exits interview mode (see the toggle listener
+// above), but that left every other click on the page (blank space,
+// header, other buttons) doing nothing to it. This makes any click outside
+// BOTH of those a valid way to dismiss it, matching how people expect a
+// modal-like overlay to behave, while still letting someone revise an
+// earlier-answered subcategory (flat, in the category) without being
+// treated as "left." Deliberately passive: it doesn't prevent the click's
+// own effect, so clicking, say, the History button exits interview mode
+// AND opens history, rather than swallowing the click.
 // Capture phase, deliberately -- not bubble phase. A click on something
-// inside the floating card that ALSO re-renders (Next/Previous category,
-// Pick for me, any selection) replaces the card's entire DOM subtree as
-// part of its own handler, which runs before this listener would fire if
-// registered normally (bubble phase runs after the target's own handlers).
-// By the time a bubble-phase check ran, event.target would be a detached,
-// orphaned node from the just-replaced tree -- .contains() can never match
-// a detached node, so it looked identical to "clicked outside," and
-// exitInterview() fired right after a perfectly normal category advance
-// (confirmed for real: clicking "Next category" was silently kicking out
-// of interview mode). Capture phase runs BEFORE any handler mutates
-// anything, so the containment check happens against accurate, unmutated
-// DOM state -- correct regardless of what the click's own handler does
-// afterward.
+// inside either container that ALSO re-renders (Next/Previous category,
+// Pick for me, any selection) replaces that container's entire DOM subtree
+// as part of its own handler, which runs before this listener would fire
+// if registered normally (bubble phase runs after the target's own
+// handlers). By the time a bubble-phase check ran, event.target would be a
+// detached, orphaned node from the just-replaced tree -- .contains() can
+// never match a detached node, so it looked identical to "clicked
+// outside," and exitInterview() fired right after a perfectly normal
+// category advance (confirmed for real: clicking "Next category" was
+// silently kicking out of interview mode). Capture phase runs BEFORE any
+// handler mutates anything, so the containment check happens against
+// accurate, unmutated DOM state -- correct regardless of what the click's
+// own handler does afterward.
 document.addEventListener("click", event => {
   if (!interviewModeActive) return;
-  const floatingCard = document.querySelector(".category-row.interview-float");
-  if (floatingCard && !floatingCard.contains(event.target)) {
+  const floatingCategory = document.querySelector(".category-row.interview-float");
+  const focusModal = el.subcategoryFocusModal;
+  const insideCategory = floatingCategory && floatingCategory.contains(event.target);
+  const insideModal = focusModal && !focusModal.hidden && focusModal.contains(event.target);
+  if (!insideCategory && !insideModal) {
     exitInterview();
   }
 }, true);
@@ -1259,6 +1268,15 @@ function renderTaxonomyImpl() {
   el.taxonomyTree.innerHTML = "";
   elementRegistry = [];
   subcategoryRegistry = [];
+
+  // Default closed -- only the category loop below (if it finds a genuine
+  // subcategory in focus) reopens it. Covers every case where nothing
+  // should be modalized: interview mode off, a zero-subcategory "Given"
+  // category, or the interview-focused category has nothing left unanswered.
+  if (el.subcategoryFocusModal) {
+    el.subcategoryFocusModal.hidden = true;
+    el.subcategoryFocusSlot.innerHTML = "";
+  }
 
   // Kept in sync here rather than at each call site that changes interview
   // state — one place that can't drift out of sync with reality.
@@ -1517,13 +1535,13 @@ function renderTaxonomyImpl() {
       const isSubInFocus = isInterviewFocus && subIndex === interviewSubRevealCount - 1 && !subcategoryHasSelection(sub);
       subEl.className = isSubInFocus ? "subcategory subcategory-in-focus" : "subcategory";
       subEl.open = isSubInFocus || state.expandedSubcategories.has(subKey);
-      // Brief entrance flash + scroll-into-view the moment this subcategory
-      // actually becomes the new focus (guarded by the same key check
-      // above) -- this is the whole "something changed here" signal now
-      // that there's no separate popup announcing it.
+      // Brief entrance flash the moment this subcategory actually becomes
+      // the new focus (guarded by the same key check above) -- no
+      // scroll-into-view needed here (unlike the category-level one below),
+      // since this element ends up in the fixed-position focus modal,
+      // already on-screen regardless of page scroll position.
       if (isSubInFocus && justEnteredSubFocus) {
         subEl.classList.add("subcategory-flash");
-        requestAnimationFrame(() => subEl.scrollIntoView({ behavior: "smooth", block: "center" }));
         setTimeout(() => subEl.classList.remove("subcategory-flash"), 1200);
       }
       subEl.addEventListener("toggle", () => {
@@ -1717,7 +1735,18 @@ function renderTaxonomyImpl() {
       }
 
       subEl.appendChild(list);
-      categorySubsWrapper.appendChild(subEl);
+      // The one subcategory actually in focus lifts out into the fixed
+      // focus modal instead of rendering inline -- everything else
+      // (already-answered subcategories in this same category) stays flat,
+      // in its normal place in the page.
+      if (isSubInFocus) {
+        el.subcategoryFocusCategory.textContent = `Tell me about ${category.questionPhrase || category.name}`;
+        el.subcategoryFocusSlot.innerHTML = "";
+        el.subcategoryFocusSlot.appendChild(subEl);
+        el.subcategoryFocusModal.hidden = false;
+      } else {
+        categorySubsWrapper.appendChild(subEl);
+      }
     });
 
     catEl.appendChild(categorySubsWrapper);
