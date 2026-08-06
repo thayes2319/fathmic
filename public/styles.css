@@ -973,7 +973,12 @@ button:disabled { opacity: 0.5; cursor: default; }
   margin-bottom: 1.5rem;
   font-size: 0.82rem;
 }
-#stakes-regen-label { color: var(--muted); white-space: nowrap; }
+/* Not nowrap -- the <br> in index.html already forces the "Stakes Change?"
+   / "Select to Regenerate." split explicitly. nowrap here would also stop
+   the tooltip icon (inline content right after the second phrase) from
+   ever wrapping to its own line, forcing real horizontal overflow at the
+   narrowest widths instead of just dropping the icon down one line. */
+#stakes-regen-label { color: var(--muted); }
 
 .info-tooltip { position: relative; display: inline-block; }
 .info-icon-btn {
@@ -1010,6 +1015,12 @@ button:disabled { opacity: 0.5; cursor: default; }
   line-height: 1.45;
   font-weight: normal;
   text-align: left;
+  /* Reset explicitly -- #stakes-regen-label sets white-space:nowrap on
+     itself (needed for its own two-line <br> layout), which this popup
+     would otherwise inherit, refusing to wrap and overflowing its own
+     fixed 320px width. The popup should always wrap regardless of what
+     its trigger's own white-space happens to be. */
+  white-space: normal;
   padding: 0.65rem 0.8rem;
   border-radius: 8px;
   opacity: 0;
