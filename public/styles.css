@@ -16,6 +16,11 @@
   --logo-dot: #34d1f8;
   /* Sampled directly from the "FATH" wordmark stroke in the same image. */
   --logo-indigo: #14146e;
+  /* The stakes dial's own blue -> accent -> red gradient (see
+     .stakes-knob-arc) -- named here so the quick stakes row can reuse the
+     same two colors instead of drifting from them over time. */
+  --stakes-low: #5b8dd6;
+  --stakes-high: #d64545;
 }
 
 * { box-sizing: border-box; }
@@ -203,6 +208,11 @@ textarea, input[type="text"] {
   border-color: var(--accent);
   color: #fff;
 }
+/* Low/High pick up the dial's own blue/red instead of the generic accent
+   every other active button on the page uses -- Medium stays on --accent
+   (the dial's own middle color), covered by the rule above already. */
+.stakes-quick-btn[data-stakes="low"].active { background: var(--stakes-low); border-color: var(--stakes-low); }
+.stakes-quick-btn[data-stakes="high"].active { background: var(--stakes-high); border-color: var(--stakes-high); }
 #placeholder-cycle {
   position: absolute;
   top: 0.6rem;
@@ -536,10 +546,23 @@ button:disabled { opacity: 0.5; cursor: default; }
 #demo-cases { margin-top: 0.75rem; }
 .demo-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
 
+/* #demos-trending-details is a flex item of #action-row (flex-wrap:wrap) --
+   without min-width:0, a flex item's default automatic minimum size is its
+   content's intrinsic (unwrapped) width, not 0, so it was growing to fit
+   every demo button laid out in one unbroken row (2300px+ with enough
+   demos) instead of respecting its own container's width. That pushed the
+   trailing scroll-right arrow off past the viewport edge, where html's
+   global overflow-x:hidden clips it entirely -- confirmed live: right
+   arrow's rendered x was >2400px in a 900px viewport. Same fix needed one
+   level deeper on .hscroll-track itself (the actual overflow-x:auto
+   scroller), since nothing else was forcing it to stay within its
+   available width either. */
+#demos-trending-details { min-width: 0; max-width: 100%; }
+
 /* Shared by all three horizontal pill lists (Fathmics to Explore, Most
    Searched Here, Trending out there) — manual arrow-scroll only, no
    auto-drift on any of them. */
-.hscroll-wrap { display: flex; align-items: center; gap: 0.4rem; }
+.hscroll-wrap { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
 .hscroll-track {
   display: flex;
   flex-wrap: nowrap;
@@ -547,6 +570,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   overflow-x: auto;
   padding-bottom: 0.3rem;
   scrollbar-width: thin;
+  min-width: 0;
 }
 .demo-btn {
   margin-top: 0;
@@ -858,9 +882,9 @@ button:disabled { opacity: 0.5; cursor: default; }
   border-radius: 50%;
   background: conic-gradient(
     from -120deg,
-    #5b8dd6 0deg,
+    var(--stakes-low) 0deg,
     var(--accent) 120deg,
-    #d64545 240deg,
+    var(--stakes-high) 240deg,
     transparent 240deg,
     transparent 360deg
   );
