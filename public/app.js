@@ -1748,6 +1748,20 @@ function renderTaxonomyImpl() {
                   state.selected.delete(otherText);
                 }
               });
+              // The Other text field is a real bug otherwise (confirmed
+              // live: typed "Desk" into Other on an exclusive "Furniture
+              // Category" subcategory while "Bed frame" was still checked
+              // from earlier browsing -- both went to synthesis together,
+              // and the result kept treating it as a bed frame). Other is
+              // deliberately NOT exclusion-aware for non-exclusive
+              // subcategories (see its own handler below) since multiple
+              // real picks plus a custom addition is a legitimate
+              // combination there -- but "pick one of these" means one,
+              // full stop, whichever way it was picked.
+              if (otherInput.value.trim()) {
+                otherInput.value = "";
+                delete state.otherText[sub.name];
+              }
             }
             if (generalCheckbox.checked) {
               generalCheckbox.checked = false;
@@ -1782,13 +1796,21 @@ function renderTaxonomyImpl() {
       list.appendChild(specificsList);
 
       // A free-text escape hatch alongside General/specifics — for when none
-      // of the generated options actually fit. Deliberately NOT axis-tagged
-      // or exclusion-aware (there's nothing structured to conflict against);
-      // it's folded into the synthesis prompt as its own line instead (see
-      // otherTextSelectionEntries). Re-rendering on every keystroke would
-      // rebuild this exact input out from under the user's cursor, so this
-      // only updates state.otherText live (for the word cap + stale-check)
-      // and defers the interview-mode reveal advance to blur/change.
+      // of the generated options actually fit. NOT axis-tagged or exclusion-
+      // aware against the cross-tree conflict system (there's nothing
+      // structured to conflict against) -- it's folded into the synthesis
+      // prompt as its own line instead (see otherTextSelectionEntries). It
+      // IS kept exclusive against this subcategory's own checkboxes when
+      // sub.exclusive is set, same as the checkboxes already are against
+      // each other -- otherwise typing a custom answer here while an
+      // earlier real pick is still checked sends both to synthesis as if
+      // the subcategory allowed multiple answers, when the model said it
+      // doesn't (confirmed live: "Desk" typed here with "Bed frame" still
+      // checked on an exclusive "Furniture Category" subcategory kept the
+      // result treating it as a bed frame). Re-rendering on every keystroke
+      // would rebuild this exact input out from under the user's cursor, so
+      // this only updates state.otherText live (for the word cap + stale-
+      // check) and defers the interview-mode reveal advance to blur/change.
       const otherWrap = document.createElement("label");
       otherWrap.className = "other-answer";
       otherWrap.append("Other: ");
@@ -1804,6 +1826,19 @@ function renderTaxonomyImpl() {
         const trimmed = otherInput.value.trim();
         if (trimmed) {
           state.otherText[sub.name] = trimmed;
+          if (sub.exclusive) {
+            specificCheckboxes.forEach(({ checkbox, text }) => {
+              if (checkbox.checked) {
+                checkbox.checked = false;
+                state.selected.delete(text);
+              }
+            });
+            if (generalCheckbox.checked) {
+              generalCheckbox.checked = false;
+              state.selected.delete(sub.name);
+              specificsList.classList.remove("collapsed-by-general");
+            }
+          }
         } else {
           delete state.otherText[sub.name];
         }
