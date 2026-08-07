@@ -17,6 +17,23 @@ const { getCostSummary } = require("./costLog");
 
 const app = express();
 app.set("trust proxy", 1); // so req.ip is the real client IP behind a host's reverse proxy, not the proxy itself
+
+// fathmic.com is a pointer, not a second copy of the app -- fathmic.ai is
+// the one canonical domain (avoids duplicate-content/cookie-scoping
+// confusion down the line from two fully-live domains). Redirects to
+// fathmic.ai preserving path/query (req.originalUrl), so a bookmark or
+// link to some-specific-page.fathmic.com lands on that same page, not
+// always the homepage. Placed before every other middleware so it fires
+// for every request regardless of path; hardcoded https:// on the target
+// so it's always the secure canonical URL regardless of which protocol
+// the original fathmic.com request came in on.
+app.use((req, res, next) => {
+  if (req.hostname === "fathmic.com" || req.hostname === "www.fathmic.com") {
+    return res.redirect(301, `https://fathmic.ai${req.originalUrl}`);
+  }
+  next();
+});
+
 // Default json body limit is 100kb -- fine for every route except
 // /api/share, which can now carry a base64-encoded BLUEPRINT illustration
 // (confirmed for real: a live image came in over 2MB as a base64 string,
