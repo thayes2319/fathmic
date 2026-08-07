@@ -527,15 +527,19 @@ button:disabled { opacity: 0.5; cursor: default; }
    blue technical images shown later in the same cycle -- reads as a spec
    sheet clipped to a drafting table, not a plain text box. Warm paper tint
    instead of the stage's neutral gray so it visually separates from the
-   image pane beside it. */
+   image pane beside it. align-items:flex-start (not center) -- in the
+   narrow phase 2 width, the paragraph is often taller than the pane; top-
+   aligned means the (always-visible, styled) "Scope" opener and the start
+   of the body copy stay fully readable and only the tail end runs off the
+   bottom, instead of centering clipping equal amounts off BOTH ends. */
 #blueprint-showcase-spec {
   width: 62%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 0.85rem 1rem 0.85rem 1.15rem;
   background:
-    repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(20, 20, 20, 0.05) 15px, rgba(20, 20, 20, 0.05) 16px),
-    repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(20, 20, 20, 0.05) 15px, rgba(20, 20, 20, 0.05) 16px),
+    repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(20, 20, 20, 0.025) 15px, rgba(20, 20, 20, 0.025) 16px),
+    repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(20, 20, 20, 0.025) 15px, rgba(20, 20, 20, 0.025) 16px),
     #f7f3ea;
   border-left: 3px solid var(--logo-dot);
   /* Overrides the shared 0.7s above -- a smooth width change means every
@@ -546,22 +550,19 @@ button:disabled { opacity: 0.5; cursor: default; }
      something you actually watch happen. */
   transition: width 0.12s ease;
 }
-/* The actual text lives here, not directly on #blueprint-showcase-spec --
-   fitShowcaseSpecText (app.js) applies transform:scale to THIS element to
-   shrink the whole paragraph down until it fits the pane's fixed height in
-   phase 2, instead of letting the pane's overflow:hidden just clip
-   whatever doesn't fit. Scaling around the left edge (not center) matches
-   where the text already sits in the pane -- shrinking toward a point it's
-   already anchored to, not jumping. Monospace + slight letter-spacing for
-   the same "drafted spec sheet" feel as the grid/margin-rule background. */
+/* The actual text lives here, not directly on #blueprint-showcase-spec.
+   Full size always now -- no scale-to-fit -- wrapping naturally fills the
+   pane's own width in the narrow phase 2 state ("fit to horizontal"), and
+   whatever doesn't fit vertically is left to run off, clipped by the
+   pane's own overflow:hidden, rather than shrinking the whole paragraph
+   down to avoid it. Monospace + slight letter-spacing for the same
+   "drafted spec sheet" feel as the grid/margin-rule background. */
 #bp-showcase-spec-inner {
   font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.8rem;
   line-height: 1.5;
   letter-spacing: 0.01em;
   color: #2a2620;
-  transform-origin: left center;
-  transition: transform 0.12s ease;
 }
 /* The leading "Scope" word every specSnippet starts with (see app.js,
    which splits it out into its own span) styled as a section-header

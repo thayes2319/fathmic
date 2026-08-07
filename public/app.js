@@ -2978,7 +2978,6 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     el.blueprintShowcaseTopic.textContent = item.topic;
     el.blueprintShowcaseTopic.classList.remove("bp-fading");
     renderShowcaseSpecText(item.specSnippet);
-    el.bpShowcaseSpecInner.style.transform = ""; // full size again for the new topic's phase A -- fitShowcaseSpecText re-shrinks it once phase B triggers
     el.blueprintShowcaseImage.src = item.image;
     const technical = item.technicalImage || item.image;
     el.bpShowcaseTechnicalFit.src = technical;
@@ -2986,37 +2985,6 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     el.bpStageScope.classList.remove("bp-image-expanded");
     stage.classList.remove("showing-technical");
     stage.classList.add("showing-scope");
-  }
-
-  // Phase B shrinks the spec pane to 26% width -- rather than guess a
-  // font-size that "usually" fits (specSnippet lengths vary a lot across
-  // fixtures), measure how tall the text actually renders at that width and
-  // scale it down just enough to fit the pane's height, so it's fully
-  // visible (shrunk) instead of getting cut off by overflow:hidden.
-  // Forces a synchronous layout at the target width first (rather than
-  // waiting for the CSS width transition to finish) so this can run
-  // immediately when phase B starts, not ~120ms later.
-  function fitShowcaseSpecText() {
-    const pane = el.blueprintShowcaseSpec;
-    const inner = el.bpShowcaseSpecInner;
-    if (!pane || !inner) return;
-    const targetWidth = stage.clientWidth * 0.26;
-    const prevInlineWidth = pane.style.width;
-    const prevTransition = pane.style.transition;
-    pane.style.transition = "none";
-    pane.style.width = `${targetWidth}px`;
-    inner.style.transform = "none";
-    const cs = getComputedStyle(pane);
-    const usableHeight = pane.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    const naturalHeight = inner.scrollHeight;
-    pane.style.width = prevInlineWidth;
-    // Force the reset to actually apply before restoring the transition,
-    // or the browser can coalesce it with the next change and animate from
-    // the wrong starting point.
-    void pane.offsetWidth;
-    pane.style.transition = prevTransition;
-    const scale = naturalHeight > usableHeight ? Math.max(0.55, usableHeight / naturalHeight) : 1;
-    inner.style.transform = scale < 1 ? `scale(${scale})` : "";
   }
 
   // Renders phase A, then -- unless paused -- chains through phases B and C
@@ -3029,7 +2997,6 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     if (showcasePaused) return;
     scheduleShowcase(() => {
       el.bpStageScope.classList.add("bp-image-expanded");
-      fitShowcaseSpecText();
       scheduleShowcase(() => {
         stage.classList.remove("showing-scope");
         stage.classList.add("showing-technical");
