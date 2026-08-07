@@ -1969,24 +1969,34 @@ if (el.subcategoryFocusNextBtn) {
       // answer this one." Never touches state.selected, so it can't ever
       // masquerade as a real answer in the synthesis payload.
       state.skippedSubcategories.add(`${categoryName}::${subName}`);
-      interviewReviewOverride = null;
-    } else {
-      // Reviewing an earlier answer -- step forward one, but only if that
-      // next one is ALSO already resolved. Checking "does a next array
-      // slot exist" isn't enough (real bug, caught live): the slot right
-      // past a fully-reviewed run is exactly the true unresolved edge, and
-      // pinning the override there stops it from ever handing back to
-      // normal derivation, even after that edge later gets a real answer
-      // via a direct checkbox click -- the override just keeps "reviewing"
-      // it forever. Resolved-ness, not existence, is what actually means
-      // "still within the reviewable run."
-      const category = state.categories.find(c => c.name === categoryName);
-      const nextSub = category && (category.subcategories || [])[subIndex + 1];
-      interviewReviewOverride = (nextSub && subcategoryIsInterviewResolved(category, nextSub))
+    }
+    // Reviewing an earlier answer -- step forward one, but only if that
+    // next one is ALSO already resolved. Checking "does a next array
+    // slot exist" isn't enough (real bug, caught live): the slot right
+    // past a fully-reviewed run is exactly the true unresolved edge, and
+    // pinning the override there stops it from ever handing back to
+    // normal derivation, even after that edge later gets a real answer
+    // via a direct checkbox click -- the override just keeps "reviewing"
+    // it forever. Resolved-ness, not existence, is what actually means
+    // "still within the reviewable run."
+    const category = state.categories.find(c => c.name === categoryName);
+    const nextSub = category && (category.subcategories || [])[subIndex + 1];
+    if (nextSub) {
+      interviewReviewOverride = subcategoryIsInterviewResolved(category, nextSub)
         ? { categoryName, subName: nextSub.name }
         : null;
+      renderTaxonomy();
+    } else {
+      // This subcategory (answered or just skipped above) was the last one
+      // in the category -- the category itself is now fully resolved.
+      // Continue straight into the next category's own interview focus
+      // instead of dropping to the flat page and requiring a separate
+      // click on its "Next category" button (that button still exists for
+      // the free-browse-completes-a-category path, just no longer the
+      // only way through from inside the modal).
+      interviewReviewOverride = null;
+      advanceInterview();
     }
-    renderTaxonomy();
   });
 }
 
