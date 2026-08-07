@@ -2849,9 +2849,19 @@ if (el.blueprintChips && el.blueprintVerticalFilter) {
     blueprintVerticalAutoCycle = false;
   });
 
+  // A real scroll/manual pick above stops the cycle for good -- this is
+  // gentler, just a pause. Hovering to read or aim for a chip doesn't mean
+  // "I want to browse a different vertical," but having the whole row (and
+  // whatever you were about to click) swap out from under the cursor mid-
+  // hover would still be jarring. Resumes on its own next tick once the
+  // mouse leaves, unless a real scroll disabled the cycle in the meantime.
+  let blueprintChipsHovered = false;
+  el.blueprintChips.addEventListener("mouseenter", () => { blueprintChipsHovered = true; });
+  el.blueprintChips.addEventListener("mouseleave", () => { blueprintChipsHovered = false; });
+
   let blueprintVerticalIndex = 0;
   setInterval(() => {
-    if (!blueprintVerticalAutoCycle) return;
+    if (!blueprintVerticalAutoCycle || blueprintChipsHovered) return;
     blueprintVerticalIndex = (blueprintVerticalIndex + 1) % BLUEPRINT_VERTICALS.length;
     const next = BLUEPRINT_VERTICALS[blueprintVerticalIndex];
     el.blueprintVerticalFilter.value = next.key;
