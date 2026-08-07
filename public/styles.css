@@ -523,11 +523,21 @@ button:disabled { opacity: 0.5; cursor: default; }
    by toggling .bp-image-expanded on #bp-stage-scope. flex-shrink:0 keeps
    flexbox from fighting the explicit widths. */
 .bp-split-pane { height: 100%; flex-shrink: 0; overflow: hidden; transition: width 0.7s ease; }
+/* Faint drafting-vellum grid + a ruled left margin, echoing the blueprint-
+   blue technical images shown later in the same cycle -- reads as a spec
+   sheet clipped to a drafting table, not a plain text box. Warm paper tint
+   instead of the stage's neutral gray so it visually separates from the
+   image pane beside it. */
 #blueprint-showcase-spec {
   width: 62%;
   display: flex;
   align-items: center;
-  padding: 0.85rem 1rem;
+  padding: 0.85rem 1rem 0.85rem 1.15rem;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(20, 20, 20, 0.05) 15px, rgba(20, 20, 20, 0.05) 16px),
+    repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(20, 20, 20, 0.05) 15px, rgba(20, 20, 20, 0.05) 16px),
+    #f7f3ea;
+  border-left: 3px solid var(--logo-dot);
   /* Overrides the shared 0.7s above -- a smooth width change means every
      line re-wraps continuously for the whole 700ms, which reads as the
      paragraph visibly shuffling itself rather than a clean transition (an
@@ -542,13 +552,24 @@ button:disabled { opacity: 0.5; cursor: default; }
    phase 2, instead of letting the pane's overflow:hidden just clip
    whatever doesn't fit. Scaling around the left edge (not center) matches
    where the text already sits in the pane -- shrinking toward a point it's
-   already anchored to, not jumping. */
+   already anchored to, not jumping. Monospace + slight letter-spacing for
+   the same "drafted spec sheet" feel as the grid/margin-rule background. */
 #bp-showcase-spec-inner {
-  font-size: 0.85rem;
-  line-height: 1.45;
-  color: var(--fg);
+  font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: #2a2620;
   transform-origin: left center;
   transition: transform 0.12s ease;
+}
+/* The leading "Scope" word every specSnippet starts with (see app.js,
+   which splits it out into its own span) styled as a section-header
+   callout instead of just running into the body copy. */
+.bp-spec-scope-label {
+  color: var(--logo-dot);
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 #bp-scope-image-pane { width: 38%; }
 /* Phase 2: image pane grows, spec shrinks -- text stays fully rendered

@@ -2953,6 +2953,22 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     showcaseTimeoutId = setTimeout(fn, ms / showcaseSpeedMultiplier);
   }
 
+  // Every specSnippet in showcase-fixtures.js starts with "Scope" (with or
+  // without a trailing colon) -- pulls just that word out into its own
+  // styled callout span instead of letting it run straight into the body
+  // copy as plain text. Fixture content is trusted/static, but the
+  // remainder is still escaped on principle before going through innerHTML.
+  function renderShowcaseSpecText(snippet) {
+    const match = snippet.match(/^(Scope:?)\s*/);
+    if (!match) {
+      el.bpShowcaseSpecInner.textContent = snippet;
+      return;
+    }
+    const label = match[1].replace(":", "");
+    const rest = snippet.slice(match[0].length);
+    el.bpShowcaseSpecInner.innerHTML = `<span class="bp-spec-scope-label">${label}</span> ${escapeHtml(rest)}`;
+  }
+
   // Renders phase A (spec + narrow image split) for the current index and
   // resets the technical frame's images -- pure render, no scheduling, so
   // pause/resume/step can all call this to land on a consistent frame
@@ -2961,7 +2977,7 @@ if (el.blueprintShowcase && typeof SHOWCASE_FIXTURES !== "undefined" && SHOWCASE
     const item = showcaseOrder[showcaseIndex];
     el.blueprintShowcaseTopic.textContent = item.topic;
     el.blueprintShowcaseTopic.classList.remove("bp-fading");
-    el.bpShowcaseSpecInner.textContent = item.specSnippet;
+    renderShowcaseSpecText(item.specSnippet);
     el.bpShowcaseSpecInner.style.transform = ""; // full size again for the new topic's phase A -- fitShowcaseSpecText re-shrinks it once phase B triggers
     el.blueprintShowcaseImage.src = item.image;
     const technical = item.technicalImage || item.image;
